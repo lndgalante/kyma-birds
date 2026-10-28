@@ -1,0 +1,12 @@
+# pnpm >= 11 reads its settings from this file (even for a single-package repo).
+# Dependency build scripts are blocked unless reviewed here; with strictDepBuilds
+# (default true) an unreviewed one fails the install.
+allowBuilds:
+  esbuild: true
+  workerd: true
+  sharp: false
+# Written by pnpm during install: these exact versions were younger than the default
+# minimumReleaseAge (1440 min) but are required by package.json. Safe to prune later.
+minimumReleaseAgeExclude:
+  - miniflare@5.20261023.1-beta
+  - wrangler@4.154.0

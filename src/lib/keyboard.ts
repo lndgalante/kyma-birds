@@ -1,0 +1,95 @@
+import { useEffect, useRef } from 'react'
+
+/**
+ * Targets that own every key the instrument maps (ui.md §8.3): text entry, ranges, radios, the
+ * rail's tabs and dialogs. The global shortcuts never steal from them.
+ */
+export const WIDGET_SELECTOR =
+  'input, textarea, select, [role=tab], [role=slider], [role=radio], [contenteditable], [contenteditable=""], dialog'
+
+/**
+ * Targets with a native Space action (activation, or the link's page scroll). Arrows, Home, End
+ * and M mean nothing to them, so those shortcuts still work while a button or link has focus
+ * (Chrome and Firefox focus a button on mouse click).
+ */
+export const ACTIVATABLE_SELECTOR = 'button, a, summary'
+
+interface KeyTarget {
+  closest?: (selector: string) => unknown
+  isContentEditable?: boolean
+}
+
+function matches(target: unknown, selector: string): boolean {
+  if (!target || typeof target !== 'object') return false
+  const t = target as KeyTarget
+  return typeof t.closest === 'function' && t.closest(selector) != null
+}
+
+export function isTypingOrWidgetTarget(target: unknown): boolean {
+  return !!(target as KeyTarget | null)?.isContentEditable || matches(target, WIDGET_SELECTOR)
+}
+
+export type ShortcutAction = 'prev' | 'next' | 'first' | 'last' | 'toggle' | 'mute'
+
+interface KeyLike {
+  key: string
+  code?: string
+  metaKey: boolean
+  ctrlKey: boolean
+  altKey: boolean
+  shiftKey?: boolean
+  target: unknown
+}
+
+/** Pure key → action mapping, so it can be tested without a DOM. */
+export function shortcutFor(e: KeyLike): ShortcutAction | null {
+  if (e.metaKey || e.ctrlKey || e.altKey) return null
+  if (isTypingOrWidgetTarget(e.target)) return null
+  switch (e.key) {
+    case 'ArrowLeft':
+      return 'prev'
+    case 'ArrowRight':
+      return 'next'
+    case 'Home':
+      return 'first'
+    case 'End':
+      return 'last'
+    case ' ':
+    case 'Spacebar':
+      return matches(e.target, ACTIVATABLE_SELECTOR) ? null : 'toggle'
+    case 'm':
+    case 'M':
+      return e.shiftKey ? null : 'mute'
+    default:
+      return null
+  }
+}
+
+/**
+ * One window keydown handler for the instrument. Actions run inside the key event, so the
+ * first Space can unlock audio (it is a user gesture).
+ */
+export function useGlobalShortcuts(
+  handler: (action: ShortcutAction, e: KeyboardEvent) => void,
+  enabled = true,
+): void {
+  const ref = useRef(handler)
+  ref.current = handler
+  useEffect(() => {
+    if (!enabled) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) return
+      // An open modal dialog owns the keyboard.
+      if (document.querySelector('dialog[open]')) return
+      const action = shortcutFor(e)
+      if (!action) return
+      // Prevent first: a held Space must not scroll the page either.
+      e.preventDefault()
+      // Holding an arrow walks the birds; holding Space must not flutter play/pause.
+      if (e.repeat && (action === 'toggle' || action === 'mute')) return
+      ref.current(action, e)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [enabled])
+}

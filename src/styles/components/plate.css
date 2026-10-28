@@ -1,0 +1,381 @@
+@layer components {
+  .zone--plate .zone-head {
+    justify-content: space-between;
+  }
+
+  /* ---------- Figure and frame ---------- */
+  .plate-figure {
+    position: relative;
+    aspect-ratio: 1;
+    margin: 0;
+  }
+  .plate-frame {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: clip;
+    background: var(--plate-surface);
+    box-shadow: var(--shadow-plate);
+  }
+
+  .plate-poster,
+  .plate-canvas,
+  .plate-poster__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .plate-poster {
+    display: grid;
+    place-items: center;
+    transition: opacity var(--dur-3) var(--ease-out);
+  }
+  /* Resting sand: thresholded noise in a seamless 180px tile, rasterised at device resolution. */
+  .plate-poster__sand {
+    position: absolute;
+    inset: 2.2%;
+    border-radius: 50%;
+    opacity: 0.85;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.935 0 0 0 0 0.9 16 0 0 0 -10.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+  .plate-figure[data-ready] .plate-poster {
+    opacity: 0;
+  }
+  .plate-poster__msg {
+    position: relative;
+    max-width: 26ch;
+    padding: 10px 14px;
+    border-radius: var(--radius-2);
+    background: color-mix(in oklch, var(--plate-surface) 88%, transparent);
+    box-shadow: var(--hairline);
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  .plate-poster__msg--nojs {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+  }
+  /* Split: the no-JS player sits in the message (song.css), which needs room for it. */
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) {
+    .plate-poster__msg--nojs {
+      width: min(340px, 80%);
+      max-width: none;
+    }
+  }
+  .plate-canvas {
+    z-index: 1;
+  }
+  /* No JS: the Listen gate and the plate controls do nothing, and the gate would cover the
+     message above. */
+  html:not(.js) .gate,
+  html:not(.js) .plate-controls {
+    display: none;
+  }
+  .plate-host canvas {
+    display: block;
+  }
+
+  /* ---------- Caption: the plate's own status line ---------- */
+  /* Outside Split the plate is too small for a corner caption; the foot row carries it instead. */
+  .plate-caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) {
+    .plate-caption {
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+      transition: opacity var(--dur-2) var(--ease-out);
+    }
+    /* While live, the head row already reads "Mode (3, 2)"; the corner speaks only for states. */
+    .plate-caption[data-kind='live'] {
+      opacity: 0;
+    }
+  }
+  .plate-caption {
+    inset-inline-start: 0;
+    bottom: 0;
+    z-index: 2;
+    max-width: 22ch;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+
+  /* ---------- Listen gate (not a modal) ---------- */
+  .gate {
+    --disc: 112px;
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-plate-gate);
+    container: gate / size;
+    text-align: center;
+    border-radius: inherit;
+    transition:
+      opacity var(--dur-3) var(--ease-out),
+      scale var(--dur-3) var(--ease-out);
+  }
+  /* The disc sits on the plate's centre, with its label and the line below hanging under it.
+     The lift is half the disc plus the button's 6px padding. */
+  .gate__stack {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    translate: 0 calc(var(--disc) / -2 - 6px);
+  }
+  .gate::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklch, var(--plate-surface) 82%, transparent) 30%,
+      color-mix(in oklch, var(--plate-surface) 40%, transparent) 70%,
+      transparent
+    );
+  }
+  .gate[data-exiting] {
+    opacity: 0;
+    scale: 0.98;
+    pointer-events: none;
+  }
+  .gate__btn {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    border-radius: var(--radius-3);
+    padding: 6px;
+    color: var(--ink);
+  }
+  .gate__disc {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--disc);
+    height: var(--disc);
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--ground);
+    transition: scale var(--dur-1) var(--ease-out);
+  }
+  .gate__disc > .icon {
+    translate: 2px 0;
+  }
+  .gate__btn:active .gate__disc {
+    scale: 0.96;
+  }
+  .gate__pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--ink);
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gate__pulse {
+      animation: gate-pulse 2.4s var(--ease-out) 3 both;
+    }
+    .gate__pulse:nth-child(2) {
+      animation-delay: 0.8s;
+    }
+    .gate__pulse:nth-child(3) {
+      animation-delay: 1.6s;
+    }
+  }
+  @keyframes gate-pulse {
+    0% {
+      opacity: 0.55;
+      scale: 1;
+    }
+    100% {
+      opacity: 0;
+      scale: 1.8;
+    }
+  }
+  .gate__arc {
+    position: absolute;
+    inset: -7px;
+    width: calc(100% + 14px);
+    height: calc(100% + 14px);
+    max-width: none;
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0;
+  }
+  .gate[data-loading] .gate__arc {
+    opacity: 1;
+    animation: spin 900ms linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gate[data-loading] .gate__arc {
+      animation: none;
+      stroke-dasharray: 0.02 0.02;
+    }
+  }
+  .gate__label {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+  .gate__sub {
+    position: relative;
+    max-width: 28ch;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  @media (width < 40rem) {
+    .gate {
+      --disc: 88px;
+    }
+    .gate__disc > .icon {
+      width: 28px;
+      height: 28px;
+    }
+  }
+  /* Under the centred disc, a small plate has room for the label but not the line below it,
+     which would run off the plate. It stays the button's description for screen readers. In px,
+     like the text it measures, so a larger default font size doesn't hide it where it fits. */
+  @container gate (height < 320px) {
+    .gate__sub {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  /* ---------- Plate foot: mode, hold, scatter ---------- */
+  .plate-foot {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 16px;
+    width: 100%;
+    min-width: 0;
+  }
+  .plate-controls {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  .describe-btn {
+    position: absolute;
+    inset-inline-end: 0;
+    bottom: calc(100% + 8px);
+    background: var(--ground);
+    opacity: 0;
+    pointer-events: none;
+    clip-path: inset(50%);
+  }
+  .describe-btn:focus-visible,
+  .describe-btn:focus {
+    opacity: 1;
+    pointer-events: auto;
+    clip-path: none;
+  }
+
+  .mode-readout {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.2;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .mode-readout__label {
+    color: var(--ink-3);
+  }
+  .mode-readout--foot {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .mode-readout--foot .mode-readout__value {
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .mode-readout__value {
+    color: var(--accent);
+  }
+  .mode-readout--head {
+    display: none;
+  }
+  .plate-foot .zone-tag + .mode-readout {
+    margin-inline-end: auto;
+  }
+
+  @media (width >= 40rem) and (height > 34rem) {
+    .plate-foot {
+      justify-content: flex-start;
+      height: 48px;
+      flex-wrap: nowrap;
+    }
+    .plate-foot .plate-controls {
+      margin-inline-start: auto;
+    }
+  }
+
+  @media (width < 40rem), (height <= 34rem) and (orientation: landscape) {
+    .plate-foot {
+      flex-direction: column;
+      gap: 8px;
+    }
+    .plate-foot .zone-tag + .mode-readout {
+      margin-inline-end: 0;
+    }
+    .plate-controls {
+      gap: 6px;
+    }
+  }
+
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) {
+    .mode-readout--head {
+      display: block;
+    }
+    .mode-readout--foot {
+      display: none;
+    }
+    .plate-foot {
+      height: auto;
+      justify-content: flex-end;
+    }
+    .plate-foot .plate-controls {
+      margin-inline-start: 0;
+    }
+  }
+}

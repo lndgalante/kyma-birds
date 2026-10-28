@@ -1,0 +1,14 @@
+{
+  "rufous-bellied-thrush": {"focal": [0.47, 0.34], "bird": [0.38, 0.26, 0.94, 0.76], "accentBox": [0.57, 0.56, 0.68, 0.66]},
+  "musician-wren": {"focal": [0.49, 0.36], "bird": [0.39, 0.28, 0.86, 0.85], "accentBox": [0.47, 0.295, 0.52, 0.33]},
+  "screaming-piha": {"focal": [0.52, 0.17], "bird": [0.45, 0.1, 0.93, 0.88], "accentBox": [0.58, 0.2, 0.74, 0.45]},
+  "jocotoco-antpitta": {"focal": [0.62, 0.23], "bird": [0.22, 0.12, 0.85, 0.85], "accentBox": [0.255, 0.42, 0.33, 0.56]},
+  "andean-solitaire": {"focal": [0.46, 0.3], "bird": [0.38, 0.22, 0.7, 0.88], "accentBox": [0.47, 0.38, 0.56, 0.5]},
+  "chalk-browed-mockingbird": {"focal": [0.39, 0.25], "bird": [0.28, 0.17, 0.85, 0.85], "accentBox": [0.36, 0.33, 0.52, 0.55]},
+  "tui": {"focal": [0.5, 0.22], "bird": [0.25, 0.12, 0.78, 0.92], "accentBox": [0.4, 0.33, 0.64, 0.56]},
+  "common-nightingale": {"focal": [0.47, 0.53], "bird": [0.2, 0.45, 0.53, 0.85], "accentBox": [0.36, 0.55, 0.46, 0.66], "scrimMin": 0.86},
+  "kakapo": {"focal": [0.4, 0.39], "bird": [0.3, 0.2, 0.75, 0.95], "accentBox": [0.52, 0.3, 0.72, 0.62]},
+  "white-browed-robin-chat": {"focal": [0.6, 0.22], "bird": [0.25, 0.15, 0.75, 0.92], "accentBox": [0.47, 0.3, 0.6, 0.46]},
+  "white-rumped-shama": {"focal": [0.36, 0.23], "bird": [0.25, 0.15, 0.95, 0.95], "accentBox": [0.39, 0.4, 0.46, 0.49]},
+  "common-loon": {"focal": [0.52, 0.345], "bird": [0.35, 0.28, 0.88, 0.62], "accentBox": [0.509, 0.333, 0.525, 0.353], "accentPct": 60}
+}

@@ -1,0 +1,222 @@
+@layer components {
+  .masthead {
+    position: relative;
+    z-index: var(--z-masthead);
+    padding-top: var(--safe-t);
+    background: var(--ground);
+    /* A shadow, not a border, so the bar stays exactly --masthead-h tall. */
+    box-shadow: inset 0 -1px 0 var(--line);
+  }
+  /* Pages other than the instrument keep the masthead (and its now-playing control) in reach. */
+  .masthead--page {
+    position: sticky;
+    top: 0;
+  }
+  .masthead__inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: var(--masthead-h);
+    padding-inline: max(var(--gutter), var(--safe-l)) max(var(--gutter), var(--safe-r));
+    max-width: 1840px;
+    margin-inline: auto;
+  }
+
+  /* Field: the masthead floats over the photo; a short scrim keeps it legible on bright skies. */
+  .masthead--instrument::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -24px 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--scrim) 70%, transparent),
+      transparent
+    );
+  }
+  @media (width >= 40rem) {
+    .masthead--instrument::before {
+      content: none;
+    }
+  }
+  @media (width < 40rem) {
+    .masthead--instrument .masthead__inner {
+      height: 48px;
+    }
+    .masthead--instrument .nav-link {
+      color: var(--ink);
+      text-shadow: 0 1px 2px oklch(0 0 0 / 0.45);
+    }
+  }
+  /* Compact landscape: the masthead floats over the photo again (layout.css), at any width. It
+     gets the Field scrim back, a halo for bright skies, and the card's inner inset, so the glyph
+     sits on the photo rather than across its rounded corner. */
+  @media (height <= 34rem) and (orientation: landscape) and (width >= 40rem) {
+    .masthead--instrument::before {
+      content: '';
+    }
+    .masthead--instrument .masthead__inner {
+      padding-inline-start: calc(max(var(--gutter), var(--safe-l)) + 16px);
+    }
+    .masthead--instrument .wordmark,
+    .masthead--instrument .nav-link {
+      color: var(--ink);
+      text-shadow:
+        0 1px 2px oklch(0 0 0 / 0.6),
+        0 0 6px color-mix(in oklch, var(--scrim) 85%, transparent),
+        0 0 14px color-mix(in oklch, var(--scrim) 70%, transparent);
+    }
+  }
+
+  .wordmark {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding-inline: 2px 6px;
+    margin-inline-start: -2px;
+    border-radius: var(--radius-2);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: 650;
+    font-stretch: 125%;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .wordmark .glyph {
+    flex: none;
+    color: var(--ink);
+  }
+  @media (width < 380px) {
+    .wordmark__rest {
+      display: none;
+    }
+  }
+
+  .masthead__hint {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-inline-start: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .masthead__hint kbd {
+    height: 20px;
+    color: var(--ink-2);
+  }
+  .masthead__hint kbd + kbd {
+    margin-inline-start: -2px;
+  }
+  .masthead__dot {
+    padding-inline: 6px;
+    color: var(--ink-4);
+  }
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) and (pointer: fine) {
+    .masthead__hint {
+      display: inline-flex;
+    }
+    .masthead__hint + .masthead__nav {
+      margin-inline-start: 20px;
+    }
+  }
+
+  .masthead__nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-inline-start: auto;
+    margin-inline-end: -10px;
+  }
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding-inline: 10px;
+    border-radius: var(--radius-2);
+    color: var(--ink-2);
+    font-size: 14px;
+    font-weight: 550;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    text-decoration: none;
+    transition:
+      color var(--dur-1) var(--ease-out),
+      background-color var(--dur-1) var(--ease-out);
+  }
+  .nav-link:hover {
+    color: var(--ink);
+    background: var(--line);
+  }
+  .nav-link[aria-current='page'] {
+    color: var(--ink);
+  }
+  @media (pointer: coarse) {
+    .nav-link,
+    .wordmark {
+      min-height: 44px;
+    }
+  }
+
+  .now-playing {
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 40px;
+    max-width: 40vw;
+    margin-inline-start: auto;
+    padding: 4px 12px 4px 4px;
+    border-radius: var(--radius-full);
+    box-shadow: var(--hairline);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 550;
+    transition: background-color var(--dur-1) var(--ease-out);
+  }
+  .now-playing:hover {
+    background: var(--line);
+  }
+  .now-playing__icon {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--ground);
+    flex: none;
+  }
+  .now-playing__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .now-playing + .masthead__nav {
+    margin-inline-start: 12px;
+  }
+  /* The wordmark and the nav never shrink: the pill gives way first, then drops its name on
+     phones (the button's label still names the bird), so About and Credits stay on screen. */
+  .masthead--page .wordmark,
+  .masthead--page .masthead__nav {
+    flex: none;
+  }
+  @media (width < 30rem) {
+    .now-playing {
+      flex: none;
+      padding: 4px;
+    }
+    .now-playing__name {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+rufous-bellied-thrush	--start 38.0 --dur 25.5 --band 1500,3500 --hp 300
+musician-wren	--start 1.0 --dur 26.8 --search 0.6 --band 900,3000 --hp 600 --lp 3800 --nr 10
+screaming-piha	--start 30.0 --dur 26.0 --search 0.6 --band 1200,6000 --hp 400 --lp 7000
+jocotoco-antpitta	--start 14.0 --dur 24.0 --band 400,1500 --hp 300
+andean-solitaire	--start 15.5 --dur 26.0 --band 2200,6000 --hp 800
+chalk-browed-mockingbird	--start 1.2 --dur 27.3 --band 1500,7000 --hp 500
+tui	--start 85.5 --dur 27.8 --band 800,6000 --hp 400
+common-nightingale	--start 202.2 --dur 26.0 --band 1500,9000 --hp 300
+kakapo	--start 62.5 --dur 24.0 --band 60,700 --hp 40 --stats-lo 150
+white-browed-robin-chat	--start 9.2 --dur 22.7 --band 1000,5000 --hp 300
+white-rumped-shama	--start 0.15 --dur 16.75 --search 0.5 --min-start 0.05 --min-dur 15.5 --band 1200,4000 --hp 400 --lp 5000
+common-loon	--start 81.8 --dur 21.2 --band 600,2500 --hp 300

@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kyma-birds",
+  "compatibility_date": "2026-10-19",
+  "compatibility_flags": ["nodejs_compat"],
+  // TanStack Start's server entry wrapped to add security headers (src/server.ts); the
+  // Cloudflare Vite plugin builds it into dist/server and wires the client build (dist/client)
+  // up as static assets.
+  "main": "src/server.ts",
+  "observability": {
+    "enabled": true,
+  },
+}

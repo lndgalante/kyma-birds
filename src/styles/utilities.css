@@ -1,0 +1,36 @@
+@layer utilities {
+  .sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .skip-link {
+    position: fixed;
+    top: calc(8px + var(--safe-t));
+    left: calc(8px + var(--safe-l));
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 16px;
+    border-radius: var(--radius-2);
+    background: var(--ink);
+    color: var(--ground);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    translate: 0 calc(-100% - 16px);
+    transition: translate var(--dur-2) var(--ease-out);
+  }
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    translate: 0 0;
+  }
+}

@@ -1,0 +1,980 @@
+[
+  {
+    "slug": "tui",
+    "commonName": "Tūī",
+    "scientificName": "Prosthemadera novaeseelandiae",
+    "localNames": {
+      "pt": "Papa-mel-tui",
+      "es": "Mielero tui",
+      "mi": "Tūī"
+    },
+    "family": "Meliphagidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "New Zealand",
+    "habitat": "Native forest, forest edges, parks and gardens",
+    "traits": [
+      "Iridescent blue-green plumage.",
+      "White throat tufts (poi).",
+      "Nectar-feeding honeyeater.",
+      "Pollinates flax and kōwhai.",
+      "Endemic to New Zealand."
+    ],
+    "songDescription": "Ringing, bell-like tolls and liquid notes mixed with clicks, cackles, creaks and wheezes, in phrases repeated every few seconds.",
+    "songCharacter": "metallic bell-like notes + clicks",
+    "photo": {
+      "src": "/birds/tui/photo.webp",
+      "srcSm": "/birds/tui/photo-sm.webp",
+      "width": 1200,
+      "height": 1600,
+      "focal": {
+        "x": 0.5,
+        "y": 0.22
+      },
+      "lqip": "data:image/webp;base64,UklGRqwAAABXRUJQVlA4IKAAAAAQBgCdASoYACAAPu1gqE4ppSOiMBgMATAdiWgAnTLohT2V+EoM2ZjR6KMb2q/Qimh6wQKES6C5vRAA/naRJAcAdqLYnCRmMA1o2eX8bPqfBZqwSLpstCD4TucNKil/6oi0J3tsEQxScs8QUUoBJ9H0RwTHK/A+KMivtbVBnmyBAaf+bgUg3ltgrJswpF9O95P1vTrYxuf7pc5JY1LdcEAA",
+      "dominantColor": "#5a6a4a",
+      "accentColor": "#4988b6",
+      "alt": "A tūī singing with its bill open, perched on a flax flower stalk. Its plumage shines blue, green and bronze, with two white tufts at the throat.",
+      "labelSide": "end",
+      "scrim": 0.62,
+      "birdBox": {
+        "x0": 0.25,
+        "y0": 0.12,
+        "x1": 0.78,
+        "y1": 0.92
+      }
+    },
+    "audio": {
+      "src": "/birds/tui/song.m4a",
+      "durationSec": 27.219501,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1200380,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 944,
+        "p50": 2131,
+        "p90": 2576
+      },
+      "peakHz": 2224,
+      "fingerprint": "Bell tones locked on ~2.2 kHz with clean harmonics at 4.4 and 6.6 kHz, led in by dry clicks and low ~1 kHz notes; ends in a buzzy harmonic rattle."
+    },
+    "credits": {
+      "photo": {
+        "title": "Tui (Prosthemadera novaeseelandiae) Tiritiri Matangi.jpg",
+        "author": "Charles J. Sharp",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Tui_(Prosthemadera_novaeseelandiae)_Tiritiri_Matangi.jpg",
+        "changes": "Resized and converted to WebP; colors converted to sRGB."
+      },
+      "audio": {
+        "title": "Tui-song-50.wav",
+        "author": "Department of Conservation (NZ), © Crown Copyright",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Tui-song-50.wav",
+        "catalog": "DOC NZ bird song library, “Male territorial calls”",
+        "changes": "Excerpt 85.04–112.26 s of the source, mixed to mono, high-pass 400 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "musician-wren",
+    "commonName": "Musician Wren",
+    "scientificName": "Cyphorhinus arada",
+    "localNames": {
+      "pt": "Uirapuru-verdadeiro",
+      "es": "Cucarachero musical"
+    },
+    "family": "Troglodytidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "Amazon basin (Brazil, Guianas, Venezuela, Colombia, Ecuador, Peru, Bolivia)",
+    "habitat": "Lower levels of humid lowland forest, including várzea",
+    "traits": [
+      "Rufous-orange face and throat.",
+      "Black-and-white streaked collar.",
+      "Finely barred brown wings.",
+      "Amazon forest floor.",
+      "The legendary uirapuru."
+    ],
+    "songDescription": "Clear, haunting, flute-like whistles that jump between pitches like a played melody. Phrases of 4–8 pure tonal notes fall between about 1 and 2.5 kHz and come every 5–7 s, with soft churring notes mixed in.",
+    "songCharacter": "pure fluting whistles in musical intervals",
+    "photo": {
+      "src": "/birds/musician-wren/photo.webp",
+      "srcSm": "/birds/musician-wren/photo-sm.webp",
+      "width": 1600,
+      "height": 1128,
+      "focal": {
+        "x": 0.49,
+        "y": 0.36
+      },
+      "lqip": "data:image/webp;base64,UklGRp4AAABXRUJQVlA4IJIAAAAQBQCdASoYABEAPu1srVEppaQiqAqpMB2JYwCuHA95Ejg8EZg9ux7uGJWo5m8kFSAAAP5CnJ26Hg3lfycvhAJfbK5SXSJcv6y3nMmc3mfM0vsX9+YFjVbUosPPOoIE9I3scSBbRGr2i7WJvXV60FAj0bEDRnewRClLh4xRyh8epRAIo5W3uTauC6iuAE6RMgAAAA==",
+      "dominantColor": "#b2c1a9",
+      "accentColor": "#6f431a",
+      "alt": "A musician wren singing with its bill open on a pale log. Rufous face, black-and-white streaked collar and barred brown wings against soft green foliage.",
+      "labelSide": "end",
+      "scrim": 0.72,
+      "birdBox": {
+        "x0": 0.39,
+        "y0": 0.28,
+        "x1": 0.86,
+        "y1": 0.85
+      }
+    },
+    "audio": {
+      "src": "/birds/musician-wren/song.m4a",
+      "durationSec": 27.862358,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1228730,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 1156,
+        "p50": 1690,
+        "p90": 2371
+      },
+      "peakHz": 2371,
+      "fingerprint": "Near-sine whistled notes stepping between 1.2 and 2.4 kHz in short melodic phrases every 6–10 s; long rests over a steady forest hiss."
+    },
+    "credits": {
+      "photo": {
+        "title": "UIRAPURU.jpg",
+        "author": "Lindolfo Souto",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:UIRAPURU.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Cyphorhinus arada - Musician Wren XC242524.mp3",
+        "author": "Niels Krabbe",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Cyphorhinus_arada_-_Musician_Wren_XC242524.mp3",
+        "catalog": "xeno-canto XC242524 (C. a. salvini, Ecuador)",
+        "changes": "Excerpt 0.50–28.36 s of the source, mixed to mono, high-pass 600 Hz, low-pass 3800 Hz, up to 10 dB stationary noise reduction, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "common-nightingale",
+    "commonName": "Common Nightingale",
+    "scientificName": "Luscinia megarhynchos",
+    "localNames": {
+      "pt": "Rouxinol",
+      "es": "Ruiseñor común",
+      "fr": "Rossignol philomèle",
+      "de": "Nachtigall"
+    },
+    "family": "Muscicapidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "Europe, North Africa and western Asia (winters in sub-Saharan Africa)",
+    "habitat": "Dense thickets, scrub and woodland edges, often near water",
+    "traits": [
+      "Plain russet-brown plumage.",
+      "Rufous, rounded tail.",
+      "Sings by night and by day."
+    ],
+    "songDescription": "Loud virtuoso song in short, varied phrases: slow swelling “piu piu piu” crescendo whistles, explosive rapid trills, rattles and gurgles, separated by dramatic pauses.",
+    "songCharacter": "complex virtuoso: crescendo whistles + rapid trills",
+    "photo": {
+      "src": "/birds/common-nightingale/photo.webp",
+      "srcSm": "/birds/common-nightingale/photo-sm.webp",
+      "width": 1600,
+      "height": 1067,
+      "focal": {
+        "x": 0.47,
+        "y": 0.53
+      },
+      "lqip": "data:image/webp;base64,UklGRnAAAABXRUJQVlA4IGQAAADwAwCdASoYABAAPu1iqU2ppaOiMAgBMB2JZgCdACIj2WUjAhlAoOcAAP7q0LjpSILe5T/wzNB9w1mdXuSxnRunkCreQvPmxf9feTyWYW5MwqRhdBeEU/D7zBn3pYFZJPMCgAAA",
+      "dominantColor": "#f9ed92",
+      "accentColor": "#9f734b",
+      "alt": "A common nightingale singing with its bill open, perched on a lichen-covered branch against a soft pale-yellow background.",
+      "labelSide": "end",
+      "scrim": 0.86,
+      "birdBox": {
+        "x0": 0.2,
+        "y0": 0.45,
+        "x1": 0.53,
+        "y1": 0.85
+      }
+    },
+    "audio": {
+      "src": "/birds/common-nightingale/song.m4a",
+      "durationSec": 26.992744,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1190380,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 2346,
+        "p50": 3223,
+        "p90": 4196
+      },
+      "peakHz": 3142,
+      "fingerprint": "A swelling “piu” whistle series held on ~3.1 kHz, then a broadband machine-gun trill (1.5–12 kHz) and quick ornamented phrases."
+    },
+    "credits": {
+      "photo": {
+        "title": "Nachtigall (April 2025) 1.jpg",
+        "author": "Romzig",
+        "license": "CC0 1.0",
+        "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Nachtigall_(April_2025)_1.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Common Nightingale (Luscinia megarhynchos) (W1CDR0001376 BD18).ogg",
+        "author": "Lawrence Shove / The British Library",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Common_Nightingale_(Luscinia_megarhynchos)_(W1CDR0001376_BD18).ogg",
+        "catalog": "British Library W1CDR0001376 BD18, Teign Valley, Devon, 1961",
+        "changes": "Excerpt 202.20–229.19 s of the source, mixed to mono, high-pass 300 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "jocotoco-antpitta",
+    "commonName": "Jocotoco Antpitta",
+    "scientificName": "Grallaria ridgelyi",
+    "localNames": {
+      "pt": "Torom-jocotoco",
+      "es": "Tororoí jocotoco"
+    },
+    "family": "Grallariidae",
+    "iucnStatus": {
+      "code": "EN",
+      "label": "Endangered"
+    },
+    "region": "Southeastern Ecuador (Zamora-Chinchipe) and adjacent northern Peru",
+    "habitat": "Steep, wet, mossy montane forest with Chusquea bamboo, about 2,300–2,650 m",
+    "traits": [
+      "Black crown, white cheek patch.",
+      "One of the largest antpittas.",
+      "Discovered in 1997.",
+      "Mossy bamboo cloud forest.",
+      "Hollow, hooting song.",
+      "Named for its call."
+    ],
+    "songDescription": "A slow, steady series of identical, low, hollow “hoo” notes, likened to a distant dog bark or a soft moo: about one a second near 0.6 kHz, with a faint second harmonic. A bird can keep it up for minutes while the pitch creeps upward.",
+    "songCharacter": "low hollow hoots (pure low tone, ~0.5–0.75 kHz)",
+    "photo": {
+      "src": "/birds/jocotoco-antpitta/photo.webp",
+      "srcSm": "/birds/jocotoco-antpitta/photo-sm.webp",
+      "width": 1067,
+      "height": 1600,
+      "focal": {
+        "x": 0.62,
+        "y": 0.23
+      },
+      "lqip": "data:image/webp;base64,UklGRuQAAABXRUJQVlA4INgAAACwBgCdASoYACQAPu1mrE6ppaQiMBVaqTAdiWgAyNRSNqKZ9fxg7546cKg1O/rVzgYJstTrNGP9Z+cUX2PuWAD+9W1K6RDa5XoHiSIbtbXSqW3DvdoO0XfEY4QlxZd183LTDDAQccI7MDvGCExiEgHdrPrluQfDYsooQ4U2VDN0nndBtJxUZUMkzkSzu6xHM1dTCMJ5EJbB59zGMLuzRzXPJWjKd5ggK3HJIoYdhRhMy0933u62eorrF4nbKF7ideOAvUdLEc5+OfiQawGdHGxN7rp/YAAAAAA=",
+      "dominantColor": "#24240e",
+      "accentColor": "#442811",
+      "alt": "A plump jocotoco antpitta standing on a mossy stump. Black crown, bold white cheek patch, gray breast and chestnut wings against deep green foliage.",
+      "labelSide": "start",
+      "scrim": 0.66,
+      "birdBox": {
+        "x0": 0.22,
+        "y0": 0.12,
+        "x1": 0.85,
+        "y1": 0.85
+      }
+    },
+    "audio": {
+      "src": "/birds/jocotoco-antpitta/song.m4a",
+      "durationSec": 24.992744,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1102180,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 576,
+        "p50": 630,
+        "p90": 698
+      },
+      "peakHz": 629,
+      "fingerprint": "Metronomic hollow hoots on ~0.63 kHz (second harmonic ~1.3 kHz), one every ~0.93 s: the lowest, steadiest pure tone of the songbirds here."
+    },
+    "credits": {
+      "photo": {
+        "title": "Jocotoco Antpitta.jpg",
+        "author": "Supreet Sahoo",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Jocotoco_Antpitta.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Grallaria ridgelyi - Jocotoco Antpitta XC250396.mp3",
+        "author": "Niels Krabbe",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Grallaria_ridgelyi_-_Jocotoco_Antpitta_XC250396.mp3",
+        "catalog": "xeno-canto XC250396, Tapichalaca, Ecuador",
+        "changes": "Excerpt 13.71–38.70 s of the source, mixed to mono, high-pass 300 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "white-browed-robin-chat",
+    "commonName": "White-browed Robin-Chat",
+    "scientificName": "Cossypha heuglini",
+    "localNames": {
+      "pt": "Pisco-de-heuglin",
+      "es": "Cosifa de Heuglin",
+      "fr": "Cossyphe de Heuglin"
+    },
+    "family": "Muscicapidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "East, central and southern Africa",
+    "habitat": "Riverine forest, thickets and well-wooded gardens",
+    "traits": [
+      "Black head, bold white brow.",
+      "Bright orange underparts.",
+      "Gray wings, rufous tail.",
+      "Riverine thickets and gardens.",
+      "Rising crescendo dawn song."
+    ],
+    "songDescription": "Rich whistled phrases repeated over and over, each repetition louder and faster, building to a ringing climax and then starting again. Often sung as a duet and at dawn.",
+    "songCharacter": "crescendo of rich repeated whistles",
+    "photo": {
+      "src": "/birds/white-browed-robin-chat/photo.webp",
+      "srcSm": "/birds/white-browed-robin-chat/photo-sm.webp",
+      "width": 1600,
+      "height": 1067,
+      "focal": {
+        "x": 0.6,
+        "y": 0.22
+      },
+      "lqip": "data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAABQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JZAC7B3gAbuES+U312VLvzEwAAP7PeNKrzjI9yviV5YR/M5ixgQANbMKoXRp5jemhQlTNGo5tYqmg0GurxITWh0hGh9UJ/2evOjkOVf0lv/TkkxN6futsFa2K6p5pHbsr7ICFBDoAAA==",
+      "dominantColor": "#131d0a",
+      "accentColor": "#f5bd2b",
+      "alt": "A white-browed robin-chat on a diagonal branch: black mask with a white brow, slate wings and glowing orange underparts against dark green forest.",
+      "labelSide": "start",
+      "scrim": 0.68,
+      "birdBox": {
+        "x0": 0.25,
+        "y0": 0.15,
+        "x1": 0.75,
+        "y1": 0.92
+      }
+    },
+    "audio": {
+      "src": "/birds/white-browed-robin-chat/song.m4a",
+      "durationSec": 22.485488,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 991610,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 1825,
+        "p50": 2273,
+        "p90": 2775
+      },
+      "peakHz": 2284,
+      "fingerprint": "Rich whistles at 1.5–3.5 kHz repeated faster and louder in ~6 s crescendos that peak and collapse, three waves per loop."
+    },
+    "credits": {
+      "photo": {
+        "title": "Cossypha heuglini.jpg",
+        "author": "Hobbyfotowiki",
+        "license": "CC0 1.0",
+        "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Cossypha_heuglini.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "White-browed Robin Chat (Cossypha heuglini) (022A-WA03044X0023-0007M0).ogg",
+        "author": "A.R. Gregory / The British Library",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:White-browed_Robin_Chat_(Cossypha_heuglini)_(022A-WA03044X0023-0007M0).ogg",
+        "catalog": "British Library W1CDR0001419 BD20, Chepareria, Kenya, 1974",
+        "changes": "Excerpt 9.92–32.40 s of the source, mixed to mono, high-pass 300 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "screaming-piha",
+    "commonName": "Screaming Piha",
+    "scientificName": "Lipaugus vociferans",
+    "localNames": {
+      "pt": "Cricrió",
+      "es": "Guardabosques gritón"
+    },
+    "family": "Cotingidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "Amazon basin, plus a disjunct Atlantic Forest population (Pernambuco and Bahia)",
+    "habitat": "Lowland evergreen forest, mainly terra firme, mid-story",
+    "traits": [
+      "Plain gray plumage.",
+      "Males call from leks.",
+      "Among the loudest birds alive.",
+      "Amazon and Atlantic Forest.",
+      "Signature “qui-qui-yo” whistle."
+    ],
+    "songDescription": "The sound of the Amazon: an explosive, whip-like “pi-pi-YO” (qui-qui-yo) of sharply up-slurred whistles that sweep from about 1.5 to 5 kHz. Several lekking males answer each other, so a song comes every few seconds. It is over 110 dB at 1 m.",
+    "songCharacter": "explosive whistled sweeps (pure tone, wide glissando)",
+    "photo": {
+      "src": "/birds/screaming-piha/photo.webp",
+      "srcSm": "/birds/screaming-piha/photo-sm.webp",
+      "width": 1600,
+      "height": 1201,
+      "focal": {
+        "x": 0.52,
+        "y": 0.17
+      },
+      "lqip": "data:image/webp;base64,UklGRpYAAABXRUJQVlA4IIoAAABwBACdASoYABIAPu1oqU+ppiOiKA1RMB2JQBjPgaM68jwjTNVaafEs61zxeADMCVPW00ncotc0TQJ7HDm22WYJ93VxGiuXHLY6IGZoFUG0qVt1j4xJGJsk6QooOFr5kbS4SGBE+9R5KdHTAY7C/tqm68zDHRDo5CnHgqsh1puJk/n/pYbIhGFQAAA=",
+      "dominantColor": "#888265",
+      "accentColor": "#816b66",
+      "alt": "A plain gray screaming piha perched on a lichen-covered branch, with pink fig berries and glossy leaves in the lower left.",
+      "labelSide": "start",
+      "scrim": 0.6,
+      "birdBox": {
+        "x0": 0.45,
+        "y0": 0.1,
+        "x1": 0.93,
+        "y1": 0.88
+      }
+    },
+    "audio": {
+      "src": "/birds/screaming-piha/song.m4a",
+      "durationSec": 25.316553,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1116460,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 1445,
+        "p50": 1818,
+        "p90": 4591
+      },
+      "peakHz": 1458,
+      "fingerprint": "Explosive whistles sweeping ~1.5 → 5 kHz in under a second; two close, loud songs per loop with distant males answering in between."
+    },
+    "credits": {
+      "photo": {
+        "title": "Lipaugus vociferans - Screaming Piha; Manaus, Amazonas, Brazil.jpg",
+        "author": "Hector Bottai",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Lipaugus_vociferans_-_Screaming_Piha;_Manaus,_Amazonas,_Brazil.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Lipaugus vociferans - Screaming Piha XC249181.mp3",
+        "author": "Niels Krabbe",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Lipaugus_vociferans_-_Screaming_Piha_XC249181.mp3",
+        "catalog": "xeno-canto XC249181, Orellana, Ecuador",
+        "changes": "Excerpt 30.60–55.91 s of the source, mixed to mono, high-pass 400 Hz, low-pass 7000 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "white-rumped-shama",
+    "commonName": "White-rumped Shama",
+    "scientificName": "Copsychus malabaricus",
+    "localNames": {
+      "pt": "Shama-malabar",
+      "es": "Shama culiblanco",
+      "hi": "शामा"
+    },
+    "family": "Muscicapidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "South and Southeast Asia (Indian subcontinent to Indonesia)",
+    "habitat": "Dense undergrowth of lowland forest and bamboo",
+    "traits": [
+      "Glossy blue-black upperparts.",
+      "Rich chestnut belly.",
+      "Long tail edged in white.",
+      "White rump patch.",
+      "Dense forest undergrowth."
+    ],
+    "songDescription": "Loud, rich and melodious phrases of clear fluty whistles, swoops and quick flourishes. Long prized as one of Asia’s finest songsters.",
+    "songCharacter": "rich melodious fluty whistles",
+    "photo": {
+      "src": "/birds/white-rumped-shama/photo.webp",
+      "srcSm": "/birds/white-rumped-shama/photo-sm.webp",
+      "width": 1600,
+      "height": 1067,
+      "focal": {
+        "x": 0.36,
+        "y": 0.23
+      },
+      "lqip": "data:image/webp;base64,UklGRnIAAABXRUJQVlA4IGYAAADwAwCdASoYABAAPu1iqU2ppaOiMAgBMB2JZQC+Y1/AMIjtLtsxf2MEAP6e6a9cw0EQNNTUxwaV+YeGd91JPC4QmpuH1GHSgMHilRL18g63tHyoUfWv6mN37qSBBGneMavqQeprgAA=",
+      "dominantColor": "#5a5550",
+      "accentColor": "#aa6d39",
+      "alt": "A male white-rumped shama on a thick curved branch: glossy blue-black head and back, chestnut belly and a long black tail sweeping down to the right.",
+      "labelSide": "end",
+      "scrim": 0.54,
+      "birdBox": {
+        "x0": 0.25,
+        "y0": 0.15,
+        "x1": 0.95,
+        "y1": 0.95
+      }
+    },
+    "audio": {
+      "src": "/birds/white-rumped-shama/song.m4a",
+      "durationSec": 16.504649,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 727855,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 1129,
+        "p50": 1888,
+        "p90": 2367
+      },
+      "peakHz": 2184,
+      "fingerprint": "Two long phrases of bending fluty whistles and quick flourishes at 1–3.5 kHz, with a ~3 s rest between them."
+    },
+    "credits": {
+      "photo": {
+        "title": "Copsychus malabaricus male - Khao Yai.jpg",
+        "author": "JJ Harrison",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Copsychus_malabaricus_male_-_Khao_Yai.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "White-rumped shama song recorded in June 2014 at Netravali, Goa.wav",
+        "author": "Sharadapte",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:White-rumped_shama_song_recorded_in_June_2014_at_Netravali,_Goa.wav",
+        "catalog": "Netravali, Goa, India, June 2014",
+        "changes": "Excerpt 0.63–17.13 s of the source, mixed to mono, high-pass 400 Hz, low-pass 5000 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "kakapo",
+    "commonName": "Kākāpō",
+    "scientificName": "Strigops habroptilus",
+    "localNames": {
+      "pt": "Kakapo",
+      "es": "Kakapo",
+      "mi": "Kākāpō"
+    },
+    "family": "Strigopidae",
+    "iucnStatus": {
+      "code": "CR",
+      "label": "Critically endangered"
+    },
+    "region": "New Zealand (predator-free offshore islands)",
+    "habitat": "Podocarp forest and scrub on predator-free islands",
+    "traits": [
+      "Moss-green mottled plumage.",
+      "Owl-like facial disc.",
+      "World’s only flightless parrot.",
+      "Nocturnal ground-dweller.",
+      "Only a few hundred birds left."
+    ],
+    "songDescription": "On lek nights the male inflates air sacs in his chest and gives deep, resonant booms (around 100 Hz) in rhythmic series every couple of seconds for hours, audible kilometers away. The booms are interspersed with metallic “ching” calls.",
+    "songCharacter": "deep resonant sub-bass booming",
+    "photo": {
+      "src": "/birds/kakapo/photo.webp",
+      "srcSm": "/birds/kakapo/photo-sm.webp",
+      "width": 1600,
+      "height": 900,
+      "focal": {
+        "x": 0.4,
+        "y": 0.39
+      },
+      "lqip": "data:image/webp;base64,UklGRngAAABXRUJQVlA4IGwAAAAQBACdASoYAA4APu1iqU2ppaOiMAgBMB2JaADCgCFsqiX2fvwXAzLMoAD+zEeUbQHq9gu69fku+WhG0lO2Qewv8OzOcTH/5hsUe9P+U/xRqGN3UrNf4fIF+VpQiX+qxmkZW7eM2cWFtRoGoAA=",
+      "dominantColor": "#1d290f",
+      "accentColor": "#7d8f3c",
+      "alt": "A kākāpō nestled among broad green lily leaves at night: moss-green mottled plumage, owl-like face and a pale gray beak.",
+      "labelSide": "end",
+      "scrim": 0.58,
+      "birdBox": {
+        "x0": 0.3,
+        "y0": 0.2,
+        "x1": 0.75,
+        "y1": 0.95
+      }
+    },
+    "audio": {
+      "src": "/birds/kakapo/song.m4a",
+      "durationSec": 23.166893,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1021660,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 203,
+        "p50": 305,
+        "p90": 307
+      },
+      "peakHz": 305,
+      "fingerprint": "Sub-bass booms every ~1.65 s: fundamental ~102 Hz carries 97% of the energy; band figures are measured above 150 Hz, where the ~203 and ~305 Hz harmonics carry the pitch."
+    },
+    "credits": {
+      "photo": {
+        "title": "Kakapo Sirocco 1.jpg",
+        "author": "Chris Birmingham / Department of Conservation (NZ)",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Kakapo_Sirocco_1.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Kakapo-18.wav",
+        "author": "Department of Conservation (NZ), © Crown Copyright",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Kakapo-18.wav",
+        "catalog": "DOC NZ bird song library, “Adult male booming”",
+        "changes": "Excerpt 63.05–86.22 s of the source, mixed to mono, high-pass 40 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "chalk-browed-mockingbird",
+    "commonName": "Chalk-browed Mockingbird",
+    "scientificName": "Mimus saturninus",
+    "localNames": {
+      "pt": "Sabiá-do-campo",
+      "es": "Calandria grande"
+    },
+    "family": "Mimidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "Brazil, Bolivia, Paraguay, Uruguay, Argentina and southern Suriname",
+    "habitat": "Savanna, cerrado, forest edge, pastures with scattered trees, gardens",
+    "traits": [
+      "Bold white eyebrow.",
+      "Long white-tipped tail.",
+      "Mimics other birds.",
+      "Open country and gardens.",
+      "Loud, varied song."
+    ],
+    "songDescription": "A loud, restless medley of whistles, rising slurs, buzzy rattles, chatters and trills, many borrowed from other species. Phrases change every second or two across 2–5 kHz, with buzzy broadband passages reaching higher.",
+    "songCharacter": "mimicry / complex varied warbling",
+    "photo": {
+      "src": "/birds/chalk-browed-mockingbird/photo.webp",
+      "srcSm": "/birds/chalk-browed-mockingbird/photo-sm.webp",
+      "width": 1600,
+      "height": 1067,
+      "focal": {
+        "x": 0.39,
+        "y": 0.25
+      },
+      "lqip": "data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAAAQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JZgCdMoAC/n+qhsJQiGYbAAD+V3uE8av0ieKu7/CvkIkjgJs/DsjT+qf5Gq0MmxHSZVrNZSE/mSh/Ss8jwsFaBrQNYdwIcQvgAA==",
+      "dominantColor": "#e9ac74",
+      "accentColor": "#e4a263",
+      "alt": "A chalk-browed mockingbird standing on a sawn stump in golden evening light, its white eyebrow glowing against a warm orange background.",
+      "labelSide": "end",
+      "scrim": 0.69,
+      "birdBox": {
+        "x0": 0.28,
+        "y0": 0.17,
+        "x1": 0.85,
+        "y1": 0.85
+      }
+    },
+    "audio": {
+      "src": "/birds/chalk-browed-mockingbird/song.m4a",
+      "durationSec": 27.159637,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1197740,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 2413,
+        "p50": 3520,
+        "p90": 4173
+      },
+      "peakHz": 3940,
+      "fingerprint": "Restless medley at 2–7 kHz: slurred whistles, rapid repeats and a 4 s buzzy rattle reaching 12 kHz; a background bird adds 9 kHz down-slurs."
+    },
+    "credits": {
+      "photo": {
+        "title": "192 Chalk-browed mockingbird in Chapada dos Guimarães National Park Photo by Giles Laurent.jpg",
+        "author": "Giles Laurent",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:192_Chalk-browed_mockingbird_in_Chapada_dos_Guimar%C3%A3es_National_Park_Photo_by_Giles_Laurent.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Mimus saturninus - Chalk-browed Mockingbird XC204967.mp3",
+        "author": "Gabriele Magurno",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Mimus_saturninus_-_Chalk-browed_Mockingbird_XC204967.mp3",
+        "catalog": "xeno-canto XC204967, Ezeiza, Buenos Aires, Argentina",
+        "changes": "Excerpt 0.50–27.66 s of the source, mixed to mono, high-pass 500 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "andean-solitaire",
+    "commonName": "Andean Solitaire",
+    "scientificName": "Myadestes ralloides",
+    "localNames": {
+      "pt": "Solitário-andino",
+      "es": "Solitario andino"
+    },
+    "family": "Turdidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "Andes from Venezuela to Bolivia",
+    "habitat": "Humid montane and cloud forest, about 900–2,800 m; favors ravines and mountain streams",
+    "traits": [
+      "Gray head and breast.",
+      "Rufous-brown back and wings.",
+      "Andean cloud forest.",
+      "Sings at dawn and dusk.",
+      "Ethereal, flute-like song."
+    ],
+    "songDescription": "A leisurely, ringing, lilting series of well-spaced phrases of pure, liquid, flute-like notes, sometimes with thin squeaky or gurgling ones, mostly between 2.5 and 5.5 kHz with pauses between.",
+    "songCharacter": "ethereal fluting with ringing, squeaky notes (high-register)",
+    "photo": {
+      "src": "/birds/andean-solitaire/photo.webp",
+      "srcSm": "/birds/andean-solitaire/photo-sm.webp",
+      "width": 1600,
+      "height": 1067,
+      "focal": {
+        "x": 0.46,
+        "y": 0.3
+      },
+      "lqip": "data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAAAwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JagC7ABel9h45jFS90MRVjgAA/rAYcPXEHaX6QIw5BGzRE+1POwOJKk+zeqZ9cXNx/BfccPUCsnPTf9XAVH56HmPqQU+SY+5bC1/qBNWTFIAoQNoBAAAA",
+      "dominantColor": "#75803a",
+      "accentColor": "#956c3b",
+      "alt": "An Andean solitaire on a moss-draped branch in a cloud forest: gray head and breast, rufous-brown back and wings, luminous green background.",
+      "labelSide": "end",
+      "scrim": 0.59,
+      "birdBox": {
+        "x0": 0.38,
+        "y0": 0.22,
+        "x1": 0.7,
+        "y1": 0.88
+      }
+    },
+    "audio": {
+      "src": "/birds/andean-solitaire/song.m4a",
+      "durationSec": 26.788209,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1181360,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 2810,
+        "p50": 3965,
+        "p90": 4836
+      },
+      "peakHz": 4095,
+      "fingerprint": "Sparse, ringing flute chords at 2.8–5.5 kHz in pairs about 2.5 s apart, plus held ~5.3 kHz whistles; the highest voice in the set."
+    },
+    "credits": {
+      "photo": {
+        "title": "Myadestes ralloides 75757649.jpg",
+        "author": "thibaudaronson",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Myadestes_ralloides_75757649.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Myadestes ralloides - Andean Solitaire XC242840.mp3",
+        "author": "Niels Krabbe",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Myadestes_ralloides_-_Andean_Solitaire_XC242840.mp3",
+        "catalog": "xeno-canto XC242840, El Placer, Esmeraldas, Ecuador",
+        "changes": "Excerpt 14.50–41.29 s of the source, mixed to mono, high-pass 800 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "common-loon",
+    "commonName": "Common Loon",
+    "scientificName": "Gavia immer",
+    "localNames": {
+      "pt": "Mobelha-grande",
+      "es": "Colimbo grande",
+      "fr": "Plongeon huard"
+    },
+    "family": "Gaviidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "North America (breeds in Canada and the northern US; also Greenland and Iceland); winters on coasts, including Atlantic Europe",
+    "habitat": "Clear northern lakes in summer; coastal waters in winter",
+    "traits": [
+      "Velvet-black head, red eyes.",
+      "Checkered black-and-white back.",
+      "Dives deep for fish.",
+      "Northern lakes of North America.",
+      "Haunting calls carry across water."
+    ],
+    "songDescription": "The male’s territorial yodel: a rising wail that breaks into repeated, undulating tonal phrases. It is low, pure and echoing, and carries for kilometers over still lakes.",
+    "songCharacter": "haunting low tonal yodel / wail",
+    "photo": {
+      "src": "/birds/common-loon/photo.webp",
+      "srcSm": "/birds/common-loon/photo-sm.webp",
+      "width": 1600,
+      "height": 1067,
+      "focal": {
+        "x": 0.52,
+        "y": 0.345
+      },
+      "lqip": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAAAwAwCdASoYABAAPu1iqk4ppaQiMAgBMB2JQAAQeIQle3rAAP7odlBjALPwosQaNIeZH4v2xhO4W9xf6Q4MrooHmhQb1oSFWW0h5vekjxPfwj8AAAA=",
+      "dominantColor": "#45512a",
+      "accentColor": "#6e171e",
+      "alt": "A common loon in breeding plumage gliding on dark green water with a fluffy chick beside it: black head, red eye, striped collar and white-spotted back.",
+      "labelSide": "start",
+      "scrim": 0.5,
+      "birdBox": {
+        "x0": 0.35,
+        "y0": 0.28,
+        "x1": 0.88,
+        "y1": 0.62
+      }
+    },
+    "audio": {
+      "src": "/birds/common-loon/song.m4a",
+      "durationSec": 22.402268,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 987940,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 1145,
+        "p50": 1754,
+        "p90": 1854
+      },
+      "peakHz": 1849,
+      "fingerprint": "Two yodels: a rising wail into tremolo “wee-oo” phrases at 1.3–1.9 kHz with clear harmonics, then a softer answer from a second loon."
+    },
+    "credits": {
+      "photo": {
+        "title": "Gavia immer1 BS.jpg",
+        "author": "Cephas",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Gavia_immer1_BS.jpg",
+        "changes": "Resized and converted to WebP."
+      },
+      "audio": {
+        "title": "Gavia immer - Great Northern Loon XC139387.ogg",
+        "author": "Jonathon Jongsma",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Gavia_immer_-_Great_Northern_Loon_XC139387.ogg",
+        "catalog": "xeno-canto XC139387, Lake Superior, Wisconsin",
+        "changes": "Excerpt 81.22–103.62 s of the source, mixed to mono, high-pass 300 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  },
+  {
+    "slug": "rufous-bellied-thrush",
+    "commonName": "Rufous-bellied Thrush",
+    "scientificName": "Turdus rufiventris",
+    "localNames": {
+      "pt": "Sabiá-laranjeira",
+      "es": "Zorzal colorado"
+    },
+    "family": "Turdidae",
+    "iucnStatus": {
+      "code": "LC",
+      "label": "Least concern"
+    },
+    "region": "Eastern and southeastern Brazil, Bolivia, Paraguay, Uruguay and central Argentina",
+    "habitat": "Forest, woodland edge, parks and wooded urban areas",
+    "traits": [
+      "Rufous-orange belly.",
+      "Gray-brown upperparts.",
+      "Yellow bill and eye-ring.",
+      "National bird of Brazil.",
+      "Sings through spring nights."
+    ],
+    "songDescription": "Unhurried, rich caroling: liquid, slurred phrases of 4–10 notes, mostly 1.8–2.7 kHz, repeated every few seconds with each phrase a little different. The classic sabiá dawn song.",
+    "songCharacter": "rich warbling / fluty caroling phrases",
+    "photo": {
+      "src": "/birds/rufous-bellied-thrush/photo.webp",
+      "srcSm": "/birds/rufous-bellied-thrush/photo-sm.webp",
+      "width": 1600,
+      "height": 1067,
+      "focal": {
+        "x": 0.47,
+        "y": 0.34
+      },
+      "lqip": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAAAQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbAAAUrov0IQKb55HTvl4AAD+6EW4G2wdFhZDdP3FJXMPDFxuv/X5Q+ZLIF7dv/3Yph8IbClOKAixGsDWfGXt1czuaXTM82ZPcvkdihJ8LTvL4Weu4uY3BSWcveMhdd0kX3F+7B7WhrAA",
+      "dominantColor": "#dcf481",
+      "accentColor": "#b75a17",
+      "alt": "A rufous-bellied thrush standing on a lichen-spotted rock: gray-brown back, rufous-orange belly and yellow bill against bright green grass.",
+      "labelSide": "end",
+      "scrim": 0.75,
+      "birdBox": {
+        "x0": 0.38,
+        "y0": 0.26,
+        "x1": 0.94,
+        "y1": 0.76
+      }
+    },
+    "audio": {
+      "src": "/birds/rufous-bellied-thrush/song.m4a",
+      "durationSec": 25.060998,
+      "sampleRate": 44100,
+      "fileSampleRate": 44100,
+      "validFrames": 1105190,
+      "primingFrames": 2112,
+      "bandHz": {
+        "p10": 1933,
+        "p50": 2320,
+        "p90": 3212
+      },
+      "peakHz": 2598,
+      "fingerprint": "Liquid slurred notes at 2.0–2.7 kHz in 4–6 s caroling phrases with squeaky down-slurs to ~6 kHz; a faint insect line sits at 4 kHz."
+    },
+    "credits": {
+      "photo": {
+        "title": "Rufous-bellied thrush (Turdus rufiventris) Colonia.jpg",
+        "author": "Charles J. Sharp",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Rufous-bellied_thrush_(Turdus_rufiventris)_Colonia.jpg",
+        "changes": "Resized and converted to WebP; colors converted to sRGB."
+      },
+      "audio": {
+        "title": "Turdus rufiventris - Rufous-bellied Thrush XC112745.mp3",
+        "author": "Niels Krabbe",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Turdus_rufiventris_-_Rufous-bellied_Thrush_XC112745.mp3",
+        "catalog": "xeno-canto XC112745, Vaqueros, Salta, Argentina",
+        "changes": "Excerpt 38.63–63.69 s of the source, mixed to mono, high-pass 300 Hz, loudness-normalized, 0.6 s loop crossfade, AAC 128 kbps."
+      }
+    }
+  }
+]
