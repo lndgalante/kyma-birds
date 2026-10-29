@@ -272,6 +272,11 @@ export interface CymaticsPlateProps {
   onReady?(info: PlateReadyInfo): void
   onError?(error: PlateError): void
   onTelemetry?(t: PlateTelemetry): void  // ≤ 8 Hz
+  ref?: Ref<PlateHandle>               // the shell's Take photo
+}
+
+export interface PlateHandle {
+  capture(): HTMLCanvasElement | null  // the plate as drawn now (draws a frame and copies it in the same task); null when nothing can be drawn
 }
 ```
 

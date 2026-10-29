@@ -7,6 +7,7 @@ import {
   formatHzShort,
   formatIndex,
   formatMode,
+  platePhotoName,
   splitHz,
   truncate,
 } from '~/lib/format'
@@ -50,5 +51,11 @@ describe('format', () => {
     expect(t.length).toBeLessThanOrEqual(30)
     expect(t.endsWith('…')).toBe(true)
     expect(t).not.toMatch(/[,\s]…$/)
+  })
+
+  it('names a plate photo after the bird and the local time', () => {
+    expect(platePhotoName('tui', new Date(2026, 9, 29, 1, 42, 3))).toBe(
+      'kyma-birds-tui-20261029-014203.png',
+    )
   })
 })

@@ -1,7 +1,7 @@
 // The plate as a React component (docs/specs/engine.md §9.1): the lazy chunk, and the only React file that
 // imports three. It fills its absolutely positioned host; React never re-renders it per frame.
 import '@tanstack/react-start/client-only'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { PlateController } from './gpu/PlateController'
 import type { CymaticsPlateProps } from './types'
 
@@ -74,6 +74,7 @@ export default function CymaticsPlate(props: CymaticsPlateProps) {
     () => ctrlRef.current?.setDebug(!!props.debug, props.accentColor),
     [props.debug, props.accentColor, gen],
   )
+  useImperativeHandle(props.ref, () => ({ capture: () => ctrlRef.current?.capture() ?? null }), [])
 
   return (
     <div ref={hostRef} className={props.className} style={{ position: 'absolute', inset: 0 }} />

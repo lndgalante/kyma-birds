@@ -1,8 +1,8 @@
 import { ClientOnly } from '@tanstack/react-router'
-import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Component, Suspense, useEffect, useMemo, useState, type ReactNode, type Ref } from 'react'
 import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
 import type { PlateDriveSource } from '~/audio/engine'
-import type { PlateBird, PlateError } from '~/cymatics'
+import type { PlateBird, PlateError, PlateHandle } from '~/cymatics'
 import { COPY, plateAria } from '~/lib/copy'
 import type { Bird } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
@@ -15,6 +15,9 @@ interface PlateFigureProps {
   bird: Bird
   held: boolean
   scatterToken: number
+  /** Each increment flashes the plate, as a camera shutter would. */
+  photoToken: number
+  plateRef: Ref<PlateHandle>
   caption: string
   captionKind: string
 }
@@ -45,7 +48,15 @@ export function useReducedMotion(): boolean {
 
 type GatePhase = 'shown' | 'exiting' | 'gone'
 
-export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: PlateFigureProps) {
+export function PlateFigure({
+  bird,
+  held,
+  scatterToken,
+  photoToken,
+  plateRef,
+  caption,
+  captionKind,
+}: PlateFigureProps) {
   const api = useAudioApi()
   const snap = useAudioSnapshot()
   const reducedMotion = useReducedMotion()
@@ -114,6 +125,7 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
                   <LazyCymaticsPlate
                     // The controller takes its source once; remount when the engine appears.
                     key={engine ? 'engine' : 'silent'}
+                    ref={plateRef}
                     source={engine?.driveSource ?? SILENT_SOURCE}
                     bird={plateBird}
                     plateShape="circle"
@@ -135,6 +147,13 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
             </ClientOnly>
           )}
         </div>
+        {photoToken > 0 && (
+          <span
+            key={photoToken}
+            className="plate-flash pointer-events-none absolute inset-0 z-2 bg-plate-sand opacity-0 motion-safe:animate-shutter"
+            aria-hidden="true"
+          />
+        )}
       </div>
       {gate !== 'gone' && (
         <ListenGate

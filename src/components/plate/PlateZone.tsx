@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useAudioApi } from '~/audio/useAudio'
-import { describeMode } from '~/cymatics'
+import { describeMode, type PlateHandle } from '~/cymatics'
 import { COPY, describeSay, describeSayHeld, plateCaptionHeld } from '~/lib/copy'
 import { NBSP, formatHz } from '~/lib/format'
 import type { Bird } from '~/lib/manifest'
@@ -10,6 +10,7 @@ import { ZoneHead } from '../shell/Zone'
 import { ModeReadout } from './ModeReadout'
 import { PlateControls } from './PlateControls'
 import { PlateFigure } from './PlateFigure'
+import { savePlatePhoto } from './platePhoto'
 import { usePlateCaption } from './usePlateCaption'
 
 interface PlateZoneProps {
@@ -21,7 +22,21 @@ export function PlateZone({ bird }: PlateZoneProps) {
   const announce = useAnnounce()
   const [held, setHeld] = useState(false)
   const [scatterToken, setScatterToken] = useState(0)
+  const [photoToken, setPhotoToken] = useState(0)
+  const plate = useRef<PlateHandle>(null)
   const caption = usePlateCaption(held)
+
+  const onPhoto = () => {
+    const image = plate.current?.capture()
+    if (!image) {
+      announce(COPY.photoFailed)
+      return
+    }
+    setPhotoToken((t) => t + 1)
+    void savePlatePhoto(image, bird, caption.mode).then((saved) => {
+      if (saved) announce(COPY.photoSaved)
+    })
+  }
 
   const onDescribe = () => {
     // While held, describe the frozen pattern on screen; it no longer follows the song.
@@ -56,6 +71,8 @@ export function PlateZone({ bird }: PlateZoneProps) {
           bird={bird}
           held={held}
           scatterToken={scatterToken}
+          photoToken={photoToken}
+          plateRef={plate}
           caption={caption.text}
           captionKind={caption.kind}
         />
@@ -65,7 +82,7 @@ export function PlateZone({ bird }: PlateZoneProps) {
           Split the row is level with the song strip. */}
       <div
         className={cn(
-          'plate-foot flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2.5',
+          'plate-foot flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2.5 narrow:gap-x-3',
           'foot-row:h-12 foot-row:flex-nowrap foot-row:justify-start',
           'compact:flex-col compact:gap-2',
           'split:h-auto',
@@ -76,6 +93,7 @@ export function PlateZone({ bird }: PlateZoneProps) {
           held={held}
           onHeldChange={setHeld}
           onScatter={() => setScatterToken((t) => t + 1)}
+          onPhoto={onPhoto}
           onDescribe={onDescribe}
         />
       </div>

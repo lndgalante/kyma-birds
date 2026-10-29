@@ -1,5 +1,6 @@
 // Shared contract between the plate (src/cymatics/**) and the app shell.
 // Source of truth: docs/specs/engine.md §3.2. Changing a signature here is a cross-team change.
+import type { Ref } from 'react'
 import type { PlateDriveSource } from '~/audio/engine/types'
 
 export type PlateShape = 'circle' | 'square'
@@ -50,4 +51,11 @@ export interface CymaticsPlateProps {
   onReady?(info: PlateReadyInfo): void
   onError?(error: PlateError): void
   onTelemetry?(t: PlateTelemetry): void // ≤ 8 Hz
+  ref?: Ref<PlateHandle>
+}
+
+/** What the shell can ask of a mounted plate. */
+export interface PlateHandle {
+  /** The plate as drawn now, at the canvas's pixel size, transparent outside the plate; null when nothing can be drawn. */
+  capture(): HTMLCanvasElement | null
 }

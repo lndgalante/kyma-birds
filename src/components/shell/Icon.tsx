@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
+  Camera,
   ChevronLeft,
   ChevronRight,
   Pause,
@@ -27,6 +28,7 @@ export type IconName =
   | 'arrow-right'
   | 'arrow-left'
   | 'close'
+  | 'camera'
 
 const ICONS: Record<IconName, LucideIcon> = {
   play: Play,
@@ -40,6 +42,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   'arrow-right': ArrowRight,
   'arrow-left': ArrowLeft,
   close: X,
+  camera: Camera,
 }
 
 // Solid glyphs on the caps and the disc (play cap, Listen disc, now-playing).

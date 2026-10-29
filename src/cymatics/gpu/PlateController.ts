@@ -392,6 +392,24 @@ export class PlateController {
     this.wake()
   }
 
+  /**
+   * The plate as it looks now, copied into a 2D canvas. The WebGL buffer is cleared once the page
+   * composites it (no preserveDrawingBuffer), so this draws a frame and copies it in the same task.
+   */
+  capture(): HTMLCanvasElement | null {
+    if (this.disposed || this.lost || this.failed) return null
+    const { width, height } = this.canvas
+    if (!width || !height) return null
+    this.draw()
+    const out = document.createElement('canvas')
+    out.width = width
+    out.height = height
+    const ctx = out.getContext('2d')
+    if (!ctx) return null
+    ctx.drawImage(this.canvas, 0, 0)
+    return out
+  }
+
   // ── Disposal (§8.9) ─────────────────────────────────────────────────────────────────────────
 
   dispose(): void {

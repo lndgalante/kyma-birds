@@ -52,6 +52,13 @@ export function pad2(n: number): string {
   return String(n).padStart(2, '0')
 }
 
+/** "kyma-birds-tui-20261029-014233.png": the bird, then the local date and time, so photos sort by when. */
+export function platePhotoName(slug: string, at: Date): string {
+  const day = `${at.getFullYear()}${pad2(at.getMonth() + 1)}${pad2(at.getDate())}`
+  const time = `${pad2(at.getHours())}${pad2(at.getMinutes())}${pad2(at.getSeconds())}`
+  return `kyma-birds-${slug}-${day}-${time}.png`
+}
+
 /** Zero-based index → "03 / 12". */
 export function formatIndex(i: number, total: number): string {
   return `${pad2(i + 1)} / ${pad2(total)}`

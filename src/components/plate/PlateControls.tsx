@@ -2,27 +2,43 @@ import { Button } from '~/components/ui/button'
 import { Toggle } from '~/components/ui/toggle'
 import { COPY } from '~/lib/copy'
 import { cn } from '~/lib/utils'
+import { Icon } from '../shell/Icon'
 
 interface PlateControlsProps {
   held: boolean
   onHeldChange(b: boolean): void
   onScatter(): void
+  onPhoto(): void
   onDescribe(): void
 }
 
-export function PlateControls({ held, onHeldChange, onScatter, onDescribe }: PlateControlsProps) {
+export function PlateControls({
+  held,
+  onHeldChange,
+  onScatter,
+  onPhoto,
+  onDescribe,
+}: PlateControlsProps) {
   return (
     <div
       className={cn(
-        'plate-controls relative flex flex-wrap items-center justify-center gap-2 no-js:hidden',
+        'plate-controls relative flex flex-wrap items-center justify-center gap-2 no-js:hidden narrow:gap-1.5',
         'foot-row:ms-auto',
       )}
     >
-      <Toggle className="btn btn--toggle" pressed={held} onPressedChange={onHeldChange}>
+      <Toggle className="btn btn--toggle narrow:px-3" pressed={held} onPressedChange={onHeldChange}>
         {COPY.hold}
       </Toggle>
+      {/* A camera on phones, where three labelled pills and the status won't share one row. */}
       <Button
-        className="btn"
+        className="btn btn--photo field-or-compact:size-11 field-or-compact:px-0"
+        onClick={onPhoto}
+      >
+        <Icon name="camera" className="hidden field-or-compact:block" />
+        <span className="field-or-compact:sr-only">{COPY.takePhoto}</span>
+      </Button>
+      <Button
+        className="btn narrow:px-3"
         aria-disabled={held || undefined}
         onClick={held ? undefined : onScatter}
       >

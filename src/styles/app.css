@@ -176,6 +176,7 @@
   --animate-gate-pulse: gate-pulse 2.4s var(--ease-out) 3 both;
   --animate-gate-pulse-2: gate-pulse 2.4s var(--ease-out) 0.8s 3 both;
   --animate-gate-pulse-3: gate-pulse 2.4s var(--ease-out) 1.6s 3 both;
+  --animate-shutter: shutter 420ms var(--ease-out) both;
   @keyframes spin {
     to {
       rotate: 360deg;
@@ -184,6 +185,15 @@
   @keyframes flow-dash {
     to {
       background-position-x: 48px;
+    }
+  }
+  /* Take photo: a soft flash of sand-white across the plate. */
+  @keyframes shutter {
+    from {
+      opacity: 0.45;
+    }
+    to {
+      opacity: 0;
     }
   }
   @keyframes gate-pulse {
