@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   ACTIVATABLE_SELECTOR,
   WIDGET_SELECTOR,
+  isDialogOpen,
   isTypingOrWidgetTarget,
   shortcutFor,
 } from '~/lib/keyboard'
@@ -13,6 +14,16 @@ const el = (kind: 'plain' | 'widget' | 'button' = 'plain') => ({
     (sel === WIDGET_SELECTOR && kind === 'widget') ||
     (sel === ACTIVATABLE_SELECTOR && kind === 'button')
       ? {}
+      : null,
+})
+// A stand-in document holding one element: `querySelector` matches attribute selectors such as
+// `[role=dialog][data-state=open]`.
+const doc = (attrs: Record<string, string>) => ({
+  querySelector: (selector: string) =>
+    [...selector.matchAll(/\[([\w-]+)=([\w-]+)\]/g)].every(
+      ([, name, value]) => attrs[name] === value,
+    )
+      ? ({} as Element)
       : null,
 })
 const key = (k: string, extra: Partial<Parameters<typeof shortcutFor>[0]> = {}) => ({
@@ -62,10 +73,24 @@ describe('keyboard', () => {
     expect(isTypingOrWidgetTarget(el('button'))).toBe(false)
     expect(isTypingOrWidgetTarget(el())).toBe(false)
     expect(isTypingOrWidgetTarget(null)).toBe(false)
-    for (const s of ['input', 'select', '[role=tab]', '[role=slider]', '[role=radio]', 'dialog']) {
+    for (const s of [
+      'input',
+      'select',
+      '[role=tab]',
+      '[role=slider]',
+      '[role=radio]',
+      '[role=dialog]',
+    ]) {
       expect(WIDGET_SELECTOR).toContain(s)
     }
     expect(WIDGET_SELECTOR).not.toMatch(/\bbutton\b/)
     for (const s of ['button', 'a', 'summary']) expect(ACTIVATABLE_SELECTOR).toContain(s)
+  })
+
+  it('lets an open dialog own the keyboard, but not one that is animating out', () => {
+    expect(isDialogOpen(doc({ role: 'dialog', 'data-state': 'open' }))).toBe(true)
+    expect(isDialogOpen(doc({ role: 'dialog', 'data-state': 'closed' }))).toBe(false)
+    expect(isDialogOpen(doc({ 'data-state': 'open' }))).toBe(false)
+    expect(isDialogOpen(doc({}))).toBe(false)
   })
 })

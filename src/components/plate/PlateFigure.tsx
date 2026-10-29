@@ -5,10 +5,11 @@ import type { PlateDriveSource } from '~/audio/engine'
 import type { PlateBird, PlateError } from '~/cymatics'
 import { COPY, plateAria } from '~/lib/copy'
 import type { Bird } from '~/lib/manifest'
-import { PLAY_BUTTON_ID } from '../song/PlayButton'
+import { cn } from '~/lib/utils'
+import { focusPlayButton } from '../song/PlayButton'
 import { LazyCymaticsPlate } from './CymaticsPlate'
 import { ListenGate } from './ListenGate'
-import { PlatePoster } from './PlatePoster'
+import { POSTER_MESSAGE, PlatePoster } from './PlatePoster'
 
 interface PlateFigureProps {
   bird: Bird
@@ -77,24 +78,29 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
     const fromKeyboard = a?.closest('.gate') != null && a.matches(':focus-visible')
     void api.listen()
     // Keyboard users land on Pause, ready to stop what they just started.
-    if (fromKeyboard) document.getElementById(PLAY_BUTTON_ID)?.focus()
+    if (fromKeyboard) focusPlayButton()
   }
 
   const failed = plateError != null
   return (
     <figure
-      className="plate-figure"
+      className="plate-figure group/figure relative m-0 aspect-square w-(--plate)"
       aria-labelledby="plate-caption"
       data-ready={(ready && !failed) || undefined}
     >
-      <div className="plate-frame">
+      <div className="plate-frame absolute inset-0 overflow-clip rounded-[50%] bg-plate-surface shadow-plate">
         <PlatePoster message={failed ? COPY.plateFallbackWebgl : undefined} />
         <noscript>
-          <div className="plate-poster__msg plate-poster__msg--nojs">
+          <div
+            className={cn(
+              POSTER_MESSAGE,
+              'plate-poster__msg--nojs absolute top-1/2 left-1/2 -translate-1/2 split:w-[min(340px,80%)] split:max-w-none',
+            )}
+          >
             <p>{COPY.plateFallbackNojs}</p>
             {/* Split only: the 108px song spine is too narrow for a native player. */}
             <audio
-              className="noscript-audio noscript-audio--plate"
+              className="noscript-audio noscript-audio--plate mt-2.5 hidden w-full max-w-full min-w-0 split:block"
               controls
               loop
               preload="none"
@@ -104,7 +110,7 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
           </div>
         </noscript>
         <div
-          className="plate-canvas"
+          className="plate-canvas absolute inset-0 z-1 size-full"
           role="img"
           aria-label={plateAria(bird.commonName)}
           aria-describedby="plate-desc"
@@ -123,7 +129,7 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
                     held={held}
                     scatterToken={scatterToken}
                     reducedMotion={reducedMotion}
-                    className="plate-host"
+                    className="plate-host [&_canvas]:block"
                     onReady={() => setReady(true)}
                     onError={(e) => {
                       console.warn('[plate]', e.code, e.message)
@@ -146,7 +152,17 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
           onListen={onListen}
         />
       )}
-      <figcaption id="plate-caption" className="plate-caption" data-kind={captionKind}>
+      {/* Outside Split the plate is too small for a corner caption; the foot row carries it. */}
+      <figcaption
+        id="plate-caption"
+        className={cn(
+          'plate-caption pointer-events-none absolute start-0 bottom-0 z-2 max-w-[22ch] font-mono text-2xs leading-[1.3] font-medium tracking-label text-ink-3 uppercase',
+          'strip:sr-only',
+          // While live, the head row already reads "Mode (3, 2)"; the corner speaks only for states.
+          'split:transition-opacity split:duration-(--dur-2) split:ease-out split:data-[kind=live]:opacity-0',
+        )}
+        data-kind={captionKind}
+      >
         {caption}
       </figcaption>
       <p id="plate-desc" className="sr-only">

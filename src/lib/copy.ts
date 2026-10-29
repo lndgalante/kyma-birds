@@ -73,7 +73,8 @@ export const COPY = {
   creditsSong: 'Song',
   creditsFonts:
     'Typefaces: Archivo by Omnibus-Type and Martian Mono by Evil Martians, both under the SIL Open Font License 1.1.',
-  creditsSoftware: 'Software: Three.js, React, and TanStack, under the MIT License.',
+  creditsSoftware:
+    'Software: Three.js, React, TanStack, Radix UI, shadcn/ui, Tailwind CSS, tw-animate-css, clsx and tailwind-merge, under the MIT License; class-variance-authority, under the Apache License 2.0; icons by Lucide, under the ISC License.',
   creditsBack: 'Back to the birds',
   creditsAll: 'All credits',
   newTabSr: '(opens in a new tab)',

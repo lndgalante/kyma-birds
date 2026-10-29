@@ -2,7 +2,7 @@
 
 Scope: everything except the internals of `<CymaticsPlate>` (sand, rim, bolt, physics, shaders) and the internals of `AudioEngine` (decoding, looping, analysis). This spec defines the page around them, the contracts the shell expects from them, and every user-facing string.
 
-Stack: TanStack Start (React 19, file routes, SSR) on Cloudflare Workers, Three.js inside the plate only, plain CSS with cascade layers (no Tailwind, no CSS-in-JS), self-hosted variable fonts via Fontsource.
+Stack: TanStack Start (React 19, file routes, SSR) on Cloudflare Workers, Three.js inside the plate only, Tailwind CSS v4 and shadcn/ui (Radix) themed with the Kyma tokens (no CSS-in-JS), self-hosted variable fonts via Fontsource.
 
 ---
 
@@ -19,7 +19,7 @@ No interview round was possible, so these were inferred from the brief and the t
 | D5 | Sound never autoplays. A "Listen" press (or Space) is always the first sound. After that, changing birds plays the new bird's song unless the user paused. | Browser autoplay policy and WCAG 1.4.2. It also makes cause and effect visible: still sand until you listen. |
 | D6 | One accent per bird, taken from its photo (`accentColor`) and clamped for contrast. The ground is lightly tinted by the photo's `dominantColor`. Sand is always neutral white. | Color shows up at page scale (the room takes on the bird's habitat), not as scattered UI tints. The sand is matter, not UI, so it never takes the accent. |
 | D7 | Mobile uses a stacked "Field" layout: full-bleed photo with an overlaid label (the type treatment from reference 2), the song strip layered over the photo's lower fade, then the plate. The full "reel" variant, with the plate sitting on top of the photo, was **considered and rejected for v1** (see §2.6). | It keeps DOM order equal to visual order (Bird → Song → Plate) and never covers the bird. |
-| D8 | Plain CSS with `@layer`, co-located component stylesheets imported into one `app.css`. | The stack is small, it gives full control of modern CSS (subgrid, container queries, `@property`, scroll-driven animation), and there's no utility-class churn. |
+| D8 | Tailwind CSS v4 and shadcn/ui (new-york v4, vendored in `components/ui/`, Radix primitives, Lucide icons), themed with the Kyma tokens. One stylesheet, `styles/app.css`: the theme, the layout modes and container queries as custom variants, a few `@utility` rules (halos, scrims) and a base layer. Every component class name stays on its element as an unstyled hook. (2026-10-28, below; it was plain CSS with `@layer`.) | The user chose "Kyma look, built with shadcn": shadcn's consistent radii, focus rings, hover states, tooltips and dialogs, drawn in Kyma's palette, type and per-bird signal color rather than the stock look. Modern CSS stays available through variants and arbitrary values (subgrid, container queries, `@property`, scroll-driven animation). |
 | D9 | Fonts: **Archivo** (variable, wdth 62–125, wght 100–900, with italics) for names and prose. **Martian Mono** (variable, wdth 75–112.5, wght 100–800) for measurements, labels and readouts. | A grotesque with a real width axis gives instrument-label uppercase (expanded) and compact display names (semi-condensed) from one family. A wide, technical mono reads like instrument readouts. Neither is on the overused list (no Inter, Space Grotesk, IBM Plex, DM, Geist or JetBrains Mono). |
 | D10 | Manifest fields assumed beyond the brief: `slug` (if absent, derive it as `kebab(commonName)` in the loader) and optional `photo.alt`, `photo.labelSide`, `photo.scrim`. All optional fields have fallbacks. | These are the only extra fields the shell needs. |
 
@@ -27,6 +27,7 @@ No interview round was possible, so these were inferred from the brief and the t
 - **No plate-shape toggle: the app shows only the circle.** The Circle/Square radios, `?plate=`, the square frame, poster and caption rules, the frame's `border-radius` animation, the segmented control, the circle and square icons, `--radius-plate` and the `shape.*` strings are gone, and `plate.aria` always says "circular". The plate module keeps its square physics for the plate lab (`pnpm lab:plate`, :3102), its tests and engine.md; the shell passes `plateShape="circle"`.
 - **The Listen disc is centered on the plate.** The disc's center sits exactly on the plate's center, with "Listen" and the sub-line hanging below it. On plates under 320px tall the sub-line is visually hidden and stays the button's description (§5.2).
 - **The default bird is the Common Nightingale** (`DEFAULT_BIRD_SLUG` in `lib/manifest.ts`), the best-known songbird of the twelve. It is #10 of 12 on the Low → High rail. The build had defaulted to the Tūī.
+- **Tailwind CSS v4 + shadcn/ui instead of plain CSS (D8).** Same look and layout, measured against the plain-CSS build in every layout mode. The CSS files this spec names (`tokens.css`, `base.css`, `layout.css`, `utilities.css`, `components/*.css`) are now one `src/styles/app.css`; where a section shows CSS for a component class, those values are Tailwind utilities on that element, and the layout modes are the variants `field:`, `stacked:`, `split:`, `compact:` (plus unions such as `field-or-compact:`). The bird's signal color is **`--signal`** (utility `signal`), formerly `--accent`, because shadcn's `accent` is its hover surface (here `--line`); `--on-accent` is likewise `--on-signal`. The sections below say `--signal`. Dialogs are shadcn's Dialog (Radix) rather than `<dialog>`: About and Details keep their look, focus moves to the close button and returns to the opener, and Details is still a bottom sheet in Field. Icons are Lucide at stroke 1.8 (the old 1.5 on a 20px grid); the solid play and pause keep the old glyph size and optical centre. New: the pager, mute and play buttons show their shortcut in a tooltip on hover or keyboard focus, the masthead hint and About's key list use key caps, the hairline buttons show the focus halo, and hover styles no longer stick after a tap.
 - **Contrast on the Nightingale's photo.** Its pale-yellow photo is now the first one people see, so its `photo.scrim` went from 0.73 to 0.86 (a `scrimMin` floor in `scripts/assets/photo-config.json`), `.habitat` uses `--ink` instead of `--ink-2` (§4.3), and its two traits that repeated its habitat and range ("Dense thickets and woodland edges.", "Winters in sub-Saharan Africa.") were dropped, which also keeps the label clear of its beak at 1440×900. The worst habitat contrast went from 3.23:1 to 5.03:1.
 
 Anti-goals (a reviewer should reject any of these): purple or neon gradients; glassmorphism or `backdrop-filter` blur panels; emoji; glowing edges; bouncy springs on data; an auto-advancing carousel; autoplaying sound; decorative particles outside the plate; skeleton shimmer over the photo (use the LQIP); a light theme toggle.
@@ -45,15 +46,15 @@ Mood: **a field station after dark.** Quiet, exact and alive. The photo carries 
 
 Seven devices, all required:
 
-1. **Zone labels in one aligned row.** On desktop, the head row of the three-column grid reads `01 Bird ───▸  02 Song ─▸  03 Plate`. The labels sit in the same subgrid row, and a 1px hairline with a 5px arrowhead runs from each label to the next zone (it is decorative and `aria-hidden`). While a song plays, the hairline carries a slow dash in `--accent` moving toward the plate (1.6s linear loop). It stops when paused and is static under reduced motion.
+1. **Zone labels in one aligned row.** On desktop, the head row of the three-column grid reads `01 Bird ───▸  02 Song ─▸  03 Plate`. The labels sit in the same row (each zone repeats the page grid's rows), and a 1px hairline with a 5px arrowhead runs from each label to the next zone (it is decorative and `aria-hidden`). While a song plays, the hairline carries a slow dash in `--signal` moving toward the plate (1.6s linear loop). It stops when paused and is static under reduced motion.
 2. **The Song zone sits physically between the other two.** Desktop: a vertical "spine" column between card and plate. Tablet and mobile: a horizontal strip between card and plate.
 3. **A spectrum on a log-frequency axis.** It runs from 500 Hz to 12 kHz with ticks at 1k, 2k, 4k and 8k. On desktop the spectrum bars grow from the bird side toward the plate side, so energy visibly flows left to right.
-4. **The band bracket.** The card's data row prints `Band 2.1–4.6 kHz` from `audio.bandHz.p10–p90`. The same band is drawn as a 2px `--accent` bracket on the spectrum's frequency axis, so the static fact on the card and the live signal line up visibly.
+4. **The band bracket.** The card's data row prints `Band 2.1–4.6 kHz` from `audio.bandHz.p10–p90`. The same band is drawn as a 2px `--signal` bracket on the spectrum's frequency axis, so the static fact on the card and the live signal line up visibly.
 5. **The dominant-frequency hairline.** A 1px `--ink` line crosses the spectrum at the live dominant frequency and ends in an arrowhead at the spine's plate-side edge. Under it is the readout `2.84 kHz`, and under that `→ (3, 2)`, the mode now driving the plate.
-6. **The mode readout at the plate.** The Plate zone's head row repeats `Mode (3, 2)` in `--accent`, so the eye links the spine readout to the plate.
+6. **The mode readout at the plate.** The Plate zone's head row repeats `Mode (3, 2)` in `--signal`, so the eye links the spine readout to the plate.
 7. **Idle state shows causality.** Before Listen, the sand lies scattered and still and the caption reads "Waiting for sound". Pressing Listen makes the sand jump and find its first lines while the spectrum fills. That moment is the signature of the page.
 
-**One color, one meaning.** `--accent` means "this bird's live signal" and is used only for: the spectrum fill and band bracket, the dash on the flow hairline, the loop-progress ring on the play button, the active rail tick, and the mode readout. Buttons, links and focus rings never use the accent.
+**One color, one meaning.** `--signal` means "this bird's live signal" and is used only for: the spectrum fill and band bracket, the dash on the flow hairline, the loop-progress ring on the play button, the active rail tick, and the mode readout. Buttons, links and focus rings never use the accent.
 
 ### 1.3 What we take from the references
 
@@ -110,7 +111,7 @@ Viewport units: in Split, sizes use `dvh` (desktop has no dynamic toolbars). In 
 ┌───────────────────────────────────────────────────────────────────────────────────────┐
 │ ◎ KYMA BIRDS                                   Space to play · ← → to change bird  About  Credits │ 56px masthead
 ├───────────────────────────────────────────────────────────────────────────────────────┤
-│ 01 Bird ─────────────────────────────▸ │ 02 Song ─▸ │ 03 Plate               Mode (3, 2) │ 40px head row (subgrid)
+│ 01 Bird ─────────────────────────────▸ │ 02 Song ─▸ │ 03 Plate               Mode (3, 2) │ 40px head row
 │ ┌───────────────────────────────────┐ │   ( ▶ )    │ ┌──────────────────────────────┐ │
 │ │                       Gray Antwren  │ │  Playing   │ │                              │ │
 │ │                   MYRMOTHERULA SNOWI│ │ 8k ┤▬▬      │ │                              │ │
@@ -159,12 +160,14 @@ Viewport units: in Split, sizes use `dvh` (desktop has no dynamic toolbars). In 
       max-width: 1840px;
       margin-inline: auto;
     }
-    .zone { display: grid; grid-row: 1 / -1; grid-template-rows: subgrid; }
+    .zone { display: grid; grid-row: 1 / -1; grid-template-rows: var(--zone-head) minmax(0, 1fr) var(--zone-foot); }
     .zone-head { display: flex; align-items: center; gap: 12px; }   /* restores what Stacked hid */
-    /* Each zone renders exactly three direct children: head, body, foot. The bird zone's body (track) and
-       foot (picker-nav) share the carousel region, which spans rows 2–3 as a nested subgrid. */
-    .carousel { grid-row: 2 / 4; display: grid; grid-template-rows: subgrid; min-height: 0; }
-    .track { height: auto; min-height: 0; }                         /* fills the subgrid body row */
+    /* Each zone renders exactly three direct children: head, body, foot, on rows that repeat the page
+       grid's (not a subgrid: WebKit hit-tests a subgrid's rows where they were before a relayout, and
+       clicks miss the play button). The bird zone's body (track) and foot (picker-nav) share the
+       carousel region, which spans rows 2–3 with the same two rows. */
+    .carousel { grid-row: 2 / 4; display: grid; grid-template-rows: minmax(0, 1fr) var(--zone-foot); min-height: 0; }
+    .track { height: auto; min-height: 0; }                         /* fills the body row */
     .zone--bird  { grid-column: 1; }
     .zone--song  { grid-column: 2; border-inline: 1px solid var(--line); }
     .zone--plate { grid-column: 3; }
@@ -203,7 +206,7 @@ Resolved sizes (these are acceptance targets):
 └──────────────────────────────────────────┘
 ```
 
-Cascade order in `layout.css`: the Field block (`width < 40rem`), then Stacked (`width >= 40rem`), then Split, which overrides Stacked (it restores `.zone-head { display: flex }` and the rail), then Compact landscape last. Ordering by source keeps every media query simple.
+Cascade order of the layout variants in `app.css`: Field (`width < 40rem`), then Stacked (`width >= 40rem`), then Split, which overrides Stacked (it restores the zone heads and the rail), then Compact landscape last. Registering them in that order keeps every media query simple.
 
 ```css
 @media (width >= 40rem) {
@@ -347,7 +350,7 @@ LOW  │ │ │ ▌ │ │ │ │ │ │ │ │  HIGH    Gray Antwren · 1.
 ```
 
 - `PickerRail` is a `role="tablist"` (`aria-label="Choose a bird"`, `aria-describedby` → sr text "Birds are ordered from lowest to highest voice.") with 12 `<button role="tab">` elements. Each tab has `id="tab-<slug>"`, `aria-controls="slide-<slug>"`, `aria-selected`, `aria-label={commonName}`, and a roving `tabIndex` (`0` on the selected tab, `-1` on the rest).
-- Tick visuals: hit area 24 × 40px (24 × 44 on coarse pointers). The tick is drawn as a centered `::before`: 1 × 12px `--ink-3`; on hover 1 × 16px `--ink-2`; when selected 2 × 20px `--accent`. Ticks are evenly spaced. The end caps "Low" and "High" are mono labels and `aria-hidden` (the sr description covers them).
+- Tick visuals: hit area 24 × 40px (24 × 44 on coarse pointers). The tick is drawn as a centered `::before`: 1 × 12px `--ink-3`; on hover 1 × 16px `--ink-2`; when selected 2 × 20px `--signal`. Ticks are evenly spaced. The end caps "Low" and "High" are mono labels and `aria-hidden` (the sr description covers them).
 - **Hover/focus label:** to the right of the rail, one line, Martian Mono 11px `--ink-2` (the `mono-data` role, §7.2). When a tick is hovered or focused it shows that bird's `commonName · p50`. Otherwise it shows the active bird. This replaces tooltips.
 - **Counter:** `03 / 12`. The current number is in `--ink` and ` / 12` in `--ink-3`, set in Martian Mono 12px with `tabular-nums`, `aria-hidden="true"` (slides carry "3 of 12").
 - Field: the rail is hidden and the pager shows `‹ 03 / 12 ›`.
@@ -357,7 +360,7 @@ LOW  │ │ │ ▌ │ │ │ │ │ │ │ │  HIGH    Gray Antwren · 1.
 | | `viewIndex` | committed `bird` |
 |---|---|---|
 | Changes when | The slide under the scrollport changes, mid-gesture | The scroll has settled **and** 250ms have passed with no new movement |
-| Drives | Counter, rail selection, `inert` on slides, the theme (`--accent`, `--ground`), image priority | URL `?bird`, audio switch, plate figure label, live announcement, `<title>`, `theme-color`, Media Session |
+| Drives | Counter, rail selection, `inert` on slides, the theme (`--signal`, `--ground`), image priority | URL `?bird`, audio switch, plate figure label, live announcement, `<title>`, `theme-color`, Media Session |
 | Owner | `Instrument` local state (passed into `BirdZone`, set by `useSnapIndex`) | URL search param (TanStack Router) |
 
 `useSnapIndex(trackRef, { count, initialIndex, onView, onSettle })`:
@@ -609,7 +612,7 @@ export function birdTheme(b: Bird): React.CSSProperties {
   const accent = fitSrgb({ l: clamp(acc.l, 0.76, 0.86), c: clamp(acc.c, 0.07, 0.15), h: hue })
   const gc = clamp(dom.c * 0.35, 0.006, 0.03)
   return {
-    '--accent': oklch(accent),
+    '--signal': oklch(accent),
     '--ground': oklch({ l: 0.19, c: gc, h: dom.h }),
     '--ground-raised': oklch({ l: 0.23, c: gc, h: dom.h }),
     '--ground-sunken': oklch({ l: 0.155, c: gc * 0.8, h: dom.h }),
@@ -622,11 +625,11 @@ export function birdTheme(b: Bird): React.CSSProperties {
 The style is applied on `.app` from `birds[viewIndex]`, so the room shifts while you swipe. Transitions use registered properties:
 
 ```css
-@property --accent        { syntax: '<color>'; inherits: true; initial-value: oklch(0.8 0.11 150); }
+@property --signal        { syntax: '<color>'; inherits: true; initial-value: oklch(0.8 0.11 150); }
 @property --ground        { syntax: '<color>'; inherits: true; initial-value: oklch(0.19 0.014 150); }
 @property --ground-raised { syntax: '<color>'; inherits: true; initial-value: oklch(0.23 0.014 150); }
 @property --ground-sunken { syntax: '<color>'; inherits: true; initial-value: oklch(0.155 0.012 150); }
-.app { transition: --accent var(--dur-4) var(--ease-in-out), --ground var(--dur-4) var(--ease-in-out),
+.app { transition: --signal var(--dur-4) var(--ease-in-out), --ground var(--dur-4) var(--ease-in-out),
                    --ground-raised var(--dur-4) var(--ease-in-out), --ground-sunken var(--dur-4) var(--ease-in-out); }
 ```
 
@@ -642,7 +645,7 @@ Measured contrast: an accent with L ≥ 0.76 on any tinted ground (L 0.19, C ≤
 |---|---|---|---|---|
 | `idle` | Page load, before any gesture | Play icon; ring empty | "Ready" | Still sand, Listen gate visible, caption "Waiting for sound" |
 | `loading` | Listen pressed (or bird committed while on) and the buffer isn't decoded yet | Spinner arc (900ms linear rotation; under reduced motion a static dashed ring) | "Loading" | Old pattern holds and settles naturally |
-| `playing` | The buffer started | Pause icon; ring = loop progress in `--accent` | "Playing" | Live |
+| `playing` | The buffer started | Pause icon; ring = loop progress in `--signal` | "Playing" | Live |
 | `paused` | The user paused | Play icon; ring frozen | "Paused" | Sand rests where it is |
 | `error` | Fetch or decode failed | Retry icon | "Can't play" + inline "This song didn't load." and a "Try again" button | Still; caption "No sound" |
 
@@ -686,12 +689,12 @@ The disc is centered on the plate: its center sits exactly on the plate's center
 
 ### 5.3 Transport and Song zone
 
-**Spine (Split), top to bottom inside the subgrid body row:**
-1. Play/pause, 56px disc. It is the single filled control on the page: `--ink` fill and `--ground` glyph. The loop ring is 2px `--accent` on a 1px `--line` track, 4px outside the disc. `aria-label`: "Play song" or "Pause song", toggled. Use no `aria-pressed`, since the label changes.
+**Spine (Split), top to bottom inside the body row:**
+1. Play/pause, 56px disc. It is the single filled control on the page: `--ink` fill and `--ground` glyph. The loop ring is 2px `--signal` on a 1px `--line` track, 4px outside the disc. `aria-label`: "Play song" or "Pause song", toggled. Use no `aria-pressed`, since the label changes.
 2. State text: Martian Mono 11px UPPERCASE `--ink-3`, 8px below. It sits in a `role="status"` wrapper scoped to the transport, which announces "Loading", "Playing", "Paused" and errors politely.
-3. Spectrum: `<canvas>` with flex 1 and min-height 180px. Frequency is on the y-axis (log, 500 Hz at the bottom to 12 kHz at the top). Tick labels 1k / 2k / 4k / 8k in Martian Mono 11px `--ink-3` sit at the inline start. Bars grow toward the plate. Fill is `--accent` at 0.85 alpha, and the band bracket is a 2px `--accent` line with 6px end caps at the left edge. `peakHz` is a 4px notch on the bracket. The dominant hairline is 1px `--ink` across the full width, ending in a 5px arrowhead at the right edge. The canvas is DPR-aware (cap DPR at 2) and redraws on rAF only while playing; when paused or idle it draws one static frame. **Accessibility:** `role="img"` and `aria-label="Live spectrum. Song band 2.1 to 4.6 kHz, peak 3.2 kHz."` (static per bird).
-4. Readout: `2.84` Martian Mono 450 at 24px (`font-stretch: 87.5%`), unit `kHz` at 11px `--ink-3`. Below it, an SVG arrow and `(3, 2)` in 13px `--accent`. It updates at 8 Hz from a throttled snapshot (§9.2). **Silence handling:** when loudness falls below the gate for >400ms, hold the last value and dim it to `--ink-3`. Before any sound, show `—` (sr: "No sound yet").
-5. Foot row: Mute (40px icon button, `aria-label="Mute"`, `aria-pressed`) and Volume (`<input type="range" min=0 max=100 step=1>` 72–96px wide, `aria-label="Volume"`, `aria-valuetext="70%"`). Range styling: 2px `--line-2` track, `--ink` fill, 12px `--ink` thumb, and a 24px hit area via the input height.
+3. Spectrum: `<canvas>` with flex 1 and min-height 180px. Frequency is on the y-axis (log, 500 Hz at the bottom to 12 kHz at the top). Tick labels 1k / 2k / 4k / 8k in Martian Mono 11px `--ink-3` sit at the inline start. Bars grow toward the plate. Fill is `--signal` at 0.85 alpha, and the band bracket is a 2px `--signal` line with 6px end caps at the left edge. `peakHz` is a 4px notch on the bracket. The dominant hairline is 1px `--ink` across the full width, ending in a 5px arrowhead at the right edge. The canvas is DPR-aware (cap DPR at 2) and redraws on rAF only while playing; when paused or idle it draws one static frame. **Accessibility:** `role="img"` and `aria-label="Live spectrum. Song band 2.1 to 4.6 kHz, peak 3.2 kHz."` (static per bird).
+4. Readout: `2.84` Martian Mono 450 at 24px (`font-stretch: 87.5%`), unit `kHz` at 11px `--ink-3`. Below it, an SVG arrow and `(3, 2)` in 13px `--signal`. It updates at 8 Hz from a throttled snapshot (§9.2). **Silence handling:** when loudness falls below the gate for >400ms, hold the last value and dim it to `--ink-3`. Before any sound, show `—` (sr: "No sound yet").
+5. Foot row: Mute (40px icon button, `aria-label="Mute"`, `aria-pressed`) and Volume (a Radix slider, 0–100 in steps of 1, 72–96px wide; its `role="slider"` thumb carries `aria-label="Volume"` and `aria-valuetext="70%"`). Styling: 2px `--line-2` track, `--ink` fill, and a 12px `--ink` dot painted by the 24×24px thumb, which is the hit target.
 
 **Strip (Stacked, Field, Compact):** one row, 64px (56px in Field): `[02 Song label (Stacked only)] [Play 48] [Spectrum flex, 40px tall, frequency on x, bars grow up] [Readout: 15px value + 11px unit / mode] [Mute 44] [Volume 96 (Stacked only)]`. In Field the volume slider is hidden and the hardware volume is used.
 
@@ -705,7 +708,7 @@ The disc is centered on the plate: its center sits exactly on the plate's center
 | Scatter sand | `<button>` with text "Scatter sand" | Re-randomizes the grains (`scatterToken++`). Disabled-looking but focusable (`aria-disabled`) while Hold is on. |
 | Describe pattern | `<button>`, visually hidden until focused (skip-link style) | Announces through the global status region, e.g. "Mode (3, 2): 3 nodal diameters and 2 nodal circles. Following the song at 2.84 kHz." Uses `describeMode()` from the plate module; falls back to "Mode (3, 2)". |
 
-The plate head row (Split) shows `03 Plate` on the left and `Mode (3, 2)` on the right (Martian Mono 13px, label `--ink-3`, value `--accent`). In other modes the mode readout leads the plate foot row.
+The plate head row (Split) shows `03 Plate` on the left and `Mode (3, 2)` on the right (Martian Mono 13px, label `--ink-3`, value `--signal`). In other modes the mode readout leads the plate foot row.
 
 There is no plate-shape control: the app shows only the circle (§0, 2026-10-28).
 
@@ -732,7 +735,7 @@ SONG   Rafael Roe · CC BY 4.0 · xeno-canto XC123456 ↗          All credits
 
 ### 6.2 Details sheet (Overlay mode) and About
 
-The Details sheet (native `<dialog>` styled as a bottom sheet in Field and a centered 560px dialog elsewhere) has these sections, in order:
+The Details sheet (a Radix dialog, styled as a bottom sheet in Field and a centered 560px dialog elsewhere) has these sections, in order:
 1. Common name (h2), scientific name, local names, IUCN scale strip.
 2. "Traits": all traits.
 3. "Song": the full song description, song facts.
@@ -741,7 +744,7 @@ The Details sheet (native `<dialog>` styled as a bottom sheet in Field and a cen
 
 ### 6.3 `/credits` route
 
-Server-rendered with one `<h1>`. Each bird is an `<article id={slug}>` (`scroll-margin-top: 80px`). When `?bird` is present, that article gets an `--accent` 2px inline-start rule and is scrolled into view.
+Server-rendered with one `<h1>`. Each bird is an `<article id={slug}>` (`scroll-margin-top: 80px`). When `?bird` is present, that article gets a `--signal` 2px inline-start rule and is scrolled into view.
 
 ```
 Credits
@@ -754,7 +757,7 @@ Every photo and recording here is shared under a Creative Commons license. Thank
                       Changes: trimmed to a seamless loop and re-encoded as AAC.
 …
 Typefaces   Archivo by Omnibus-Type · Martian Mono by Evil Martians · SIL Open Font License 1.1
-Software    Three.js, React, TanStack · MIT License
+Software    Three.js, React, TanStack, Radix UI, shadcn/ui, Tailwind CSS … · MIT; class-variance-authority · Apache 2.0; Lucide · ISC
 ← Back to the birds
 ```
 
@@ -791,8 +794,8 @@ The audio provider lives at the root (§9.2), so a song keeps playing on /credit
     --ground-raised: oklch(0.23 0.014 150);   /* #181f19 */
     --ground-sunken: oklch(0.155 0.012 150);  /* #090e0a */
     --scrim:         oklch(0.14 0.012 150);
-    --accent:        oklch(0.80 0.11 150);
-    --on-accent:     oklch(0.18 0.015 60);    /* ≥ 8.4:1 on any clamped accent */
+    --signal:        oklch(0.80 0.11 150);
+    --on-signal:     oklch(0.18 0.015 60);    /* ≥ 8.4:1 on any clamped accent */
 
     /* Plate (shell poster and fallback only; the renderer owns the real surface) */
     --plate-surface: oklch(0.13 0.004 150);   /* #060807 */
@@ -862,23 +865,22 @@ Rules: copy is stored in natural case and UPPERCASE comes from `text-transform`;
 ### 7.3 Space, radii, shadows, z-index
 
 ```css
-:root {
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px;
-  --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px;
+@theme {
+  --spacing: 4px;       /* p-1 = 4px … p-16 = 64px */
 
-  --radius-1: 3px;      /* chips, ticks */
-  --radius-2: 6px;      /* rectangular buttons */
-  --radius-3: 10px;     /* inputs, small panels */
-  --radius-4: 14px;     /* card / track (0 in Field: full-bleed) */
-  --radius-sheet: 18px; /* sheet top corners, dialogs */
-  --radius-full: 999px;
+  --radius-xs: 2px;
+  --radius-sm: 3px;     /* chips, ticks */
+  --radius-md: 6px;     /* rectangular buttons */
+  --radius-lg: 10px;    /* inputs, small panels */
+  --radius-xl: 14px;    /* card / track (0 in Field: full-bleed) */
+  --radius-2xl: 18px;   /* sheet top corners, dialogs */
 
   --shadow-plate: 0 40px 80px -24px oklch(0 0 0 / 0.7), 0 12px 24px -12px oklch(0 0 0 / 0.5);
   --shadow-sheet: 0 -24px 48px -12px oklch(0 0 0 / 0.6);
-  --hairline: inset 0 0 0 1px var(--line);
-
-  --z-plate-gate: 3; --z-song-overlay: 2; --z-masthead: 10;   /* dialogs use the top layer */
+  --shadow-dialog: 0 32px 64px -16px oklch(0 0 0 / 0.65);
 }
+/* Pills are rounded-full; hairlines are inset-ring inset-ring-line. Stacking: z-2 song overlay,
+   z-3 plate gate, z-10 masthead, z-50 the Radix portals (dialogs, tooltips). */
 ```
 
 Concentric radii: the photo inside the captioned card shares the card's top radius (14px) with no inset. Separators are hairlines (`--line`); there are no shadows on UI chrome. Only the plate and the sheets cast shadows.
@@ -905,7 +907,7 @@ Concentric radii: the photo inside the captioned card shares the card's top radi
 | Long jump (rail, distance > 2) | Track opacity dips 1 → 0 → 1 (100ms out, 160ms in) around an instant scroll |
 | Button press | `scale: 0.96` over `--dur-1` `--ease-out` on `:active`. Never on the rail ticks. |
 | Gate exit | Opacity plus scale 0.98 over `--dur-3` `--ease-out`, then unmount |
-| Sheet / dialog | Enter: `translate: 0 100%` → 0 over `--dur-3` `--ease-sheet` (sheet), or opacity + `scale: 0.98` (dialog), via `@starting-style` and `transition-behavior: allow-discrete`. Exit over 200ms `--ease-in`. |
+| Sheet / dialog | Enter: `translate: 0 100%` → 0 over `--dur-3` `--ease-sheet` (sheet), or opacity + `scale: 0.98` (dialog), as tw-animate-css enter/exit animations (Radix keeps the dialog mounted until the exit ends). Exit over 200ms `--ease-in`. |
 | Flow hairline | Dash offset loop at 1.6s linear, only while playing |
 | Readouts | None. Numbers change in place. |
 
@@ -925,7 +927,7 @@ Concentric radii: the photo inside the captioned card shares the card's top radi
 ```html
 <body>
   <a class="skip-link" href="#birds">Skip to the birds</a>
-  <div class="app" style="--accent:…">
+  <div class="app" style="--signal:…">
     <header class="masthead">
       <a href="/" class="wordmark" aria-label="Kyma Birds, home">…</a>
       <nav aria-label="Site"><button type="button">About</button> <a href="/credits">Credits</a></nav>
@@ -938,7 +940,6 @@ Concentric radii: the photo inside the captioned card shares the card's top radi
     </main>
   </div>
   <p id="sr-status" class="sr-only" role="status" aria-live="polite"></p>   <!-- rendered empty at SSR -->
-  <dialog id="about" aria-labelledby="about-title">…</dialog>
 </body>
 ```
 
@@ -964,9 +965,9 @@ Heading outline: h1 (sr-only) → h2 "Bird" / "Song" / "Plate" (in Field the vis
 | Space | Focus on a non-interactive target (body, main, zone, slide) | Toggle play (first press = Listen) |
 | M | Same as Space (no modifiers) | Toggle mute |
 | Enter / Space | Any button | Native activation |
-| Esc | Dialog or sheet | Close (native `<dialog>`); focus returns to the trigger |
+| Esc | Dialog or sheet | Close (Radix handles Esc); focus returns to the trigger (`Sheet` restores it) |
 
-The global handler lives in `lib/keyboard.ts` and ignores events with `metaKey`, `ctrlKey` or `altKey`, and any target matching `input, textarea, select, [role=tab], [role=slider], [role=radio], [contenteditable], dialog`. On `button, a, summary` it ignores only Space, which keeps its native activation; ← / → / Home / End and M have no native action there, so they still work (Chrome and Firefox focus a button on mouse click, so excluding buttons would break the arrows right after Listen or a pager click).
+The global handler lives in `lib/keyboard.ts` and ignores events with `metaKey`, `ctrlKey` or `altKey`, and any target matching `input, textarea, select, [role=tab], [role=slider], [role=radio], [contenteditable], [role=dialog]`; while a dialog is open (`[role=dialog][data-state=open]`) it ignores every key. On `button, a, summary` it ignores only Space, which keeps its native activation; ← / → / Home / End and M have no native action there, so they still work (Chrome and Firefox focus a button on mouse click, so excluding buttons would break the arrows right after Listen or a pager click).
 
 ### 8.4 Announcements (one polite region, `#sr-status`)
 
@@ -1032,12 +1033,19 @@ src/
       Masthead.tsx                    { variant: 'instrument' | 'page'; nowPlaying?: boolean; onAbout(): void }
                                       ('instrument' is a bar in Split/Stacked and overlays the photo in Field, purely in CSS;
                                        'page' is always a bar, used on /credits and 404)
-      Wordmark.tsx                    { compact?: boolean }
+      Wordmark.tsx                    { bird?: string; className?: string }
       AboutDialog.tsx                 { open: boolean; onClose(): void }
-      Sheet.tsx                       <dialog>-based sheet/dialog primitive { open; onClose; labelledBy; variant: 'sheet' | 'dialog' }
-      IconButton.tsx                  { label: string; icon: IconName; pressed?: boolean; size?: 'sm' | 'md' | 'lg' } & ButtonHTMLAttributes
-      Icon.tsx                        inline SVGs on a 20px grid, 1.5px stroke, currentColor: play, pause, retry, volume, muted,
-                                      chevron-left, chevron-right, external, arrow-right
+      Sheet.tsx                       modal sheet/dialog on shadcn's Dialog { open; onClose; variant: 'sheet' | 'dialog' },
+                                      SheetTitle, SheetCloseButton, SheetClose
+      IconButton.tsx                  { label: string; icon: IconName; pressed?: boolean; size?: 'sm' | 'md' | 'lg';
+                                        shortcut?: { keys; spoken } } & ButtonHTMLAttributes (shortcut adds a tooltip)
+      Icon.tsx                        Lucide icons by name at stroke 1.8, currentColor: play, pause, retry, volume, muted,
+                                      chevron-left, chevron-right, external, arrow-right, arrow-left, close
+      AppShell.tsx  SkipLink.tsx  Zone.tsx   .app (theme + portal container), skip link, ZoneHead / ZoneTag
+      page.ts                         the /credits and 404 column, title and back-link classes
+    ui/                               shadcn/ui (new-york v4) with the Kyma variants: button, toggle, slider, dialog,
+                                      tooltip, badge, kbd, separator; plus portal.tsx (portal container),
+                                      external-link.tsx and text-link.ts
       SrStatus.tsx                    the #sr-status region + useAnnounce(): (msg: string) => void
     bird/
       BirdZone.tsx                    { birds: Bird[]; committedIndex: number; viewIndex: number;
@@ -1087,11 +1095,11 @@ src/
     format.ts                         formatHz(1840) → "1.84 kHz", formatHz(860) → "860 Hz", formatBand, formatMode("(3,2)") → "(3, 2)",
                                       formatDuration(24) → "0:24", formatIndex(2, 12) → "03 / 12"
     credits.ts                        sourceLabel(url), xcNumber(url), shortLicense("CC BY-SA 4.0") → "CC BY-SA"
-    keyboard.ts                       useGlobalShortcuts(), isTypingOrControlTarget()
+    keyboard.ts                       useGlobalShortcuts(), shortcutFor(), isTypingOrWidgetTarget(), isDialogOpen()
+    utils.ts                          cn(): clsx + tailwind-merge taught the Kyma theme scales
     site.ts                           SITE_ORIGIN (from env VITE_SITE_ORIGIN), absoluteUrl(path)
   styles/
-    app.css                           @layer order + @imports of the files below
-    tokens.css  base.css  layout.css  components/*.css  utilities.css (.sr-only, .skip-link)
+    app.css                           the only stylesheet: Tailwind theme (Kyma tokens), custom variants, @utility rules, base layer
   data/
     birds.json                        the manifest (written by the asset pipeline)
 public/
@@ -1351,7 +1359,7 @@ Everything is in sentence case. Bird names keep the manifest's capitalization (I
 | `credits.changes.photo` | Changes: cropped, resized, and converted to WebP. *(confirm with the pipeline)* |
 | `credits.changes.song` | Changes: trimmed to a seamless loop and re-encoded as AAC. *(confirm with the pipeline)* |
 | `credits.fonts` | Typefaces: Archivo by Omnibus-Type and Martian Mono by Evil Martians, both under the SIL Open Font License 1.1. |
-| `credits.software` | Software: Three.js, React, and TanStack, under the MIT License. |
+| `credits.software` | Software: Three.js, React, TanStack, Radix UI, shadcn/ui, Tailwind CSS, tw-animate-css, clsx and tailwind-merge, under the MIT License; class-variance-authority, under the Apache License 2.0; icons by Lucide, under the ISC License. |
 | `credits.back` | Back to the birds |
 | `credits.all` (card link) | All credits |
 | `link.newtab.sr` | (opens in a new tab) |

@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react'
 
-// Same conditions as the Split and Compact landscape layouts in layout.css: only there does a
+// Same conditions as the `split` and `compact` variants in app.css: only there does a
 // vertical wheel over the track mean "next bird" rather than "scroll the page".
 const WHEEL_LAYOUTS =
   '(pointer: fine) and (((width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem)) or ((height <= 34rem) and (orientation: landscape) and (width >= 40rem)))'

@@ -136,7 +136,7 @@ export function photoSrcSet(b: Bird): string {
   return `${b.photo.srcSm} ${Math.round(b.photo.width / 2)}w, ${b.photo.src} ${b.photo.width}w`
 }
 
-// The Split layout's media condition (layout.css), in the syntax `sizes` accepts everywhere.
+// The `split` variant's media condition (app.css), in the syntax `sizes` accepts everywhere.
 const SPLIT_MEDIA = '(min-width: 64rem) and (min-aspect-ratio: 5/4) and (min-height: 34.0625rem)'
 
 /**

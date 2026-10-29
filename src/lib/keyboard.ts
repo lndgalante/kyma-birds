@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
  * rail's tabs and dialogs. The global shortcuts never steal from them.
  */
 export const WIDGET_SELECTOR =
-  'input, textarea, select, [role=tab], [role=slider], [role=radio], [contenteditable], [contenteditable=""], dialog'
+  'input, textarea, select, [role=tab], [role=slider], [role=radio], [contenteditable], [contenteditable=""], [role=dialog]'
 
 /**
  * Targets with a native Space action (activation, or the link's page scroll). Arrows, Home, End
@@ -27,6 +27,14 @@ function matches(target: unknown, selector: string): boolean {
 
 export function isTypingOrWidgetTarget(target: unknown): boolean {
   return !!(target as KeyTarget | null)?.isContentEditable || matches(target, WIDGET_SELECTOR)
+}
+
+/**
+ * Whether a modal is open (the Sheet, on Radix Dialog); an open one owns the keyboard. A closed
+ * one stays in the DOM while it animates out, so its state counts, not its role.
+ */
+export function isDialogOpen(doc: Pick<Document, 'querySelector'>): boolean {
+  return doc.querySelector('[role=dialog][data-state=open]') != null
 }
 
 export type ShortcutAction = 'prev' | 'next' | 'first' | 'last' | 'toggle' | 'mute'
@@ -79,8 +87,7 @@ export function useGlobalShortcuts(
     if (!enabled) return
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return
-      // An open modal dialog owns the keyboard.
-      if (document.querySelector('dialog[open]')) return
+      if (isDialogOpen(document)) return
       const action = shortcutFor(e)
       if (!action) return
       // Prevent first: a held Space must not scroll the page either.

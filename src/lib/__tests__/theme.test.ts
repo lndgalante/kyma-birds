@@ -45,7 +45,7 @@ describe('theme', () => {
   it('emits CSS custom properties and a hex theme colour', () => {
     const b = getBirds()[0]
     const style = birdTheme(b) as Record<string, string>
-    for (const k of ['--accent', '--ground', '--ground-raised', '--ground-sunken', '--scrim']) {
+    for (const k of ['--signal', '--ground', '--ground-raised', '--ground-sunken', '--scrim']) {
       expect(style[k]).toMatch(/^oklch\(/)
     }
     expect(themeColorHex(b)).toMatch(/^#[0-9a-f]{6}$/)

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { COPY, gateAria } from '~/lib/copy'
+import { cn } from '~/lib/utils'
 import { Icon } from '../shell/Icon'
 
 interface ListenGateProps {
@@ -8,6 +9,9 @@ interface ListenGateProps {
   exiting: boolean
   onListen(): void
 }
+
+const PULSE =
+  'gate__pulse pointer-events-none absolute inset-0 rounded-[50%] opacity-0 ring-1 ring-ink'
 
 /** Not a modal: centred over the plate while the rest of the page stays usable (ui.md §5.2). */
 export function ListenGate({ birdName, loading, exiting, onListen }: ListenGateProps) {
@@ -23,27 +27,51 @@ export function ListenGate({ birdName, loading, exiting, onListen }: ListenGateP
   }, [loading])
 
   return (
-    <div className="gate" data-exiting={exiting || undefined} data-loading={slow || undefined}>
-      <div className="gate__stack">
+    <div
+      className={cn(
+        'gate group/gate absolute inset-0 z-3 @container-size/gate rounded-[inherit] text-center [--disc:112px] field:[--disc:88px]',
+        'transition-[opacity,scale] duration-(--dur-3) ease-out data-exiting:pointer-events-none data-exiting:scale-98 data-exiting:opacity-0',
+        'before:pointer-events-none before:absolute before:inset-0 before:rounded-[50%] before:scrim-gate',
+        'no-js:hidden',
+      )}
+      data-exiting={exiting || undefined}
+      data-loading={slow || undefined}
+    >
+      {/* The disc sits on the plate's centre, with its label and the line below hanging under
+          it: the lift is half the disc plus the button's 6px padding. */}
+      <div className="gate__stack absolute inset-x-0 top-1/2 grid justify-items-center gap-2.5 translate-y-[calc(var(--disc)/-2_-_6px)]">
         <button
           type="button"
-          className="gate__btn"
+          className="gate__btn group/btn relative grid justify-items-center gap-3.5 rounded-lg p-1.5 text-ink"
           aria-label={gateAria(birdName)}
           aria-describedby="gate-sub"
           onClick={onListen}
         >
-          <span className="gate__disc">
-            <span className="gate__pulse" aria-hidden="true" />
-            <span className="gate__pulse" aria-hidden="true" />
-            <span className="gate__pulse" aria-hidden="true" />
-            <svg className="gate__arc" viewBox="0 0 100 100" aria-hidden="true">
+          <span className="gate__disc relative grid size-(--disc) place-items-center rounded-[50%] bg-ink text-ground transition-[scale] duration-(--dur-1) ease-out group-active/btn:scale-96">
+            <span className={cn(PULSE, 'motion-safe:animate-gate-pulse')} aria-hidden="true" />
+            <span className={cn(PULSE, 'motion-safe:animate-gate-pulse-2')} aria-hidden="true" />
+            <span className={cn(PULSE, 'motion-safe:animate-gate-pulse-3')} aria-hidden="true" />
+            <svg
+              className={cn(
+                'gate__arc absolute -inset-[7px] size-[calc(100%+14px)] max-w-none fill-none stroke-ink stroke-2 [stroke-linecap:round] opacity-0',
+                'group-data-loading/gate:opacity-100 motion-safe:group-data-loading/gate:animate-spin motion-reduce:group-data-loading/gate:[stroke-dasharray:0.02_0.02]',
+              )}
+              viewBox="0 0 100 100"
+              aria-hidden="true"
+            >
               <circle cx="50" cy="50" r="47" pathLength={1} strokeDasharray="0.25 0.75" />
             </svg>
-            <Icon name="play" size={34} />
+            <Icon name="play" size={34} className="translate-x-0.5 field:size-7" />
           </span>
-          <span className="gate__label">{slow ? COPY.gateLoading : COPY.gateButton}</span>
+          <span className="gate__label text-xl leading-none font-semibold tracking-ui">
+            {slow ? COPY.gateLoading : COPY.gateButton}
+          </span>
         </button>
-        <p id="gate-sub" className="gate__sub">
+        {/* On a small plate this line would run off the edge; it stays the button's description. */}
+        <p
+          id="gate-sub"
+          className="gate__sub relative max-w-[28ch] text-sm leading-[1.4] text-ink-2 gate-short:sr-only"
+        >
           {COPY.gateSub}
         </p>
       </div>

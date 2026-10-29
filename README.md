@@ -54,8 +54,9 @@ only text fields, sliders, the rail's tabs and open dialogs keep the keys for th
 - Web Audio API for playback and analysis, with no dependencies.
 - three.js (WebGL2 with float render targets), only inside the lazily loaded plate chunk. It is
   never in the server bundle or the initial client chunk.
-- Plain CSS with cascade layers and container queries. Fonts are self-hosted Archivo and
-  Martian Mono (Fontsource).
+- Tailwind CSS v4 and shadcn/ui (Radix primitives, Lucide icons), themed with the Kyma tokens:
+  one stylesheet, with the layout modes and container queries as custom variants. Fonts are
+  self-hosted Archivo and Martian Mono (Fontsource).
 
 ## Getting started
 
@@ -95,8 +96,10 @@ src/
     bird/            picker track, rail, pager, card, field label, photo, details sheet
     song/            play button, spectrum, Hz/mode readout, volume, flow line
     plate/           plate zone, figure, poster, Listen gate, controls, lazy plate wrapper
-    shell/           masthead, About dialog, sheet, icons, polite status region
+    shell/           app shell, masthead, About dialog, sheet, zone heads, icons, skip link, polite status region
     credits/         /credits page
+    ui/              shadcn/ui components with the Kyma variants (button, toggle, slider, dialog, tooltip, badge, kbd,
+                     separator), plus the portal container and link helpers
   audio/
     AudioProvider.tsx, useAudio.ts, useLiveFeatures.ts, mediaSession.ts   the shell's bridge to the engine
     engine/          the audio engine (playback, loop region, crossfades, SongAnalyzer, dsp/), plus __tests__ and __harness__
@@ -106,8 +109,8 @@ src/
     gpu/             PlateController, field pass, sand sim, grain and plate layers, shaders, tiers, governor
     params.ts        every plate tuning constant
     __tests__/  __harness__/
-  lib/               manifest loading and sorting, URL search, theme (OKLCH), copy deck, head tags, credits, keyboard
-  styles/            app.css → tokens, base, layout, utilities, components/*
+  lib/               manifest loading and sorting, URL search, theme (OKLCH), copy deck, head tags, credits, keyboard, cn()
+  styles/app.css     the only stylesheet: Tailwind theme (Kyma tokens), layout and container variants, base layer
   data/birds.json    the manifest
 public/
   birds/<slug>/      photo.webp (1600 px), photo-sm.webp (half size), song.m4a

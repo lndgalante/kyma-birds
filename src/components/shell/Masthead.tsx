@@ -1,14 +1,31 @@
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
+import { Button } from '~/components/ui/button'
+import { Kbd } from '~/components/ui/kbd'
 import { COPY, nowPlayingAria } from '~/lib/copy'
 import { getBirds } from '~/lib/manifest'
+import { cn } from '~/lib/utils'
 import { AboutDialog } from './AboutDialog'
 import { Icon } from './Icon'
 import { Wordmark } from './Wordmark'
 
+/**
+ * Field and Compact landscape: the masthead floats over the photo, under a short scrim for bright
+ * skies; in Compact it spans the card column only, inset like the card so the glyph sits on the
+ * photo rather than across its rounded corner. Stacked and Split: a bar.
+ */
+const INSTRUMENT = cn(
+  'masthead--instrument absolute inset-x-0 top-0 before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:-bottom-6 before:scrim-mast',
+  'stacked:relative stacked:bg-ground stacked:shadow-[inset_0_-1px_0_var(--line)] stacked:before:content-none',
+  "compact:absolute compact:right-auto compact:w-[calc(100%-var(--plate-col)-var(--gap)-max(var(--gutter),var(--safe-r)))] compact:bg-transparent compact:shadow-none compact:before:content-['']",
+)
+
+// Over the photo the links take full ink and a halo.
+const ON_PHOTO = 'field:text-ink field:halo-soft compact:text-ink compact:halo-mast'
+
 interface MastheadProps {
-  /** 'instrument' is a bar in Split/Stacked and overlays the photo in Field (pure CSS); 'page' is always a bar. */
+  /** 'instrument' overlays the photo in Field and Compact and is a bar elsewhere; 'page' is always a bar. */
   variant: 'instrument' | 'page'
   /** Bird to keep selected when following the wordmark home. */
   bird?: string
@@ -16,41 +33,66 @@ interface MastheadProps {
 
 export function Masthead({ variant, bird }: MastheadProps) {
   const [aboutOpen, setAboutOpen] = useState(false)
+  const instrument = variant === 'instrument'
+  // Static, not Button's `relative`: in Field and Compact the header's scrim (a positioned ::before)
+  // paints over the links.
+  const navLink = cn('nav-link static', instrument && ON_PHOTO)
   return (
     <>
-      <header className={`masthead masthead--${variant}`}>
-        <div className="masthead__inner">
-          <Wordmark bird={bird} />
-          {variant === 'instrument' ? (
-            <p className="masthead__hint">
-              <kbd>Space</kbd> to play
-              <span className="masthead__dot" aria-hidden="true">
+      <header
+        className={cn(
+          'masthead z-10 pt-(--safe-t)',
+          instrument
+            ? INSTRUMENT
+            : 'masthead--page sticky top-0 bg-ground shadow-[inset_0_-1px_0_var(--line)]',
+        )}
+      >
+        <div
+          className={cn(
+            'masthead__inner mx-auto flex h-(--masthead-h) max-w-[1840px] items-center gap-4 ps-[max(var(--gutter),var(--safe-l))] pe-[max(var(--gutter),var(--safe-r))]',
+            instrument && 'field:h-12 compact:ps-[calc(max(var(--gutter),var(--safe-l))+16px)]',
+          )}
+        >
+          {/* On pages the wordmark and the nav never shrink: the now-playing pill gives way first,
+              then drops its name on phones, so About and Credits stay on screen. */}
+          <Wordmark bird={bird} className={instrument ? 'compact:halo-mast' : 'flex-none'} />
+          {instrument ? (
+            <p className="masthead__hint ms-auto hidden items-center gap-1.5 font-mono text-2xs leading-[1.2] whitespace-nowrap text-ink-3 split-fine:inline-flex">
+              <Kbd>Space</Kbd> to play
+              <span className="masthead__dot px-1.5 text-ink-4" aria-hidden="true">
                 ·
               </span>
-              <kbd>
+              <Kbd>
                 <Icon name="arrow-left" size={11} aria-label="Left arrow" role="img" />
-              </kbd>
-              <kbd>
+              </Kbd>
+              <Kbd className="-ms-0.5">
                 <Icon name="arrow-right" size={11} aria-label="Right arrow" role="img" />
-              </kbd>{' '}
+              </Kbd>{' '}
               to change bird
             </p>
           ) : (
             <NowPlaying />
           )}
-          <nav className="masthead__nav" aria-label="Site">
-            <button type="button" className="nav-link" onClick={() => setAboutOpen(true)}>
+          <nav
+            className={cn(
+              'masthead__nav ms-auto -me-2.5 flex items-center gap-0.5',
+              instrument ? 'split-fine:ms-5' : 'flex-none [.now-playing+&]:ms-3',
+            )}
+            aria-label="Site"
+          >
+            <Button variant="nav" size="nav" className={navLink} onClick={() => setAboutOpen(true)}>
               {COPY.navAbout}
-            </button>
-            <Link
-              to="/credits"
-              search={bird ? { bird } : {}}
-              hash={bird}
-              className="nav-link"
-              activeProps={{ 'aria-current': 'page' }}
-            >
-              {COPY.navCredits}
-            </Link>
+            </Button>
+            <Button asChild variant="nav" size="nav" className={navLink}>
+              <Link
+                to="/credits"
+                search={bird ? { bird } : {}}
+                hash={bird}
+                activeProps={{ 'aria-current': 'page' }}
+              >
+                {COPY.navCredits}
+              </Link>
+            </Button>
           </nav>
         </div>
       </header>
@@ -67,16 +109,17 @@ function NowPlaying() {
   if (!bird || !snap.unlocked || (snap.state !== 'playing' && snap.state !== 'paused')) return null
   const playing = snap.state === 'playing'
   return (
-    <button
-      type="button"
-      className="now-playing"
+    <Button
+      variant="pill"
+      size="bare"
+      className="now-playing ms-auto min-h-10 max-w-[40vw] min-w-0 flex-[0_1_auto] gap-2.5 py-1 ps-1 pe-3 narrow:flex-none narrow:p-1"
       aria-label={playing ? nowPlayingAria(bird.commonName) : `Play ${bird.commonName}`}
       onClick={() => (playing ? api.pause() : api.play())}
     >
-      <span className="now-playing__icon">
+      <span className="now-playing__icon grid size-[30px] flex-none place-items-center rounded-[50%] bg-ink text-ground">
         <Icon name={playing ? 'pause' : 'play'} size={14} />
       </span>
-      <span className="now-playing__name">{bird.commonName}</span>
-    </button>
+      <span className="now-playing__name truncate narrow:hidden">{bird.commonName}</span>
+    </Button>
   )
 }

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { AudioProvider } from '~/audio/AudioProvider'
 import { NotFound } from '~/components/NotFound'
 import { SrStatusProvider } from '~/components/shell/SrStatus'
+import { TooltipProvider } from '~/components/ui/tooltip'
 import { SITE_DESCRIPTION, SITE_TITLE } from '~/lib/site'
 import appCss from '~/styles/app.css?url'
 
@@ -50,7 +51,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <body>
         <ScriptOnce>{`document.documentElement.classList.add('js')`}</ScriptOnce>
         <AudioProvider>
-          <SrStatusProvider>{children}</SrStatusProvider>
+          <SrStatusProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </SrStatusProvider>
         </AudioProvider>
         <Scripts />
       </body>

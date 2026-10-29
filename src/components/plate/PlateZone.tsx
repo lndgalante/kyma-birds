@@ -4,7 +4,9 @@ import { describeMode } from '~/cymatics'
 import { COPY, describeSay, describeSayHeld, plateCaptionHeld } from '~/lib/copy'
 import { NBSP, formatHz } from '~/lib/format'
 import type { Bird } from '~/lib/manifest'
+import { cn } from '~/lib/utils'
 import { useAnnounce } from '../shell/SrStatus'
+import { ZoneHead, ZoneTag } from '../shell/Zone'
 import { ModeReadout } from './ModeReadout'
 import { PlateControls } from './PlateControls'
 import { PlateFigure } from './PlateFigure'
@@ -39,17 +41,19 @@ export function PlateZone({ bird }: PlateZoneProps) {
   }
 
   return (
-    <section className="zone zone--plate" aria-labelledby="zone-plate">
-      <header className="zone-head">
-        <h2 id="zone-plate" className="zone-title">
-          <span className="zone-num" aria-hidden="true">
-            03
-          </span>{' '}
-          {COPY.zonePlate}
-        </h2>
+    <section
+      className={cn(
+        'zone zone--plate grid justify-items-center gap-y-3 pt-4 ps-[max(var(--gutter),var(--safe-l))] pe-[max(var(--gutter),var(--safe-r))] *:min-w-0',
+        'stacked:px-0 stacked:pt-1',
+        'split:col-start-3 split:row-span-full split:grid-rows-[var(--zone-head)_minmax(0,1fr)_var(--zone-foot)] split:justify-items-stretch split:gap-y-(--row-gap) split:p-0',
+        'compact:col-start-2 compact:row-[1/span_3] compact:content-start compact:p-0',
+      )}
+      aria-labelledby="zone-plate"
+    >
+      <ZoneHead id="zone-plate" num="03" title={COPY.zonePlate} className="justify-between">
         <ModeReadout placement="head" />
-      </header>
-      <div className="plate-body">
+      </ZoneHead>
+      <div className="plate-body split:grid split:min-h-0 split:place-items-center">
         <PlateFigure
           bird={bird}
           held={held}
@@ -58,10 +62,15 @@ export function PlateZone({ bird }: PlateZoneProps) {
           captionKind={caption.kind}
         />
       </div>
-      <div className="plate-foot">
-        <span className="zone-tag" aria-hidden="true">
-          <span className="zone-num">03</span> {COPY.zonePlate}
-        </span>
+      <div
+        className={cn(
+          'plate-foot flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2.5',
+          'foot-row:h-12 foot-row:flex-nowrap foot-row:justify-start',
+          'field-or-compact:flex-col field-or-compact:gap-2',
+          'split:h-auto split:justify-end',
+        )}
+      >
+        <ZoneTag num="03" title={COPY.zonePlate} />
         <ModeReadout placement="foot" caption={caption} />
         <PlateControls
           held={held}

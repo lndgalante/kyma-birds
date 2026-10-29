@@ -2,6 +2,10 @@ import { useRef, useState, type KeyboardEvent } from 'react'
 import { COPY } from '~/lib/copy'
 import { formatHzShort } from '~/lib/format'
 import type { Bird } from '~/lib/manifest'
+import { cn } from '~/lib/utils'
+
+const RAIL_CAP =
+  'rail-cap flex-none font-mono text-2xs font-medium tracking-label text-ink-3 uppercase nav-le-430:hidden'
 
 interface PickerRailProps {
   birds: readonly Bird[]
@@ -37,12 +41,18 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
   }
 
   return (
-    <div className="picker-rail">
-      <span className="rail-cap" aria-hidden="true">
+    <div
+      className={cn(
+        'picker-rail hidden min-w-0 flex-auto items-center gap-1.5 [--tick-w:24px]',
+        'stacked:flex compact:hidden',
+        'nav-le-640:[--tick-w:20px] nav-le-430:gap-0.5 nav-le-430:[--tick-w:16px]',
+      )}
+    >
+      <span className={RAIL_CAP} aria-hidden="true">
         {COPY.railLow}
       </span>
       <div
-        className="rail"
+        className="rail flex flex-none items-center"
         role="tablist"
         aria-label={COPY.railLabel}
         aria-describedby="rail-desc"
@@ -58,7 +68,13 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
             type="button"
             role="tab"
             id={`tab-${b.slug}`}
-            className="rail-tab"
+            className={cn(
+              'rail-tab relative h-10 w-(--tick-w) rounded-sm focus-visible:-outline-offset-2 pointer-coarse:h-11',
+              'before:absolute before:top-1/2 before:left-1/2 before:h-3 before:w-px before:-translate-1/2 before:rounded-[1px] before:bg-ink-3 before:transition-[height,width,background-color] before:duration-(--dur-2) before:ease-out',
+              'hover:before:h-4 hover:before:bg-ink-2',
+              'aria-selected:before:h-[22px] aria-selected:before:w-0.5 aria-selected:before:bg-signal',
+              'forced-colors:before:bg-[CanvasText] forced-colors:before:forced-color-adjust-none forced-colors:aria-selected:before:bg-[Highlight]',
+            )}
             aria-controls={`slide-${b.slug}`}
             aria-selected={i === selectedIndex}
             aria-label={b.commonName}
@@ -70,15 +86,23 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
           />
         ))}
       </div>
-      <span className="rail-cap" aria-hidden="true">
+      <span className={RAIL_CAP} aria-hidden="true">
         {COPY.railHigh}
       </span>
       <span id="rail-desc" className="sr-only">
         {COPY.railDesc}
       </span>
-      <p className="rail-label" aria-hidden="true" data-hover={hover != null || undefined}>
-        <span className="rail-label__name">{shown.commonName}</span>
-        <span className="rail-label__hz">{formatHzShort(shown.audio.bandHz.p50)}</span>
+      <p
+        className="rail-label group/label ms-2.5 flex min-w-0 flex-auto items-baseline gap-2 overflow-hidden font-mono text-2xs leading-[1.6] whitespace-nowrap text-ink-3 nav-le-540:hidden"
+        aria-hidden="true"
+        data-hover={hover != null || undefined}
+      >
+        <span className="rail-label__name min-w-[3ch] truncate text-ink-2 group-data-hover/label:text-ink">
+          {shown.commonName}
+        </span>
+        <span className="rail-label__hz flex-none tabular-nums nav-le-640:hidden">
+          {formatHzShort(shown.audio.bandHz.p50)}
+        </span>
       </p>
     </div>
   )

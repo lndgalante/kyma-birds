@@ -134,7 +134,7 @@ export function birdPalette(b: Pick<Bird, 'slug' | 'photo'>): BirdPalette {
 export function birdTheme(b: Pick<Bird, 'slug' | 'photo'>): CSSProperties {
   const p = birdPalette(b)
   return {
-    '--accent': oklchCss(p.accent),
+    '--signal': oklchCss(p.accent),
     '--ground': oklchCss(p.ground),
     '--ground-raised': oklchCss(p.groundRaised),
     '--ground-sunken': oklchCss(p.groundSunken),

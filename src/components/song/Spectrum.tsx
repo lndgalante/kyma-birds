@@ -80,7 +80,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     if (!c || !ctx || g.w === 0 || g.h === 0) return false
     const cs = getComputedStyle(c)
     const col = {
-      accent: cs.getPropertyValue('--accent').trim() || '#9fd6a5',
+      signal: cs.getPropertyValue('--signal').trim() || '#9fd6a5',
       ink: cs.getPropertyValue('--ink').trim() || '#f2f0ea',
       ink3: cs.getPropertyValue('--ink-3').trim() || '#a19e96',
       line: cs.getPropertyValue('--line').trim() || 'rgba(242,240,234,.12)',
@@ -162,7 +162,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     // plate, so it is drawn faint: the eye goes to what moves the sand.
     const drivenLo = Math.max(axisPos(250), bp.lo - LOG_1_6)
     const drivenHi = bp.hi + LOG_1_6
-    ctx.fillStyle = col.accent
+    ctx.fillStyle = col.signal
     const pitch = span / Math.max(1, n)
     const thick = Math.max(1, pitch - (pitch > 3 ? 1.5 : 0.75))
     for (let i = 0; i < n; i++) {
@@ -179,7 +179,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     ctx.globalAlpha = 1
 
     // Band bracket with a notch at the peak: the card's static fact, drawn on the live axis.
-    ctx.strokeStyle = col.accent
+    ctx.strokeStyle = col.signal
     ctx.lineWidth = 2
     const a = at(bp.lo)
     const b = at(bp.hi)
@@ -308,8 +308,13 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
   }, [state, api])
 
   return (
-    <div className="spectrum">
-      <canvas ref={canvasRef} className="spectrum__canvas" role="img" aria-label={label} />
+    <div className="spectrum relative h-10 min-w-0 flex-auto [--spectrum-axis:x] no-js:hidden forced-colors:hidden split:h-auto split:min-h-[180px] split:w-full split:[--spectrum-axis:y]">
+      <canvas
+        ref={canvasRef}
+        className="spectrum__canvas absolute inset-0 size-full"
+        role="img"
+        aria-label={label}
+      />
     </div>
   )
 }

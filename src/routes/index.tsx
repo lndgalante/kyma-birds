@@ -7,7 +7,9 @@ import { BirdZone } from '~/components/bird/BirdZone'
 import { useSnapIndex } from '~/components/bird/useSnapIndex'
 import { useWheelStep } from '~/components/bird/useWheelStep'
 import { PlateZone } from '~/components/plate/PlateZone'
+import { AppShell } from '~/components/shell/AppShell'
 import { Masthead } from '~/components/shell/Masthead'
+import { SkipLink } from '~/components/shell/SkipLink'
 import { useAnnounce } from '~/components/shell/SrStatus'
 import { SongZone } from '~/components/song/SongZone'
 import { COPY, announceBird, announceError } from '~/lib/copy'
@@ -17,6 +19,7 @@ import { committedIndexOf, getBirds } from '~/lib/manifest'
 import { validateBirdSearch, type NavSource } from '~/lib/search'
 import { SITE_H1 } from '~/lib/site'
 import { birdTheme } from '~/lib/theme'
+import { cn } from '~/lib/utils'
 
 export const Route = createFileRoute('/')({
   validateSearch: validateBirdSearch,
@@ -136,12 +139,18 @@ function Instrument() {
   const detailsBird = birds.find((b) => b.slug === detailsSlug) ?? null
 
   return (
-    <div className="app" style={birdTheme(birds[viewIndex])}>
-      <a className="skip-link" href="#birds">
-        {COPY.skip}
-      </a>
+    <AppShell theme={birdTheme(birds[viewIndex])}>
+      <SkipLink href="#birds">{COPY.skip}</SkipLink>
       <Masthead variant="instrument" bird={search.bird} />
-      <main id="main" className="instrument">
+      <main
+        id="main"
+        className={cn(
+          'instrument grid min-h-dvh grid-cols-[minmax(0,1fr)] content-start pb-[calc(12px+var(--safe-b))] *:min-w-0',
+          'stacked:min-h-[calc(100dvh-var(--masthead-h))] stacked:gap-y-3 stacked:pt-4 stacked:pr-[max(var(--gutter),var(--safe-r))] stacked:pb-[calc(16px+var(--safe-b))] stacked:pl-[max(var(--gutter),var(--safe-l))]',
+          'split:mx-auto split:h-[calc(100dvh-var(--masthead-h))] split:min-h-[520px] split:max-w-[1840px] split:grid-cols-[minmax(340px,680px)_var(--spine)_var(--plate)] split:grid-rows-[var(--zone-head)_minmax(0,1fr)_var(--zone-foot)] split:content-stretch split:justify-center split:gap-x-(--gap) split:gap-y-(--row-gap) split:py-(--pad-y)',
+          'compact:min-h-dvh compact:grid-cols-[minmax(0,1fr)_var(--plate-col)] compact:grid-rows-[auto_auto_1fr] compact:gap-x-(--gap) compact:gap-y-2.5 compact:pt-[calc(var(--safe-t)+8px)] compact:pb-[calc(var(--safe-b)+8px)]',
+        )}
+      >
         <h1 className="sr-only">{SITE_H1}</h1>
         <BirdZone
           birds={birds}
@@ -155,6 +164,6 @@ function Instrument() {
         <PlateZone bird={committed} />
       </main>
       <BirdDetails bird={detailsBird} onClose={() => setDetailsSlug(null)} />
-    </div>
+    </AppShell>
   )
 }
