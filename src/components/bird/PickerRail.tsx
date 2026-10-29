@@ -4,8 +4,7 @@ import { formatHzShort } from '~/lib/format'
 import type { Bird } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 
-const RAIL_CAP =
-  'rail-cap flex-none font-mono text-2xs font-medium tracking-label text-ink-3 uppercase nav-le-430:hidden'
+const RAIL_CAP = 'rail-cap flex-none text-xs leading-none font-medium text-ink-3 nav-le-430:hidden'
 
 interface PickerRailProps {
   birds: readonly Bird[]
@@ -14,8 +13,11 @@ interface PickerRailProps {
 }
 
 /**
- * The index as a frequency scale: one tick per bird, Low → High. APG tabs with automatic
- * activation; the commit dwell upstream keeps audio from thrashing while arrowing.
+ * The index as a frequency scale: one tick per bird, from low voices to high. APG tabs with
+ * automatic activation; the commit dwell upstream keeps audio from thrashing while arrowing.
+ * Each tick is one 22px line scaled down: the selected one stands full height in the signal,
+ * a hovered one grows part way. The bird's name and band show beside the rail only while a tick
+ * is hovered or focused (the card already names the selected bird).
  */
 export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) {
   const [hover, setHover] = useState<number | null>(null)
@@ -45,7 +47,7 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
       className={cn(
         'picker-rail hidden min-w-0 flex-auto items-center gap-1.5 [--tick-w:24px]',
         'stacked:flex compact:hidden',
-        'nav-le-640:[--tick-w:20px] nav-le-430:gap-0.5 nav-le-430:[--tick-w:16px]',
+        'nav-le-640:[--tick-w:20px] nav-le-430:gap-0.5 nav-le-430:[--tick-w:16px] nav-le-360:[--tick-w:12px]',
       )}
     >
       <span className={RAIL_CAP} aria-hidden="true">
@@ -69,10 +71,10 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
             role="tab"
             id={`tab-${b.slug}`}
             className={cn(
-              'rail-tab relative h-10 w-(--tick-w) rounded-sm focus-visible:-outline-offset-2 pointer-coarse:h-11',
-              'before:absolute before:top-1/2 before:left-1/2 before:h-3 before:w-px before:-translate-1/2 before:rounded-[1px] before:bg-ink-3 before:transition-[height,width,background-color] before:duration-(--dur-2) before:ease-out',
-              'hover:before:h-4 hover:before:bg-ink-2',
-              'aria-selected:before:h-[22px] aria-selected:before:w-0.5 aria-selected:before:bg-signal',
+              'rail-tab relative h-10 w-(--tick-w) rounded-part focus-visible:-outline-offset-2 pointer-coarse:h-11',
+              'before:absolute before:top-1/2 before:left-1/2 before:h-[22px] before:w-px before:-translate-1/2 before:scale-y-[0.5] before:rounded-full before:bg-ink-4 before:transition-[scale,background-color] before:duration-(--dur-2) before:ease-out',
+              'hover:before:scale-y-[0.7] hover:before:bg-ink-2',
+              'aria-selected:before:w-0.5 aria-selected:before:scale-y-100 aria-selected:before:bg-signal',
               'forced-colors:before:bg-[CanvasText] forced-colors:before:forced-color-adjust-none forced-colors:aria-selected:before:bg-[Highlight]',
             )}
             aria-controls={`slide-${b.slug}`}
@@ -93,14 +95,14 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
         {COPY.railDesc}
       </span>
       <p
-        className="rail-label group/label ms-2.5 flex min-w-0 flex-auto items-baseline gap-2 overflow-hidden font-mono text-2xs leading-[1.6] whitespace-nowrap text-ink-3 nav-le-540:hidden"
+        className="rail-label ms-3 flex min-w-0 flex-auto items-baseline gap-2 overflow-hidden text-sm leading-[1.5] whitespace-nowrap text-ink-3 opacity-0 transition-opacity duration-(--dur-2) ease-out data-hover:opacity-100 nav-le-540:hidden"
         aria-hidden="true"
         data-hover={hover != null || undefined}
       >
-        <span className="rail-label__name min-w-[3ch] truncate text-ink-2 group-data-hover/label:text-ink">
+        <span className="rail-label__name min-w-[3ch] truncate font-medium text-ink">
           {shown.commonName}
         </span>
-        <span className="rail-label__hz flex-none tabular-nums nav-le-640:hidden">
+        <span className="rail-label__hz flex-none font-display tabular-nums nav-le-640:hidden">
           {formatHzShort(shown.audio.bandHz.p50)}
         </span>
       </p>

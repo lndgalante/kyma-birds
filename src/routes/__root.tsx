@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import archivoLatin from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url'
+import instrumentSansLatin from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url'
 import { HeadContent, Scripts, ScriptOnce, createRootRoute } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { AudioProvider } from '~/audio/AudioProvider'
@@ -17,7 +17,8 @@ export const Route = createRootRoute({
       { title: SITE_TITLE },
       { name: 'description', content: SITE_DESCRIPTION },
       { name: 'color-scheme', content: 'dark' },
-      { name: 'theme-color', content: '#0f1610' },
+      // The night (tokens.css --night); the bird routes set their own in lib/head.ts.
+      { name: 'theme-color', content: '#040810' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
@@ -27,7 +28,7 @@ export const Route = createRootRoute({
         ? [
             {
               rel: 'preload',
-              href: archivoLatin,
+              href: instrumentSansLatin,
               as: 'font',
               type: 'font/woff2',
               crossOrigin: 'anonymous' as const,
@@ -43,12 +44,13 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    // The inline script below adds `js` to <html> before hydration.
-    <html lang="en" suppressHydrationWarning>
+    // The inline script below adds `js` to <html> before hydration. `overflow-x-clip` on html and
+    // body repeats base.css.
+    <html lang="en" className="overflow-x-clip" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="overflow-x-clip">
         <ScriptOnce>{`document.documentElement.classList.add('js')`}</ScriptOnce>
         <AudioProvider>
           <SrStatusProvider>

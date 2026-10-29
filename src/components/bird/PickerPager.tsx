@@ -11,8 +11,8 @@ interface PickerPagerProps {
   onNext(): void
 }
 
-const BUTTON =
-  'pager__btn field-or-compact:rounded-full field-or-compact:text-ink field-or-compact:aria-disabled:text-ink-4'
+/** On the photo (Field, Compact) the arrows take full ink; the scrim pill behind them holds it. */
+const BUTTON = 'pager__btn field-or-compact:text-ink field-or-compact:aria-disabled:text-ink-4'
 
 /** Prev/next stay focusable at the ends (`aria-disabled`), so focus never drops to <body>. */
 export function PickerPager({ index, total, onPrev, onNext }: PickerPagerProps) {
@@ -22,7 +22,7 @@ export function PickerPager({ index, total, onPrev, onNext }: PickerPagerProps) 
     <div
       className={cn(
         'pager ms-auto flex flex-none items-center gap-0.5 no-js:hidden',
-        'field-or-compact:gap-0 field-or-compact:rounded-full field-or-compact:bg-scrim/72 field-or-compact:p-0.5 field-or-compact:inset-ring field-or-compact:inset-ring-line',
+        'field-or-compact:gap-0 field-or-compact:rounded-full field-or-compact:bg-scrim/72 field-or-compact:p-0.5 field-or-compact:inset-ring field-or-compact:inset-ring-ink/16',
       )}
     >
       <IconButton
@@ -38,7 +38,7 @@ export function PickerPager({ index, total, onPrev, onNext }: PickerPagerProps) 
         className={BUTTON}
       />
       <p
-        className="counter min-w-[7.2ch] text-center font-mono text-xs leading-none whitespace-nowrap tabular-nums field-or-compact:min-w-[6.4ch]"
+        className="counter min-w-[4.25rem] text-center font-display text-[0.9375rem] leading-none whitespace-nowrap tabular-nums field-or-compact:min-w-[3.75rem]"
         aria-hidden="true"
       >
         <span className="counter__now text-ink">{pad2(index + 1)}</span>

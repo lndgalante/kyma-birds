@@ -3,6 +3,7 @@ import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
 import { useFeatureFrames } from '~/audio/useLiveFeatures'
 import { Kbd } from '~/components/ui/kbd'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
+import { METAL } from '~/components/ui/surface'
 import { COPY } from '~/lib/copy'
 import { cn } from '~/lib/utils'
 import { Icon } from '../shell/Icon'
@@ -12,7 +13,10 @@ const PLAY_BUTTON_ID = 'play-button'
 // True while focusPlayButton() moves focus; a prevented focus event keeps the tooltip shut.
 let focusingQuietly = false
 
-/** The page's one filled control. The ring around it is the loop's progress, in the signal colour. */
+/**
+ * The transport: a metal cap ringed by the loop's progress in the signal colour. Its state line is
+ * for screen readers only; the cap's icon and the Listen gate already show the state.
+ */
 export function PlayButton() {
   const api = useAudioApi()
   const snap = useAudioSnapshot()
@@ -32,13 +36,13 @@ export function PlayButton() {
   const icon = state === 'error' ? 'retry' : label === COPY.pauseAria ? 'pause' : 'play'
 
   return (
-    <div className="transport flex flex-none flex-col items-center no-js:hidden split:gap-[13px]">
+    <div className="transport flex flex-none flex-col items-center no-js:hidden">
       <Tooltip>
         <TooltipTrigger asChild onFocus={(e) => focusingQuietly && e.preventDefault()}>
           <button
             id={PLAY_BUTTON_ID}
             type="button"
-            className="play-btn group/play relative grid size-(--pb) flex-none place-items-center rounded-[50%] [--pb:48px] focus-visible:outline-offset-8 field:[--pb:44px] split:[--pb:56px]"
+            className="play-btn group/play relative grid size-(--pb) flex-none place-items-center rounded-full [--pb:44px] focus-visible:outline-offset-8"
             data-state={state}
             aria-label={label}
             onClick={() => (state === 'error' ? api.retry() : api.toggle())}
@@ -72,7 +76,14 @@ export function PlayButton() {
                 strokeDasharray="0.22 0.78"
               />
             </svg>
-            <span className="play-btn__disc grid size-full place-items-center rounded-[50%] bg-ink text-ground transition-[scale] duration-(--dur-1) ease-out group-active/play:scale-96">
+            <span
+              className={cn(
+                'play-btn__disc grid size-full place-items-center rounded-full',
+                METAL,
+                'transition-[translate,--tw-gradient-from,--tw-gradient-to] duration-(--dur-1) ease-out group-hover/play:from-metal-hi-lift group-hover/play:to-metal-lo-lift group-active/play:translate-y-px',
+                'forced-colors:border-[ButtonText]',
+              )}
+            >
               <Icon name={icon} size={22} className="size-[46%]" />
             </span>
           </button>
@@ -83,10 +94,7 @@ export function PlayButton() {
           <Kbd>Space</Kbd>
         </TooltipContent>
       </Tooltip>
-      <p
-        className="state-text font-mono text-2xs leading-[1.2] font-medium tracking-label whitespace-nowrap text-ink-3 uppercase group-data-[state=error]/song:text-ink-2 strip:sr-only"
-        role="status"
-      >
+      <p className="state-text sr-only" role="status">
         {stateText(state, snap.muted)}
       </p>
     </div>
@@ -95,7 +103,7 @@ export function PlayButton() {
 
 /**
  * Hands focus to the play button without its shortcut tooltip, which would otherwise stay open
- * over the zone labels for as long as focus rests there.
+ * over the strip for as long as focus rests there.
  */
 export function focusPlayButton() {
   focusingQuietly = true

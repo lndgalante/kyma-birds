@@ -1,11 +1,13 @@
-import { textLinkVariants } from '~/components/ui/text-link'
+import { buttonVariants } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 
 /** The text column of /credits and the 404 page. */
 export const PAGE =
-  'mx-auto w-full max-w-[880px] pt-12 pr-[max(var(--gutter),var(--safe-r))] pb-[calc(64px+var(--safe-b))] pl-[max(var(--gutter),var(--safe-l))]'
+  'mx-auto w-full max-w-[960px] pt-10 pr-[max(var(--gutter),var(--safe-r))] pb-[calc(64px+var(--safe-b))] pl-[max(var(--gutter),var(--safe-l))] stacked:pt-14'
 
-export const PAGE_TITLE = 'page__title text-4xl leading-[1.15] font-semibold tracking-title'
+/** A page's h1. Add no weight class to it, as with SHEET_HEADING. */
+export const PAGE_TITLE =
+  'page__title font-display text-3xl leading-[1.08] tracking-display text-ink'
 
-/** The link back to the birds, with a 44px target. */
-export const PAGE_BACK_LINK = cn('text-link', textLinkVariants({ layout: 'flex' }), 'min-h-11')
+/** The link back to the birds, as an outline button. */
+export const PAGE_BACK_LINK = cn('text-link', buttonVariants({ variant: 'outline' }))

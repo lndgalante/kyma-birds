@@ -1,0 +1,28 @@
+{
+  "scanned": "2026-10-28",
+  "findings": {
+    "fonts": "Archivo Variable (wdth) + Martian Mono Variable via Fontsource (package.json L21-22, src/styles/app.css L10-12)",
+    "palette": "OKLCH custom properties, dark only, per-bird --signal and tinted --ground set inline by lib/theme.ts (src/styles/app.css L72-97, L334-373)",
+    "motion": "CSS only: tw-animate-css for Radix dialogs, registered @property cross-fade, --dur-1..5 tokens (src/styles/app.css L154-186, L375-380)",
+    "spacing": "Tailwind 4px unit (--spacing: 4px), --gutter/--gap clamps (src/styles/app.css L108, L383-384)",
+    "framework": "TanStack Start (React 19, SSR) on Cloudflare Workers, Tailwind CSS 4.3.3 + shadcn/ui (Radix) vendored in src/components/ui, Three.js plate",
+    "product": "the dev server at http://localhost:3000 (user's), captured by sloplint --before",
+    "design_md": "none",
+    "inspo": "none",
+    "together_api_key": "unset"
+  },
+  "preserve": [
+    "every link, handler, id, aria attribute and class hook",
+    "the layout modes (field, stacked, split, compact)",
+    "the per-bird signal colour mechanism (lib/theme.ts)",
+    "the plate renderer and audio engine",
+    "all copy except lines a gate names"
+  ],
+  "introduce": [
+    "Ribbon theme (two-in-the-morning): Instrument Sans + Figtree, blue-black night, machined parts",
+    "tokens.css + base.css",
+    "sentence-case Figtree labels",
+    "the song panel as the one machined surface",
+    "DESIGN.md lock"
+  ]
+}

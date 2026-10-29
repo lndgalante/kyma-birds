@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { LIT } from '~/components/ui/surface'
 import { COPY, gateAria } from '~/lib/copy'
 import { cn } from '~/lib/utils'
 import { Icon } from '../shell/Icon'
@@ -11,9 +12,12 @@ interface ListenGateProps {
 }
 
 const PULSE =
-  'gate__pulse pointer-events-none absolute inset-0 rounded-[50%] opacity-0 ring-1 ring-ink'
+  'gate__pulse pointer-events-none absolute inset-0 rounded-full opacity-0 ring-1 ring-signal'
 
-/** Not a modal: centred over the plate while the rest of the page stays usable (ui.md §5.2). */
+/**
+ * Not a modal: centred over the plate while the rest of the page stays usable (ui.md §5.2). Its
+ * disc is the page's one lit control.
+ */
 export function ListenGate({ birdName, loading, exiting, onListen }: ListenGateProps) {
   // Only a decode slower than 150 ms earns the loading arc; faster ones would just flicker.
   const [slow, setSlow] = useState(false)
@@ -31,7 +35,7 @@ export function ListenGate({ birdName, loading, exiting, onListen }: ListenGateP
       className={cn(
         'gate group/gate absolute inset-0 z-3 @container-size/gate rounded-[inherit] text-center [--disc:112px] field:[--disc:88px]',
         'transition-[opacity,scale] duration-(--dur-3) ease-out data-exiting:pointer-events-none data-exiting:scale-98 data-exiting:opacity-0',
-        'before:pointer-events-none before:absolute before:inset-0 before:rounded-[50%] before:scrim-gate',
+        'before:pointer-events-none before:absolute before:inset-0 before:rounded-full before:scrim-gate',
         'no-js:hidden',
       )}
       data-exiting={exiting || undefined}
@@ -42,18 +46,25 @@ export function ListenGate({ birdName, loading, exiting, onListen }: ListenGateP
       <div className="gate__stack absolute inset-x-0 top-1/2 grid justify-items-center gap-2.5 translate-y-[calc(var(--disc)/-2_-_6px)]">
         <button
           type="button"
-          className="gate__btn group/btn relative grid justify-items-center gap-3.5 rounded-lg p-1.5 text-ink"
+          className="gate__btn group/btn relative grid justify-items-center gap-3.5 rounded-bed p-1.5 text-ink"
           aria-label={gateAria(birdName)}
           aria-describedby="gate-sub"
           onClick={onListen}
         >
-          <span className="gate__disc relative grid size-(--disc) place-items-center rounded-[50%] bg-ink text-ground transition-[scale] duration-(--dur-1) ease-out group-active/btn:scale-96">
+          <span
+            className={cn(
+              'gate__disc relative grid size-(--disc) place-items-center rounded-full',
+              LIT,
+              'transition-[filter,translate] duration-(--dur-1) ease-out group-hover/btn:brightness-105 group-active/btn:translate-y-px',
+              'forced-colors:border forced-colors:border-[ButtonText]',
+            )}
+          >
             <span className={cn(PULSE, 'motion-safe:animate-gate-pulse')} aria-hidden="true" />
             <span className={cn(PULSE, 'motion-safe:animate-gate-pulse-2')} aria-hidden="true" />
             <span className={cn(PULSE, 'motion-safe:animate-gate-pulse-3')} aria-hidden="true" />
             <svg
               className={cn(
-                'gate__arc absolute -inset-[7px] size-[calc(100%+14px)] max-w-none fill-none stroke-ink stroke-2 [stroke-linecap:round] opacity-0',
+                'gate__arc absolute -inset-[7px] size-[calc(100%+14px)] max-w-none fill-none stroke-ink-2 stroke-2 [stroke-linecap:round] opacity-0',
                 'group-data-loading/gate:opacity-100 motion-safe:group-data-loading/gate:animate-spin motion-reduce:group-data-loading/gate:[stroke-dasharray:0.02_0.02]',
               )}
               viewBox="0 0 100 100"
@@ -63,7 +74,7 @@ export function ListenGate({ birdName, loading, exiting, onListen }: ListenGateP
             </svg>
             <Icon name="play" size={34} className="translate-x-0.5 field:size-7" />
           </span>
-          <span className="gate__label text-xl leading-none font-semibold tracking-ui">
+          <span className="gate__label font-display-medium text-lg leading-none tracking-title text-ink">
             {slow ? COPY.gateLoading : COPY.gateButton}
           </span>
         </button>

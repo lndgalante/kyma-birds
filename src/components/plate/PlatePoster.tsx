@@ -1,10 +1,10 @@
 export const POSTER_MESSAGE =
-  'plate-poster__msg relative max-w-[26ch] rounded-md bg-plate-surface/88 px-3.5 py-2.5 text-center text-sm leading-[1.4] text-ink-2 inset-ring inset-ring-line'
+  'plate-poster__msg relative max-w-[26ch] rounded-bed bg-plate-surface/88 px-3.5 py-2.5 text-center text-sm leading-[1.4] text-ink-2 inset-ring inset-ring-line'
 
 /**
  * The plate before (or without) the renderer: SSR, no JS, and WebGL failure. Same box and the
  * same render extents as the renderer (engine.md §8.4), so nothing shifts when the canvas takes
- * over. The resting sand is a CSS noise tile (--plate-sand-noise in app.css), drawn at device
+ * over. The resting sand is a CSS noise tile (--plate-sand-noise in tokens.css), drawn at device
  * resolution.
  */
 export function PlatePoster({ message }: { message?: string }) {

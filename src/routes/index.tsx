@@ -147,7 +147,7 @@ function Instrument() {
         className={cn(
           'instrument grid min-h-dvh grid-cols-[minmax(0,1fr)] content-start pb-[calc(12px+var(--safe-b))] *:min-w-0',
           'stacked:min-h-[calc(100dvh-var(--masthead-h))] stacked:gap-y-3 stacked:pt-4 stacked:pr-[max(var(--gutter),var(--safe-r))] stacked:pb-[calc(16px+var(--safe-b))] stacked:pl-[max(var(--gutter),var(--safe-l))]',
-          'split:mx-auto split:h-[calc(100dvh-var(--masthead-h))] split:min-h-[520px] split:max-w-[1840px] split:grid-cols-[minmax(340px,680px)_var(--spine)_var(--plate)] split:grid-rows-[var(--zone-head)_minmax(0,1fr)_var(--zone-foot)] split:content-stretch split:justify-center split:gap-x-(--gap) split:gap-y-(--row-gap) split:py-(--pad-y)',
+          'split:mx-auto split:h-[calc(100dvh-var(--masthead-h))] split:min-h-[520px] split:max-w-[1840px] split:grid-cols-[minmax(360px,720px)_var(--plate)] split:grid-rows-[minmax(0,1fr)_var(--strip-h)] split:content-stretch split:justify-center split:gap-x-(--gap) split:gap-y-(--row-gap) split:py-(--pad-y)',
           'compact:min-h-dvh compact:grid-cols-[minmax(0,1fr)_var(--plate-col)] compact:grid-rows-[auto_auto_1fr] compact:gap-x-(--gap) compact:gap-y-2.5 compact:pt-[calc(var(--safe-t)+8px)] compact:pb-[calc(var(--safe-b)+8px)]',
         )}
       >

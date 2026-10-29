@@ -3,11 +3,12 @@ import { useState } from 'react'
 import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
 import { Button } from '~/components/ui/button'
 import { Kbd } from '~/components/ui/kbd'
+import { METAL } from '~/components/ui/surface'
 import { COPY, nowPlayingAria } from '~/lib/copy'
 import { getBirds } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 import { AboutDialog } from './AboutDialog'
-import { Icon } from './Icon'
+import { ArrowKey, Icon } from './Icon'
 import { Wordmark } from './Wordmark'
 
 /**
@@ -21,8 +22,8 @@ const INSTRUMENT = cn(
   "compact:absolute compact:right-auto compact:w-[calc(100%-var(--plate-col)-var(--gap)-max(var(--gutter),var(--safe-r)))] compact:bg-transparent compact:shadow-none compact:before:content-['']",
 )
 
-// Over the photo the links take full ink and a halo.
-const ON_PHOTO = 'field:text-ink field:halo-soft compact:text-ink compact:halo-mast'
+// Over the photo the links take full ink and a halo that holds them on a pale sky.
+const ON_PHOTO = 'field-or-compact:text-ink field-or-compact:halo-mast'
 
 interface MastheadProps {
   /** 'instrument' overlays the photo in Field and Compact and is a bar elsewhere; 'page' is always a bar. */
@@ -34,14 +35,14 @@ interface MastheadProps {
 export function Masthead({ variant, bird }: MastheadProps) {
   const [aboutOpen, setAboutOpen] = useState(false)
   const instrument = variant === 'instrument'
-  // Static, not Button's `relative`: in Field and Compact the header's scrim (a positioned ::before)
-  // paints over the links.
-  const navLink = cn('nav-link static', instrument && ON_PHOTO)
+  // Button's `relative` lifts the links over the header's scrim, a positioned ::before in Field
+  // and Compact.
+  const navLink = cn('nav-link', instrument && ON_PHOTO)
   return (
     <>
       <header
         className={cn(
-          'masthead z-10 pt-(--safe-t)',
+          'masthead z-(--z-sticky-nav) pt-(--safe-t)',
           instrument
             ? INSTRUMENT
             : 'masthead--page sticky top-0 bg-ground shadow-[inset_0_-1px_0_var(--line)]',
@@ -55,28 +56,34 @@ export function Masthead({ variant, bird }: MastheadProps) {
         >
           {/* On pages the wordmark and the nav never shrink: the now-playing pill gives way first,
               then drops its name on phones, so About and Credits stay on screen. */}
-          <Wordmark bird={bird} className={instrument ? 'compact:halo-mast' : 'flex-none'} />
+          <Wordmark
+            bird={bird}
+            className={instrument ? 'field-or-compact:halo-mast' : 'flex-none'}
+          />
           {instrument ? (
-            <p className="masthead__hint ms-auto hidden items-center gap-1.5 font-mono text-2xs leading-[1.2] whitespace-nowrap text-ink-3 split-fine:inline-flex">
-              <Kbd>Space</Kbd> to play
-              <span className="masthead__dot px-1.5 text-ink-4" aria-hidden="true">
-                ·
+            <p className="masthead__hint ms-auto hidden items-center gap-6 text-sm leading-none whitespace-nowrap text-ink-3 split-fine:inline-flex">
+              <span className="inline-flex items-center gap-2">
+                <Kbd>Space</Kbd> to play
+              </span>{' '}
+              <span className="inline-flex items-center gap-2">
+                <span className="inline-flex gap-1">
+                  <Kbd>
+                    <ArrowKey side="left" />
+                  </Kbd>
+                  <Kbd>
+                    <ArrowKey side="right" />
+                  </Kbd>
+                </span>{' '}
+                to change bird
               </span>
-              <Kbd>
-                <Icon name="arrow-left" size={11} aria-label="Left arrow" role="img" />
-              </Kbd>
-              <Kbd className="-ms-0.5">
-                <Icon name="arrow-right" size={11} aria-label="Right arrow" role="img" />
-              </Kbd>{' '}
-              to change bird
             </p>
           ) : (
             <NowPlaying />
           )}
           <nav
             className={cn(
-              'masthead__nav ms-auto -me-2.5 flex items-center gap-0.5',
-              instrument ? 'split-fine:ms-5' : 'flex-none [.now-playing+&]:ms-3',
+              'masthead__nav ms-auto -me-3 flex items-center gap-1',
+              instrument ? 'split-fine:ms-8' : 'flex-none [.now-playing+&]:ms-3',
             )}
             aria-label="Site"
           >
@@ -116,7 +123,12 @@ function NowPlaying() {
       aria-label={playing ? nowPlayingAria(bird.commonName) : `Play ${bird.commonName}`}
       onClick={() => (playing ? api.pause() : api.play())}
     >
-      <span className="now-playing__icon grid size-[30px] flex-none place-items-center rounded-[50%] bg-ink text-ground">
+      <span
+        className={cn(
+          'now-playing__icon grid size-[30px] flex-none place-items-center rounded-full',
+          METAL,
+        )}
+      >
         <Icon name={playing ? 'pause' : 'play'} size={14} />
       </span>
       <span className="now-playing__name truncate narrow:hidden">{bird.commonName}</span>

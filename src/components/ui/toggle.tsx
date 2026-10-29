@@ -3,9 +3,13 @@ import type * as React from 'react'
 import { cn } from '~/lib/utils'
 import { buttonVariants } from './button'
 
-/** Kyma's pressed state: the control fills with ink (Highlight in forced colours). */
+/**
+ * The pressed state: Radix sets aria-pressed, and the outline variant's `aria-pressed:` classes
+ * sink the metal pill into a bed and light its label in the signal. Forced colours drop
+ * gradients and shadows, so there the pill fills with Highlight.
+ */
 const PRESSED =
-  'data-[state=on]:bg-ink data-[state=on]:text-ground data-[state=on]:inset-ring-ink forced-colors:data-[state=on]:forced-color-adjust-none forced-colors:data-[state=on]:bg-[Highlight] forced-colors:data-[state=on]:text-[HighlightText]'
+  'forced-colors:data-[state=on]:forced-color-adjust-none forced-colors:data-[state=on]:bg-[Highlight] forced-colors:data-[state=on]:text-[HighlightText]'
 
 function Toggle({ className, ...props }: React.ComponentProps<typeof TogglePrimitive.Root>) {
   return (

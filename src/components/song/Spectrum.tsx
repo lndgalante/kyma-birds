@@ -36,7 +36,6 @@ interface Geometry {
   w: number
   h: number
   dpr: number
-  axis: 'x' | 'y'
 }
 
 interface BandPos {
@@ -52,14 +51,15 @@ interface SpectrumProps {
 }
 
 /**
- * The live spectrum on a log-frequency axis (ui.md §5.3). Orientation comes from CSS
- * (`--spectrum-axis`: y in the Split spine, x in the strips), so SSR never guesses the layout.
+ * The live spectrum on a log-frequency axis (ui.md §5.3), low to high from left to right along
+ * the song strip's bed: gridlines with their labels, the bars, and the bird's band as a bracket
+ * under them, notched at its peak.
  */
 export function Spectrum({ band, peakHz, label }: SpectrumProps) {
   const api = useAudioApi()
   const state = useAudioField('state')
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const geo = useRef<Geometry>({ w: 0, h: 0, dpr: 1, axis: 'y' })
+  const geo = useRef<Geometry>({ w: 0, h: 0, dpr: 1 })
   const bars = useRef<Float32Array>(new Float32Array(0))
   const floors = useRef<Float32Array>(new Float32Array(0))
   const lastLive = useRef(0)
@@ -84,7 +84,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
       ink: cs.getPropertyValue('--ink').trim() || '#f2f0ea',
       ink3: cs.getPropertyValue('--ink-3').trim() || '#a19e96',
       line: cs.getPropertyValue('--line').trim() || 'rgba(242,240,234,.12)',
-      font: `400 11px ${cs.getPropertyValue('--font-mono').trim() || 'monospace'}`,
+      font: `500 12px ${cs.getPropertyValue('--font-sans').trim() || 'sans-serif'}`,
     }
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     const live = stateRef.current === 'playing'
@@ -104,41 +104,40 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     ctx.font = col.font
     ctx.textBaseline = 'middle'
 
-    const vertical = g.axis === 'y'
-    // Layout: a gutter for tick labels, the bracket, then the bar field.
-    const labelGutter = vertical ? 30 : 14
-    const lenStart = vertical ? 6 : 0
-    const lenEnd = vertical ? g.h - 6 : g.w
-    const span = lenEnd - lenStart
-    // Position along the frequency axis in CSS px (vertical: low at the bottom).
-    const at = (p: number) => (vertical ? lenEnd - p * span : lenStart + p * span)
-    const fieldStart = vertical ? labelGutter + 10 : 0
-    const fieldEnd = vertical ? g.w - 7 : g.h - labelGutter - 6
-    const depth = Math.abs(fieldEnd - fieldStart)
+    // Layout: the bar field on top, the bracket under it, then a gutter for tick labels.
+    const labelGutter = 14
+    const fieldH = g.h - labelGutter - 6
+    // Position along the frequency axis in CSS px.
+    const at = (p: number) => p * g.w
 
     // Ticks and grid.
     ctx.fillStyle = col.ink3
     ctx.strokeStyle = col.line
     ctx.lineWidth = 1
-    ctx.textAlign = vertical ? 'left' : 'center'
-    // A narrow strip keeps three labels; a sliver keeps none rather than overprint them.
-    const narrow = !vertical && g.w < 260
-    const labelled = vertical || g.w >= 120
+    ctx.textAlign = 'center'
+    // A narrow bed keeps three ticks (500, 2k, 8k) so the bracket still reads against a scale; a
+    // sliver drops the labels rather than overprint them.
+    const narrow = g.w < 260
+    const labelled = g.w >= 80
     for (const [hz, text] of TICKS) {
+      if (narrow && !NARROW_TICKS.has(hz)) continue
       const q = Math.round(at(axisPos(hz))) + 0.5
       ctx.beginPath()
-      if (vertical) {
-        ctx.moveTo(fieldStart, q)
-        ctx.lineTo(fieldEnd, q)
-      } else {
-        ctx.moveTo(q, 0)
-        ctx.lineTo(q, fieldEnd)
-      }
+      ctx.moveTo(q, 0)
+      ctx.lineTo(q, fieldH)
       ctx.stroke()
-      if (!labelled || (narrow && !NARROW_TICKS.has(hz))) continue
-      if (vertical) ctx.fillText(text, 0, q)
-      else ctx.fillText(text, Math.min(g.w - 10, Math.max(10, q)), g.h - labelGutter / 2)
+      if (labelled) ctx.fillText(text, Math.min(g.w - 10, Math.max(10, q)), g.h - labelGutter / 2)
     }
+
+    // The bird's band as a faint glow rising from its bracket, sounding or not: at rest the bed
+    // shows where this song sits; while it plays, the bars rise through it.
+    const glow = ctx.createLinearGradient(0, fieldH, 0, 0)
+    glow.addColorStop(0, col.signal)
+    glow.addColorStop(1, 'transparent')
+    ctx.fillStyle = glow
+    ctx.globalAlpha = 0.3
+    ctx.fillRect(at(bp.lo), 0, at(bp.hi) - at(bp.lo), fieldH)
+    ctx.globalAlpha = 1
 
     // Bars.
     const n = bars.current.length
@@ -163,7 +162,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     const drivenLo = Math.max(axisPos(250), bp.lo - LOG_1_6)
     const drivenHi = bp.hi + LOG_1_6
     ctx.fillStyle = col.signal
-    const pitch = span / Math.max(1, n)
+    const pitch = g.w / Math.max(1, n)
     const thick = Math.max(1, pitch - (pitch > 3 ? 1.5 : 0.75))
     for (let i = 0; i < n; i++) {
       const v = bars.current[i]
@@ -171,10 +170,8 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
       const p = (i + 0.5) / n
       const inBand = p >= drivenLo && p <= drivenHi
       ctx.globalAlpha = (live ? 0.85 : 0.4) * (inBand ? 1 : 0.32)
-      const len = Math.max(1, v * depth)
-      const q = at(p)
-      if (vertical) ctx.fillRect(fieldStart, q - thick / 2, len, thick)
-      else ctx.fillRect(q - thick / 2, fieldEnd - len, thick, len)
+      const len = Math.max(1, v * fieldH)
+      ctx.fillRect(at(p) - thick / 2, fieldH - len, thick, len)
     }
     ctx.globalAlpha = 1
 
@@ -184,26 +181,17 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     const a = at(bp.lo)
     const b = at(bp.hi)
     const pk = at(bp.peak)
-    const base = vertical ? labelGutter + 3 : fieldEnd + 4
+    const base = fieldH + 4
     ctx.beginPath()
-    if (vertical) {
-      ctx.moveTo(base + 6, a)
-      ctx.lineTo(base, a)
-      ctx.lineTo(base, b)
-      ctx.lineTo(base + 6, b)
-      ctx.moveTo(base, pk)
-      ctx.lineTo(base + 4, pk)
-    } else {
-      ctx.moveTo(a, base - 6)
-      ctx.lineTo(a, base)
-      ctx.lineTo(b, base)
-      ctx.lineTo(b, base - 6)
-      ctx.moveTo(pk, base)
-      ctx.lineTo(pk, base - 4)
-    }
+    ctx.moveTo(a, base - 6)
+    ctx.lineTo(a, base)
+    ctx.lineTo(b, base)
+    ctx.lineTo(b, base - 6)
+    ctx.moveTo(pk, base)
+    ctx.lineTo(pk, base - 4)
     ctx.stroke()
 
-    // Dominant-frequency hairline, ending in an arrowhead on the plate side.
+    // Dominant-frequency hairline, ending in an arrowhead on the bracket.
     const hz = live ? (f?.dominantHz ?? null) : null
     if (hz != null) {
       const q = Math.round(at(axisPos(hz))) + 0.5
@@ -211,23 +199,13 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
       ctx.fillStyle = col.ink
       ctx.lineWidth = 1
       ctx.beginPath()
-      if (vertical) {
-        ctx.moveTo(fieldStart - 4, q)
-        ctx.lineTo(g.w - 1, q)
-        ctx.stroke()
-        ctx.beginPath()
-        ctx.moveTo(g.w, q)
-        ctx.lineTo(g.w - 5, q - 3.5)
-        ctx.lineTo(g.w - 5, q + 3.5)
-      } else {
-        ctx.moveTo(q, 0)
-        ctx.lineTo(q, fieldEnd + 6)
-        ctx.stroke()
-        ctx.beginPath()
-        ctx.moveTo(q, fieldEnd + 10)
-        ctx.lineTo(q - 3.5, fieldEnd + 5)
-        ctx.lineTo(q + 3.5, fieldEnd + 5)
-      }
+      ctx.moveTo(q, 0)
+      ctx.lineTo(q, fieldH + 6)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(q, fieldH + 10)
+      ctx.lineTo(q - 3.5, fieldH + 5)
+      ctx.lineTo(q + 3.5, fieldH + 5)
       ctx.closePath()
       ctx.fill()
     }
@@ -259,20 +237,17 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     return () => cancelAnimationFrame(raf)
   }, [band, peakHz])
 
-  // Size, DPR and orientation; one static frame after every change.
+  // Size and DPR; one static frame after every change.
   useEffect(() => {
     const c = canvasRef.current
     if (!c) return
     const measure = () => {
       const r = c.getBoundingClientRect()
       const dpr = Math.min(2, window.devicePixelRatio || 1)
-      const axis =
-        getComputedStyle(c).getPropertyValue('--spectrum-axis').trim() === 'x' ? 'x' : 'y'
-      geo.current = { w: r.width, h: r.height, dpr, axis }
+      geo.current = { w: r.width, h: r.height, dpr }
       c.width = Math.max(1, Math.round(r.width * dpr))
       c.height = Math.max(1, Math.round(r.height * dpr))
-      const len = axis === 'y' ? r.height - 12 : r.width
-      const n = Math.max(16, Math.min(160, Math.floor(len / (axis === 'y' ? 5 : 4))))
+      const n = Math.max(16, Math.min(160, Math.floor(r.width / 4)))
       if (bars.current.length !== n) {
         bars.current = new Float32Array(n)
         floors.current = new Float32Array(n)
@@ -282,7 +257,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     const ro = new ResizeObserver(measure)
     ro.observe(c)
     measure()
-    // Tick labels drawn before the mono face arrived would stay in the fallback font.
+    // Tick labels drawn before Figtree arrived would stay in the fallback font.
     void document.fonts?.ready.then(() => drawRef.current(null, performance.now()))
     return () => ro.disconnect()
   }, [])
@@ -308,7 +283,8 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
   }, [state, api])
 
   return (
-    <div className="spectrum relative h-10 min-w-0 flex-auto [--spectrum-axis:x] no-js:hidden forced-colors:hidden split:h-auto split:min-h-[180px] split:w-full split:[--spectrum-axis:y]">
+    // Fills SongZone's bed.
+    <div className="spectrum relative min-h-0 min-w-0 flex-auto no-js:hidden forced-colors:hidden">
       <canvas
         ref={canvasRef}
         className="spectrum__canvas absolute inset-0 size-full"

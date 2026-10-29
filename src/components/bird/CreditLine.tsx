@@ -6,7 +6,12 @@ import { shortAuthor, shortLicense, sourceLabel } from '~/lib/credits'
 import type { Bird, Credit } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 
-const TEXT_LINK = cn('text-link', textLinkVariants({ layout: 'flex' }))
+/** The card's actions: 32px tall, their hit area extended to 44px. */
+const ACTION = cn(
+  'text-link',
+  textLinkVariants({ layout: 'flex' }),
+  'relative min-h-8 after:absolute after:-inset-x-1 after:-inset-y-1.5',
+)
 
 export function CreditLine({
   credits,
@@ -17,29 +22,27 @@ export function CreditLine({
   credits: Bird['credits']
   slug: string
   variant: 'full' | 'compact'
-  /** Full variant: the captioned card clamps its texts, so it keeps a way to the full ones. */
+  /** Full variant: the card keeps its texts short, so it keeps a way to the full ones. */
   onDetails?: () => void
 }) {
   if (variant === 'compact') {
-    // The labels separate the credits; a "·" would dangle at the end of a wrapped line.
+    // On the photo (Field, Compact). The labels part the two credits: a separator would dangle
+    // at the end of a wrapped line.
     return (
-      <p className="credit-line credit-line--compact flex max-w-full min-w-0 flex-wrap items-baseline gap-x-[2ch] font-mono text-2xs leading-[1.6] text-ink-2 stacked-or-split:card-w-gt-520:flex-auto">
+      <p className="credit-line credit-line--compact flex max-w-full min-w-0 flex-wrap items-baseline gap-x-4 gap-y-0.5 text-sm leading-[1.5] text-ink">
         <CompactPart label={COPY.creditsPhoto} credit={credits.photo} />
-        <span className="sep hidden px-1.5 text-ink-4" aria-hidden="true">
-          ·
-        </span>
         <CompactPart label={COPY.creditsSong} credit={credits.audio} />
       </p>
     )
   }
+  // On the night (Stacked, Split): a line per work, then the actions.
   return (
-    <div className="credit-line credit-line--full hidden grid-cols-[1fr_auto] items-end gap-x-4 font-mono text-2xs leading-[1.6] card-captioned:grid">
-      <FullRow label={COPY.creditsPhoto} credit={credits.photo} className="col-start-1" />
-      {/* The song row may be long (institutional recordists); it takes the full width. */}
-      <FullRow label={COPY.creditsSong} credit={credits.audio} className="col-span-full" />
-      <p className="credit-line__more col-start-2 row-start-1 flex gap-3.5 self-start whitespace-nowrap">
+    <div className="credit-line credit-line--full grid text-sm leading-[1.55] field-or-compact:hidden">
+      <FullRow label={COPY.creditsPhoto} credit={credits.photo} />
+      <FullRow label={COPY.creditsSong} credit={credits.audio} />
+      <p className="credit-line__more mt-2 flex flex-wrap items-center gap-x-6 whitespace-nowrap">
         {onDetails && (
-          <button type="button" className={cn(TEXT_LINK, 'no-js:hidden')} onClick={onDetails}>
+          <button type="button" className={cn(ACTION, 'no-js:hidden')} onClick={onDetails}>
             {COPY.detailsButton}
           </button>
         )}
@@ -47,7 +50,7 @@ export function CreditLine({
           to="/credits"
           search={{ bird: slug }}
           hash={slug}
-          className={cn('credit-line__all', TEXT_LINK)}
+          className={cn('credit-line__all', ACTION)}
         >
           {COPY.creditsAll}
         </Link>
@@ -56,36 +59,22 @@ export function CreditLine({
   )
 }
 
-/** "PHOTO  Author ↗ · CC BY-SA 4.0": the author links to the work's page, the licence to its deed. */
-function FullRow({
-  label,
-  credit,
-  className,
-}: {
-  label: string
-  credit: Credit
-  className?: string
-}) {
+/**
+ * "Photo  Author (CC BY-SA 4.0)": the author links to the work's page, the licence to its deed.
+ * Only the author wraps (a long one, such as "Chris Birmingham / Department of Conservation
+ * (NZ)", stays in its column); the licence and its parentheses stay together.
+ */
+function FullRow({ label, credit }: { label: string; credit: Credit }) {
   return (
-    <p
-      className={cn('credit-row grid grid-cols-[6ch_minmax(0,1fr)] gap-x-2 text-ink-2', className)}
-    >
-      <span className="credit-row__label font-medium tracking-label text-ink-3 uppercase">
-        {label}
-      </span>
-      {/* Inline flow, so a wrapped author is followed on the same line by the licence. Only the
-          author wraps: a long one (e.g. "Chris Birmingham / Department of Conservation (NZ)")
-          stays inside its column instead of running under "All credits". */}
-      <span className="credit-row__value min-w-0">
-        <ExternalLink href={credit.source} arrow className="credit-row__author">
+    <p className="credit-row grid grid-cols-[3rem_minmax(0,1fr)] gap-x-2">
+      <span className="credit-row__label font-medium text-ink-3">{label}</span>
+      <span className="credit-row__value min-w-0 text-ink-3">
+        <ExternalLink href={credit.source} className="credit-row__author">
           {shortAuthor(credit.author)}
-        </ExternalLink>
-        <span className="sep px-1.5 whitespace-nowrap text-ink-4" aria-hidden="true">
-          ·
+        </ExternalLink>{' '}
+        <span className="whitespace-nowrap">
+          (<ExternalLink href={credit.licenseUrl}>{credit.license}</ExternalLink>)
         </span>
-        <ExternalLink href={credit.licenseUrl} className="whitespace-nowrap">
-          {credit.license}
-        </ExternalLink>
         <span className="sr-only">, via {sourceLabel(credit.source)}</span>
       </span>
     </p>
@@ -93,28 +82,28 @@ function FullRow({
 }
 
 /**
- * Compact links keep the caption's halo, but WebKit misplaces (or drops) the underline of text with
- * more than one text-shadow, so these draw theirs as a dotted border instead. The author is a flex
- * item: the negative margin keeps the border from growing its line.
+ * Links on the photo keep the label's halo, but WebKit misplaces (or drops) the underline of
+ * text with more than one text-shadow, so these draw theirs as a dotted border instead. The
+ * author is a flex item: the negative margin keeps the border from growing its line.
  */
 const COMPACT_LINK =
-  '-mb-px border-b border-dotted border-current/70 no-underline hover:border-solid'
+  '-mb-px border-b border-dotted border-current/70 text-ink no-underline hover:border-solid hover:text-ink'
 
 /** Only the author may truncate; the licence sits in its own box so it is never clipped. */
 function CompactPart({ label, credit }: { label: string; credit: Credit }) {
   return (
-    <span className="credit-compact__part inline-flex max-w-full min-w-0 items-baseline gap-[0.6ch] whitespace-nowrap">
-      <span className="credit-compact__label flex-none text-ink-2">{label}</span>{' '}
+    <span className="credit-compact__part inline-flex max-w-full min-w-0 items-baseline gap-[0.5ch] whitespace-nowrap">
+      <span className="credit-compact__label flex-none font-medium text-ink-2">{label}</span>{' '}
       <ExternalLink
         href={credit.source}
         className={cn(
-          'credit-compact__author max-w-[24ch] min-w-0 overflow-hidden text-ellipsis stacked-or-split:card-w-gt-520:max-w-[18ch] card-w-ge-600:max-w-[32ch]',
+          'credit-compact__author max-w-[22ch] min-w-0 overflow-hidden text-ellipsis',
           COMPACT_LINK,
         )}
       >
         {shortAuthor(credit.author)}
       </ExternalLink>{' '}
-      <span className="credit-compact__lic flex-none">
+      <span className="credit-compact__lic flex-none text-ink-2">
         (
         <ExternalLink href={credit.licenseUrl} className={COMPACT_LINK}>
           {shortLicense(credit.license)}

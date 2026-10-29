@@ -42,7 +42,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   close: X,
 }
 
-// Solid glyphs inside the ink discs (play button, Listen gate, now-playing).
+// Solid glyphs on the caps and the disc (play cap, Listen disc, now-playing).
 const FILLED = new Set<IconName>(['play', 'pause'])
 
 // Lucide's play and pause fill three quarters of their grid. These frames draw them a little over
@@ -71,6 +71,18 @@ export function Icon({
       focusable="false"
       className={cn('icon', className)}
       {...rest}
+    />
+  )
+}
+
+/** An arrow key's glyph, drawn: U+2190–2192 are not in the Latin subsets of either font. */
+export function ArrowKey({ side }: { side: 'left' | 'right' }) {
+  return (
+    <Icon
+      name={`arrow-${side}`}
+      size={12}
+      aria-label={side === 'left' ? 'Left arrow' : 'Right arrow'}
+      role="img"
     />
   )
 }

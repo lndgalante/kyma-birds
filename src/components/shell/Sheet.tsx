@@ -84,7 +84,7 @@ export function Sheet({ open, onClose, variant = 'dialog', children }: SheetProp
           }
         }}
       >
-        <div className="sheet__body flex min-h-0 flex-col overflow-y-auto overscroll-contain px-6 pt-[22px] pb-[calc(24px+var(--safe-b))] [&_:focus-visible]:scroll-my-4">
+        <div className="sheet__body flex min-h-0 flex-col overflow-y-auto overscroll-contain px-5 pt-6 pb-[calc(24px+var(--safe-b))] stacked:px-8 stacked:pt-7 stacked:pb-[calc(32px+var(--safe-b))] [&_:focus-visible]:scroll-my-4">
           {children}
         </div>
       </DialogContent>
@@ -92,22 +92,25 @@ export function Sheet({ open, onClose, variant = 'dialog', children }: SheetProp
   )
 }
 
-/** A section heading inside a sheet: a small uppercase mono label. */
-export const SHEET_HEADING =
-  'font-mono text-2xs leading-[1.2] font-medium tracking-label text-ink-3 uppercase'
+/**
+ * A section heading inside a sheet. Add no weight class to it in cn(): tailwind-merge reads
+ * `font-display` as a weight and would drop it.
+ */
+export const SHEET_HEADING = 'mt-8 mb-3 font-display text-lg leading-[1.2] tracking-title text-ink'
 
 export function SheetTitle({ className, ...props }: ComponentProps<typeof DialogTitle>) {
   return <DialogTitle className={cn('sheet__title', className)} {...props} />
 }
 
 /**
- * The header's X. No tooltip: Radix focuses it when the sheet opens, and a tooltip would pop up
- * on every open.
+ * The header's X, pulled up and out so its glyph lines up with the title's cap height and the
+ * text's end edge; `className` can place it elsewhere, as over Details' photo. No tooltip: Radix
+ * focuses it when the sheet opens, and a tooltip would pop up on every open.
  */
-export function SheetCloseButton() {
+export function SheetCloseButton({ className }: { className?: string }) {
   return (
     <DialogClose asChild>
-      <IconButton label={COPY.close} icon="close" className="-mt-1.5 -me-2.5" />
+      <IconButton label={COPY.close} icon="close" className={cn('-mt-1.5 -me-2.5', className)} />
     </DialogClose>
   )
 }

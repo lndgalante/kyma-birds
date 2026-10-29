@@ -4,18 +4,20 @@ import type * as React from 'react'
 import { cn } from '~/lib/utils'
 
 /**
- * shadcn/ui Badge with the Kyma chips. `iucn` is the two-part Red List chip and `iucn-step` a
- * step of the Details scale; both take their colour from `--status`, which the caller sets
- * with a literal class such as `[--status:var(--iucn-cr)]` (StatusChip.tsx keeps the map).
+ * shadcn/ui Badge with the Kyma chips. `iucn` is the two-part Red List chip: the code on a
+ * `--status` fill, then the label (StatusChip.tsx renders the parts). `iucn-step` is one step of
+ * the Details meter: a bar, dim unless it is the current step, over its code. Both take their
+ * colour from `--status`, which the caller sets with a literal class such as
+ * `[--status:var(--iucn-cr)]` (StatusChip.tsx keeps the map).
  */
 const badgeVariants = cva(
-  'inline-flex w-fit shrink-0 items-center justify-center overflow-hidden rounded-sm whitespace-nowrap [&>svg]:pointer-events-none',
+  'inline-flex w-fit shrink-0 items-center justify-center overflow-hidden rounded-part whitespace-nowrap [&>svg]:pointer-events-none',
   {
     variants: {
       variant: {
-        iucn: 'h-6 items-stretch gap-0 bg-ground/72 align-middle text-shadow-none inset-ring inset-ring-(--status)/55 forced-colors:border forced-colors:border-[CanvasText]',
+        iucn: 'h-6 items-stretch gap-0 bg-ground/72 align-middle text-shadow-none inset-ring inset-ring-(--status)/45 forced-colors:border forced-colors:border-[CanvasText]',
         'iucn-step':
-          'grid h-[26px] w-auto place-items-center font-mono text-2xs leading-none font-semibold tracking-chip text-ink-3 inset-ring inset-ring-line-2 data-current:bg-(--status) data-current:text-on-status data-current:inset-ring-0',
+          'grid w-auto content-start justify-items-stretch gap-1.5 text-center text-xs leading-none font-medium tabular-nums text-ink-3 before:h-2 before:rounded-full before:bg-(--status)/25 data-current:text-ink data-current:before:bg-(--status) forced-colors:before:bg-[GrayText] forced-colors:data-current:before:bg-[CanvasText]',
       },
     },
     defaultVariants: { variant: 'iucn' },

@@ -4,7 +4,8 @@ import { cn } from '~/lib/utils'
 
 /**
  * The page root (`.app`): the bird's palette inline (lib/theme.ts), the cross-fade between
- * birds through the registered colour properties, and the mount point for Radix portals.
+ * birds through the registered colour properties, and the mount point for Radix portals. A fade
+ * is not motion, so `keep-motion` keeps it under reduced motion, where --dur-4 shortens.
  */
 export function AppShell({
   theme,
@@ -21,7 +22,7 @@ export function AppShell({
     <div
       ref={setEl}
       className={cn(
-        'app min-h-dvh bg-ground text-ink transition-[--signal,--ground,--ground-raised,--ground-sunken,--scrim] duration-(--dur-4) ease-in-out',
+        'app keep-motion min-h-dvh bg-ground text-ink transition-[--signal,--ground,--ground-raised,--ground-sunken,--scrim] duration-(--dur-4) ease-in-out',
         className,
       )}
       style={theme}

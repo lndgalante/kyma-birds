@@ -4,83 +4,99 @@ import { sourceLabel } from '~/lib/credits'
 import type { Bird, Credit } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 
-const LINK = 'inline-flex min-h-6 items-center'
-const NOTE = 'work__note font-sans text-md leading-[1.45] text-ink-3 md:col-[2/-1]'
-
-export function CreditEntry({ bird: b, highlighted }: { bird: Bird; highlighted: boolean }) {
+/**
+ * One bird on the credits page: its photo, its name, then its two works. On phones the works run
+ * full width under the thumbnail and name; from md they sit under the name, side by side from lg.
+ * `priority` loads the thumbnail first.
+ */
+export function CreditEntry({
+  bird: b,
+  highlighted,
+  priority,
+}: {
+  bird: Bird
+  highlighted: boolean
+  priority: boolean
+}) {
   return (
     <li>
       <article
         id={b.slug}
         className={cn(
-          'credit-entry relative grid scroll-mt-20 grid-cols-[96px_minmax(0,1fr)] gap-5 border-b border-line py-6 field:grid-cols-[64px_minmax(0,1fr)] field:gap-4',
-          // In the page gutter, but never past it: on phones html clips x overflow.
-          'data-highlight:before:absolute data-highlight:before:inset-y-5 data-highlight:before:start-[calc(-1*min(18px,var(--gutter)-6px))] data-highlight:before:w-0.5 data-highlight:before:rounded-xs data-highlight:before:bg-signal',
+          'credit-entry relative grid scroll-mt-20 grid-cols-[96px_minmax(0,1fr)] gap-x-5 gap-y-6 border-b border-line py-6',
+          'md:grid-cols-[152px_minmax(0,1fr)] md:gap-x-8 md:gap-y-4 md:py-7',
+          // The signal line sits in the gutter, never past it: on phones html clips x overflow.
+          'data-highlight:before:absolute data-highlight:before:inset-y-6 data-highlight:before:start-[calc(-1*min(18px,var(--gutter)-6px))] data-highlight:before:w-0.5 data-highlight:before:rounded-full data-highlight:before:bg-signal md:data-highlight:before:inset-y-7',
         )}
         data-highlight={highlighted || undefined}
         aria-labelledby={`credit-${b.slug}`}
       >
-        <img
-          className="credit-entry__thumb size-24 max-w-none rounded-md object-cover inset-ring inset-ring-white/8 field:size-16"
-          src={b.photo.srcSm}
-          width={Math.round(b.photo.width / 2)}
-          height={Math.round(b.photo.height / 2)}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          style={{
-            objectPosition: `${b.photo.focal.x * 100}% ${b.photo.focal.y * 100}%`,
-            backgroundColor: b.photo.dominantColor,
-          }}
-        />
-        <div className="credit-entry__body">
+        {/* A wrapper draws the hairline ring: an inset shadow on an <img> paints under the image. */}
+        <div className="credit-entry__frame relative size-24 self-start overflow-hidden rounded-part bg-ground-sunken after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:inset-ring after:inset-ring-line-photo md:row-span-2 md:size-38">
+          <img
+            className="credit-entry__thumb block size-full max-w-none object-cover"
+            src={b.photo.srcSm}
+            width={Math.round(b.photo.width / 2)}
+            height={Math.round(b.photo.height / 2)}
+            alt=""
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : undefined}
+            decoding="async"
+            style={{
+              objectPosition: `${b.photo.focal.x * 100}% ${b.photo.focal.y * 100}%`,
+              backgroundColor: b.photo.dominantColor,
+            }}
+          />
+        </div>
+        <div className="credit-entry__body min-w-0 self-center md:self-start">
           <h2
             id={`credit-${b.slug}`}
-            className="credit-entry__name mb-3.5 text-2xl leading-[1.2] font-display font-stretch-92%"
+            className="credit-entry__name font-display text-xl leading-[1.15] tracking-title text-ink"
           >
-            {b.commonName}{' '}
-            <i className="credit-entry__sci ms-1.5 text-base font-normal font-stretch-100% text-ink-3">
-              {b.scientificName}
-            </i>
+            {b.commonName}
           </h2>
+          <p className="credit-entry__sci mt-1 text-md leading-[1.4] text-ink-3">
+            <i>{b.scientificName}</i>
+          </p>
+        </div>
+        <div className="credit-entry__works col-span-full grid min-w-0 gap-x-10 gap-y-5 md:col-span-1 md:col-start-2 lg:grid-cols-2">
           <Work label={COPY.creditsPhoto} credit={b.credits.photo} />
-          <Work
-            label={COPY.creditsSong}
-            credit={b.credits.audio}
-            className="border-t border-dashed border-line"
-          />
+          <Work label={COPY.creditsSong} credit={b.credits.audio} />
         </div>
       </article>
     </li>
   )
 }
 
-function Work({ label, credit, className }: { label: string; credit: Credit; className?: string }) {
+const LINK = 'inline-flex min-h-6 items-center pointer-coarse:min-h-11'
+const NOTE = 'work__note text-sm leading-[1.5] text-ink-3'
+
+/** One licensed work: the photo or the song. */
+function Work({ label, credit }: { label: string; credit: Credit }) {
   return (
-    <div
-      className={cn(
-        'work grid grid-cols-[minmax(0,1fr)] gap-0.5 py-2 font-mono text-xs leading-[1.6] text-ink-2 md:grid-cols-[7ch_minmax(0,1fr)_auto_auto] md:items-baseline md:gap-x-[18px]',
-        className,
-      )}
-    >
-      <p className="work__label text-2xs font-medium tracking-label text-ink-3 uppercase">
-        {label}
+    <div className="work grid min-w-0 content-start border-t border-line pt-3 text-sm leading-[1.5]">
+      <p className="work__label font-medium text-ink-3">{label}</p>
+      <p className="work__author mt-1 text-md leading-[1.45] text-ink">{credit.author}</p>
+      <p className="work__links flex flex-wrap items-center gap-x-5">
+        <span className="work__license">
+          <ExternalLink href={credit.licenseUrl} className={LINK}>
+            {credit.license}
+          </ExternalLink>
+        </span>
+        <span className="work__source">
+          <ExternalLink href={credit.source} className={LINK}>
+            {sourceLabel(credit.source)}
+          </ExternalLink>
+        </span>
       </p>
-      <p className="work__author text-ink field:font-sans field:text-base">{credit.author}</p>
-      <p className="work__license">
-        <ExternalLink href={credit.licenseUrl} className={LINK}>
-          {credit.license}
-        </ExternalLink>
-      </p>
-      <p className="work__source">
-        <ExternalLink href={credit.source} arrow className={LINK}>
-          {sourceLabel(credit.source)}
-        </ExternalLink>
-      </p>
-      <p className={NOTE}>
+      <p className={cn(NOTE, 'mt-1.5')}>
         <span className="work__title wrap-anywhere">“{credit.title}”</span>
-        {credit.catalog && <span className="work__catalog"> · {credit.catalog}</span>}
       </p>
+      {credit.catalog && (
+        <p className={NOTE}>
+          <span className="work__catalog">{credit.catalog}</span>
+        </p>
+      )}
       <p className={NOTE}>Changes: {credit.changes}</p>
     </div>
   )

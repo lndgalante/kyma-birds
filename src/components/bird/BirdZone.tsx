@@ -3,8 +3,7 @@ import { useCallback, useEffect, useState, type RefObject } from 'react'
 import { COPY } from '~/lib/copy'
 import type { Bird } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
-import { ZoneHead, ZoneTag } from '../shell/Zone'
-import { FlowLine } from '../song/FlowLine'
+import { ZoneHead } from '../shell/Zone'
 import { BirdCard } from './BirdCard'
 import type { PhotoPriority } from './BirdPhoto'
 import { PickerPager } from './PickerPager'
@@ -18,15 +17,6 @@ interface BirdZoneProps {
   trackRef: RefObject<HTMLDivElement | null>
   snap: SnapController
   onDetails(slug: string): void
-}
-
-function useSaveData(): boolean {
-  const [save, setSave] = useState(false)
-  useEffect(() => {
-    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
-    setSave(!!conn?.saveData)
-  }, [])
-  return save
 }
 
 export function BirdZone({
@@ -69,17 +59,16 @@ export function BirdZone({
       id="birds"
       className={cn(
         'zone zone--bird relative *:min-w-0',
-        'split:col-start-1 split:row-span-full split:grid split:grid-rows-[var(--zone-head)_minmax(0,1fr)_var(--zone-foot)] split:gap-y-(--row-gap)',
+        // Split: the bird column's first row; the song strip takes the foot row under it.
+        'split:col-start-1 split:row-start-1 split:grid split:grid-rows-1',
         'compact:col-start-1 compact:row-start-1',
       )}
       aria-labelledby="zone-bird"
       tabIndex={-1}
     >
-      <ZoneHead id="zone-bird" num="01" title={COPY.zoneBird}>
-        <FlowLine />
-      </ZoneHead>
+      <ZoneHead id="zone-bird" title={COPY.zoneBird} />
       <div
-        className="carousel grid split:row-[2/4] split:grid-rows-[minmax(0,1fr)_var(--zone-foot)] split:gap-y-(--row-gap) split:min-h-0"
+        className="carousel grid split:min-h-0 split:grid-rows-[minmax(0,1fr)_auto] split:gap-y-(--row-gap)"
         role="region"
         aria-roledescription="carousel"
         aria-label={COPY.carouselLabel}
@@ -87,10 +76,12 @@ export function BirdZone({
         <div
           id="bird-track"
           className={cn(
-            'track isolate grid h-[max(var(--photo-min),46svh,min(62svh,100svh-var(--plate)-116px))] auto-cols-[100%] grid-flow-col snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain no-scrollbar motion-safe:scroll-smooth',
-            'stacked:h-[clamp(300px,34svh,520px)] stacked:rounded-xl',
-            'split:h-auto split:min-h-0',
-            'compact:h-[calc(100svh-var(--strip-h)-40px)] compact:min-h-[220px]',
+            'track isolate grid h-(--track-h) auto-cols-[100%] grid-flow-col snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain no-scrollbar motion-safe:scroll-smooth',
+            // On the night the track reaches 8px past its column (6px in Split's height), padded
+            // back, so a focus ring at the card's edge is not clipped. The gap between slides is
+            // twice the padding, so a slide's pitch stays the track's clientWidth (useSnapIndex).
+            'stacked-or-split:-mx-2 stacked-or-split:gap-x-4 stacked-or-split:px-2',
+            'split:-my-1.5 split:h-auto split:min-h-0 split:py-1.5',
           )}
           ref={trackRef}
         >
@@ -110,16 +101,17 @@ export function BirdZone({
         <ScriptOnce>
           {`(function(t){if(t&&t.clientWidth)t.scrollTo({left:${committedIndex}*t.clientWidth,behavior:'instant'})})(document.getElementById('bird-track'))`}
         </ScriptOnce>
+        {/* Field and Compact: the pager floats at the photo's bottom end, level with the
+            label's Details pill. Stacked and Split: a row under the card, above the song
+            strip. */}
         <div
           className={cn(
-            'picker-nav absolute end-[max(10px,var(--safe-r))] bottom-[calc(var(--strip-h)+8px)] z-3 flex min-w-0 items-center gap-4 @container/nav',
+            'picker-nav absolute end-[max(12px,var(--safe-r))] bottom-3 z-3 flex min-w-0 items-center gap-4 @container/nav',
             'field:@container-normal',
             'stacked:static stacked:h-12',
-            'split:h-auto split:gap-3',
-            'compact:absolute compact:end-2.5 compact:bottom-3.5 compact:h-auto compact:@container-normal',
+            'compact:absolute compact:end-3 compact:bottom-3 compact:h-auto compact:@container-normal',
           )}
         >
-          <ZoneTag num="01" title={COPY.zoneBird} />
           <PickerRail birds={birds} selectedIndex={viewIndex} onSelect={(i) => goTo(i, 'rail')} />
           <PickerPager
             index={viewIndex}
@@ -131,4 +123,13 @@ export function BirdZone({
       </div>
     </section>
   )
+}
+
+function useSaveData(): boolean {
+  const [save, setSave] = useState(false)
+  useEffect(() => {
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+    setSave(!!conn?.saveData)
+  }, [])
+  return save
 }

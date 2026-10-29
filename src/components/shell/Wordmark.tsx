@@ -10,13 +10,13 @@ export function Wordmark({ bird, className }: { bird?: string; className?: strin
       to="/"
       search={bird ? { bird } : {}}
       className={cn(
-        'wordmark relative -ms-0.5 inline-flex min-h-10 items-center gap-2.5 rounded-md ps-0.5 pe-1.5 font-sans text-md leading-none font-mark font-stretch-125% tracking-mark whitespace-nowrap text-ink uppercase no-underline pointer-coarse:min-h-11 [&>svg]:shrink-0',
+        'wordmark relative -ms-0.5 inline-flex min-h-10 items-center gap-2.5 rounded-part ps-0.5 pe-1.5 font-display-medium text-lg leading-none tracking-title whitespace-nowrap text-ink no-underline pointer-coarse:min-h-11 [&>svg]:shrink-0',
         className,
       )}
       aria-label={COPY.navHomeAria}
       activeOptions={{ includeSearch: false }}
     >
-      <ChladniGlyph />
+      <ChladniGlyph size={18} />
       <span className="wordmark__text" aria-hidden="true">
         Kyma<span className="wordmark__rest tiny:hidden"> Birds</span>
       </span>

@@ -94,19 +94,11 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
           <div
             className={cn(
               POSTER_MESSAGE,
-              'plate-poster__msg--nojs absolute top-1/2 left-1/2 -translate-1/2 split:w-[min(340px,80%)] split:max-w-none',
+              'plate-poster__msg--nojs absolute top-1/2 left-1/2 -translate-1/2',
             )}
           >
+            {/* The native player is in the song strip. */}
             <p>{COPY.plateFallbackNojs}</p>
-            {/* Split only: the 108px song spine is too narrow for a native player. */}
-            <audio
-              className="noscript-audio noscript-audio--plate mt-2.5 hidden w-full max-w-full min-w-0 split:block"
-              controls
-              loop
-              preload="none"
-              src={bird.audio.src}
-              aria-label={COPY.noscriptAudio}
-            />
           </div>
         </noscript>
         <div
@@ -152,17 +144,8 @@ export function PlateFigure({ bird, held, scatterToken, caption, captionKind }: 
           onListen={onListen}
         />
       )}
-      {/* Outside Split the plate is too small for a corner caption; the foot row carries it. */}
-      <figcaption
-        id="plate-caption"
-        className={cn(
-          'plate-caption pointer-events-none absolute start-0 bottom-0 z-2 max-w-[22ch] font-mono text-2xs leading-[1.3] font-medium tracking-label text-ink-3 uppercase',
-          'strip:sr-only',
-          // While live, the head row already reads "Mode (3, 2)"; the corner speaks only for states.
-          'split:transition-opacity split:duration-(--dur-2) split:ease-out split:data-[kind=live]:opacity-0',
-        )}
-        data-kind={captionKind}
-      >
+      {/* The figure's accessible caption; the foot row's status line is the one the eye reads. */}
+      <figcaption id="plate-caption" className="plate-caption sr-only" data-kind={captionKind}>
         {caption}
       </figcaption>
       <p id="plate-desc" className="sr-only">

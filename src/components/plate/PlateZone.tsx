@@ -6,7 +6,7 @@ import { NBSP, formatHz } from '~/lib/format'
 import type { Bird } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 import { useAnnounce } from '../shell/SrStatus'
-import { ZoneHead, ZoneTag } from '../shell/Zone'
+import { ZoneHead } from '../shell/Zone'
 import { ModeReadout } from './ModeReadout'
 import { PlateControls } from './PlateControls'
 import { PlateFigure } from './PlateFigure'
@@ -45,14 +45,12 @@ export function PlateZone({ bird }: PlateZoneProps) {
       className={cn(
         'zone zone--plate grid justify-items-center gap-y-3 pt-4 ps-[max(var(--gutter),var(--safe-l))] pe-[max(var(--gutter),var(--safe-r))] *:min-w-0',
         'stacked:px-0 stacked:pt-1',
-        'split:col-start-3 split:row-span-full split:grid-rows-[var(--zone-head)_minmax(0,1fr)_var(--zone-foot)] split:justify-items-stretch split:gap-y-(--row-gap) split:p-0',
+        'split:col-start-2 split:row-span-full split:grid-rows-[minmax(0,1fr)_var(--strip-h)] split:justify-items-stretch split:gap-y-(--row-gap) split:p-0',
         'compact:col-start-2 compact:row-[1/span_3] compact:content-start compact:p-0',
       )}
       aria-labelledby="zone-plate"
     >
-      <ZoneHead id="zone-plate" num="03" title={COPY.zonePlate} className="justify-between">
-        <ModeReadout placement="head" />
-      </ZoneHead>
+      <ZoneHead id="zone-plate" title={COPY.zonePlate} />
       <div className="plate-body split:grid split:min-h-0 split:place-items-center">
         <PlateFigure
           bird={bird}
@@ -62,16 +60,18 @@ export function PlateZone({ bird }: PlateZoneProps) {
           captionKind={caption.kind}
         />
       </div>
+      {/* Status at the start, controls at the end. Phones centre the two as one row (the status
+          shows only once there is a mode); compact landscape stacks them in its narrow column; in
+          Split the row is level with the song strip. */}
       <div
         className={cn(
           'plate-foot flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2.5',
           'foot-row:h-12 foot-row:flex-nowrap foot-row:justify-start',
-          'field-or-compact:flex-col field-or-compact:gap-2',
-          'split:h-auto split:justify-end',
+          'compact:flex-col compact:gap-2',
+          'split:h-auto',
         )}
       >
-        <ZoneTag num="03" title={COPY.zonePlate} />
-        <ModeReadout placement="foot" caption={caption} />
+        <ModeReadout caption={caption} />
         <PlateControls
           held={held}
           onHeldChange={setHeld}

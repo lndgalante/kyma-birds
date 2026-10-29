@@ -7,27 +7,8 @@ import { textLinkVariants } from '~/components/ui/text-link'
 import { MAPPING_SENTENCE } from '~/cymatics'
 import { COPY } from '~/lib/copy'
 import { cn } from '~/lib/utils'
-import { Icon } from './Icon'
+import { ArrowKey } from './Icon'
 import { SHEET_HEADING, Sheet, SheetClose, SheetCloseButton, SheetTitle } from './Sheet'
-
-// Arrows are SVG: U+2190–2192 are not in the Latin subsets of either font.
-const LEFT = <Icon name="arrow-left" size={12} aria-label="Left arrow" role="img" />
-const RIGHT = <Icon name="arrow-right" size={12} aria-label="Right arrow" role="img" />
-
-const KEYS: Array<[keys: Array<string | [string, ReactNode]>, action: string]> = [
-  [['Space'], 'play or pause'],
-  [
-    [
-      ['left', LEFT],
-      ['right', RIGHT],
-    ],
-    'previous or next bird',
-  ],
-  [['Home', 'End'], 'first or last bird'],
-  [['M'], 'mute'],
-]
-
-const HEADING = cn(SHEET_HEADING, 'mt-3')
 
 interface AboutDialogProps {
   open: boolean
@@ -39,57 +20,61 @@ interface AboutDialogProps {
 export function AboutDialog({ open, onClose, bird }: AboutDialogProps) {
   return (
     <Sheet open={open} onClose={onClose} variant="dialog">
-      <header className="sheet__head mb-3.5 flex items-start justify-between gap-4">
+      <header className="sheet__head mb-5 flex items-start justify-between gap-4">
         <SheetTitle>{COPY.aboutTitle}</SheetTitle>
         <SheetCloseButton />
       </header>
-      <div className="prose grid gap-2.5 text-lg leading-[1.55] text-ink-2">
-        <p className="about-kyma max-w-[62ch] text-xl text-ink">
+      <div className="prose text-md leading-[1.6] text-ink-2">
+        <p className="about-kyma max-w-[62ch] text-lg leading-[1.5] text-ink">
           Kyma (<span lang="grc">κῦμα</span>) is Greek for wave. It’s the root of the word{' '}
           <i>cymatics</i>.
         </p>
-        <h3 className={HEADING}>{COPY.aboutSeeingHeading}</h3>
+        <h3 className={SHEET_HEADING}>{COPY.aboutSeeingHeading}</h3>
         <p className="max-w-[62ch]">{COPY.aboutCymatics}</p>
-        <h3 className={HEADING}>{COPY.aboutHowHeading}</h3>
+        <h3 className={SHEET_HEADING}>{COPY.aboutHowHeading}</h3>
         <p className="max-w-[62ch]">
           The plate on this page is simulated. As each song loops, we follow its strongest frequency
           in real time. {MAPPING_SENTENCE} The sand reorganizes as the bird’s voice rises and falls.
           Mode numbers like (3, 2) count the nodal lines in the pattern.
         </p>
-        <h3 className={HEADING}>{COPY.aboutKeyboardHeading}</h3>
-        <dl className="keys grid gap-1.5">
+        <h3 className={SHEET_HEADING}>{COPY.aboutKeyboardHeading}</h3>
+        {/* No line under the last row: the footer's separator closes the table of keys. */}
+        <dl className="keys divide-y divide-line border-t border-line">
           {KEYS.map(([keys, action]) => (
             <div
               key={action}
-              className="keys__row grid grid-cols-[9.5rem_1fr] items-center gap-3 text-base field:grid-cols-[7.5rem_1fr]"
+              className="keys__row grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-4 py-2.5 field:grid-cols-[6.5rem_minmax(0,1fr)]"
             >
-              <dt className="flex items-center gap-0.5">
+              <dt className="flex items-center gap-1">
                 {keys.map((k, i) => {
                   const [id, glyph] = typeof k === 'string' ? [k, k] : k
                   return (
-                    <span key={id}>
-                      {i > 0 && <span className="keys__sep text-ink-4">, </span>}
-                      <Kbd>{glyph}</Kbd>
+                    <span key={id} className="contents">
+                      {/* Caps side by side read as a pair; the comma is for screen readers. */}
+                      {i > 0 && <span className="keys__sep sr-only">, </span>}
+                      <Kbd className="h-6 min-w-6 px-2">{glyph}</Kbd>
                     </span>
                   )
                 })}
               </dt>
-              <dd>{action}</dd>
+              <dd className="text-ink-2">{action}</dd>
             </div>
           ))}
         </dl>
       </div>
-      <Separator className="mt-[22px]" />
-      <footer className="sheet__foot flex items-center justify-between gap-4 pt-4 field:flex-wrap">
+      <Separator className="mt-8" />
+      <footer className="sheet__foot flex items-center justify-between gap-4 pt-5 field:flex-wrap">
         <Link
           to="/credits"
           search={bird ? { bird } : {}}
           hash={bird}
-          className={cn('text-link', textLinkVariants({ layout: 'flex' }))}
+          className={cn(
+            'text-link inline-flex min-h-6 items-center text-sm pointer-coarse:min-h-11',
+            textLinkVariants(),
+          )}
           onClick={onClose}
         >
           {COPY.aboutCreditsLink}
-          <Icon name="arrow-right" size={14} />
         </Link>
         <SheetClose asChild>
           <Button className="btn">{COPY.close}</Button>
@@ -98,3 +83,16 @@ export function AboutDialog({ open, onClose, bird }: AboutDialogProps) {
     </Sheet>
   )
 }
+
+const KEYS: Array<[keys: Array<string | [string, ReactNode]>, action: string]> = [
+  [['Space'], 'play or pause'],
+  [
+    [
+      ['left', <ArrowKey side="left" />],
+      ['right', <ArrowKey side="right" />],
+    ],
+    'previous or next bird',
+  ],
+  [['Home', 'End'], 'first or last bird'],
+  [['M'], 'mute'],
+]

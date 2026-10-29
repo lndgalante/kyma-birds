@@ -1,18 +1,19 @@
 import { Slider as SliderPrimitive } from 'radix-ui'
 import type * as React from 'react'
 import { cn } from '~/lib/utils'
+import { METAL } from './surface'
 
 /**
- * One-thumb Kyma slider (the volume), behaving like a native range: 2px --line-2 track, ink fill,
- * and a 12px ink dot whose centre travels 6px in from each end and follows the pointer; a press
- * beside the dot moves it there. The thumb, the element with role="slider" that gets `aria-label`
- * and `aria-valuetext`, is a 24px target that paints the dot, but only the dot grabs. `muted`
- * empties the fill and dims the dot without moving it.
+ * One-thumb Kyma fader (the volume), behaving like a native range: the signal glows in a sunk
+ * track up to the level, and a metal thumb with a lit index line follows the pointer, its centre
+ * 7px (half its width) in from each end; a press beside the thumb moves it there. The thumb is
+ * the element with role="slider" that gets `aria-label` and `aria-valuetext`. `muted` empties
+ * the glow and dims the index without moving the thumb.
  *
  * The caller's className sizes the outer span. Radix maps the pointer over the root, so the root
- * is inset 6px; its ::before still takes presses there and the track reaches back out to the
- * span's ends. Radix also pulls the thumb inward by up to half its width, which the thumb's
- * translate undoes; hence `value` only, no `defaultValue`.
+ * is inset 7px; its ::before still takes presses there and 10px above and below (a 44px target),
+ * and the track reaches back out to the span's ends. Radix also pulls the thumb inward by up to
+ * half its width, which the thumb's translate undoes; hence `value` only, no `defaultValue`.
  */
 function Slider({
   className,
@@ -58,16 +59,16 @@ function Slider({
         onKeyDown={onShiftArrow}
         onValueChange={onValueChange}
         onValueCommit={onValueCommit}
-        className="absolute inset-x-1.5 inset-y-0 flex cursor-pointer touch-none items-center select-none before:absolute before:inset-y-0 before:-inset-x-1.5 forced-colors:forced-color-adjust-none"
+        className="absolute inset-x-[7px] inset-y-0 flex cursor-pointer touch-none items-center select-none before:absolute before:-inset-x-[7px] before:-inset-y-2.5 forced-colors:forced-color-adjust-none"
         {...props}
       >
         <SliderPrimitive.Track
           data-slot="slider-track"
-          className="relative -mx-1.5 h-0.5 grow overflow-hidden rounded-[2px] bg-line-2 forced-colors:bg-[GrayText]"
+          className="relative -mx-[7px] h-1.5 grow overflow-hidden rounded-full bg-ground-sunken shadow-bed forced-colors:bg-[GrayText]"
         >
           <SliderPrimitive.Range
             data-slot="slider-range"
-            className="absolute h-full bg-ink group-data-muted/slider:bg-transparent forced-colors:bg-[CanvasText]"
+            className="absolute h-full bg-linear-to-r from-signal/25 to-signal group-data-muted/slider:invisible forced-colors:bg-[CanvasText] forced-colors:bg-none"
           />
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
@@ -75,7 +76,12 @@ function Slider({
           aria-label={ariaLabel}
           aria-valuetext={ariaValueText}
           style={{ '--fraction': fraction } as React.CSSProperties}
-          className="pointer-events-none relative block size-6 translate-x-[calc(var(--fraction)*24px-12px)] rounded-full before:pointer-events-auto before:absolute before:inset-1.5 before:rounded-full before:bg-ink group-data-muted/slider:before:bg-ink-3 forced-colors:before:bg-[CanvasText]"
+          className={cn(
+            METAL,
+            'relative block h-[22px] w-3.5 translate-x-[calc(var(--fraction)*14px-7px)] rounded-part',
+            'before:absolute before:inset-y-[5px] before:start-1/2 before:w-0.5 before:-translate-x-1/2 before:rounded-full before:bg-signal group-data-muted/slider:before:bg-ink-4',
+            'forced-colors:bg-[CanvasText] forced-colors:bg-none forced-colors:before:bg-[Canvas]',
+          )}
         />
       </SliderPrimitive.Root>
     </span>

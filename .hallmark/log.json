@@ -1,0 +1,31 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "ribbon",
+  "axes": "dark/grotesk-sans/chromatic",
+  "hero": "none (app screen)",
+  "nav": "the project bar, kept",
+  "footer": "none",
+  "imagery": "the user photos (12 birds)",
+  "photos": [],
+  "entry": "the instrument: photo, song strip, plate",
+  "fingerprint": "app screen / two columns / bird column with strip foot / plate / no hero / atmospheric",
+  "sections": [
+   "bird card",
+   "song strip",
+   "plate",
+   "details dialog",
+   "about dialog",
+   "credits ledger"
+  ],
+  "signature": "the sand plate, answered in the bird colour by the song strip",
+  "waived": [
+   "39b"
+  ],
+  "prompt": "a listening instrument: one bird at a time, its song loops and moves sand on a vibrating plate",
+  "date": "2026-10-29"
+ }
+]

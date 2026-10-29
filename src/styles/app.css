@@ -1,15 +1,31 @@
+/* Hallmark · shape: app screen · genre: atmospheric · theme: Ribbon (deal 2/3, seed listening-instrument-one-bird-1e69·68b1da44·2026-10-29·r0) · redesign: full
+ * nav: the project's bar, kept (wordmark, key hint, About, Credits) · signature: the sand plate, answered in the bird's colour by the song strip level with its foot · states: ready, loading, playing, paused, muted, held, error, no WebGL, no JS · ribbon: two-in-the-morning, the signal taken from each bird's photo
+ * axes: dark/grotesk-sans/chromatic · posture: restrained · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V5 · weakest: H, bird, song and plate could read as three equal columns; the song became the one machined panel, the bird sits unboxed on the night, the plate takes the most width */
+/* Hallmark · finish-review: subagent · 8 findings · 7 resolved 1 partial · gap: none */
+/* Hallmark · waive 39b · every other control stands 32 to 40px with a 44px coarse-pointer target · the Listen gate is the plate's one lit disc, 112px with its label under it, the first press that wakes the sound */
+/* Hallmark · dismissed F18 · badge and kbd are shadcn's own data-slot names on the IUCN chip and the key caps, not picture slots waiting for an image */
+/* Hallmark · dismissed 54 · ZoneHead renders the visually hidden h2 that each zone section's aria-labelledby names; nothing sits above a heading */
+/* Hallmark · answered F25 · on a phone the label on the photo keeps the name, scientific name and status (and the short credits where the photo has room); the song description, figures and full credits are one tap away in Details */
+/* Hallmark · reworded "01 Bird" to "Bird", "02 Song" to "Song", "03 Plate" to "Plate" · 54 and 66: the zone ordinals left the visually hidden zone heads */
+/* Hallmark · reworded "Kākāpō Strigops habroptilus", "Jocotoco Antpitta Grallaria ridgelyi", "Musician Wren Cyphorhinus arada", "Common Loon Gavia immer", "Screaming Piha Lipaugus vociferans", "White-rumped Shama Copsychus malabaricus", "Tūī Prosthemadera novaeseelandiae", "White-browed Robin-Chat Cossypha heuglini", "Rufous-bellied Thrush Turdus rufiventris", "Common Nightingale Luscinia megarhynchos", "Chalk-browed Mockingbird Mimus saturninus", "Andean Solitaire Myadestes ralloides" to the common name alone · 38i: each credits h2 holds the name, the scientific name moved to an italic line under it */
+/* Hallmark · reworded "1997" "0.75" "2,300" "2,650" "2,800" off the bird card · the habitat, traits and song character left the card for Details, which prints every one of them */
 /*
- * Kyma Birds' only stylesheet: Tailwind CSS v4, the Kyma theme mapped onto shadcn/ui's semantic
- * tokens, the layout-mode variants, a few named utilities and a short base layer. Components
- * style themselves with utilities; nothing here targets a component class.
+ * Kyma Birds' entry stylesheet: Tailwind CSS v4, the Ribbon tokens (tokens.css) mapped onto
+ * utilities and shadcn/ui's semantic names, the layout-mode variants, a few named utilities and
+ * a short base layer (element defaults in base.css). Components style themselves with utilities;
+ * nothing here targets a component class.
  */
 /* Scan only src/: docs and research notes would add stray utilities. */
 @import 'tailwindcss' source('..');
 @import 'tw-animate-css';
 
-@import '@fontsource-variable/archivo/wdth.css';
-@import '@fontsource-variable/archivo/wdth-italic.css';
-@import '@fontsource-variable/martian-mono/wdth.css';
+@import '@fontsource-variable/instrument-sans/wght.css';
+@import '@fontsource-variable/figtree/wght.css';
+@import '@fontsource-variable/figtree/wght-italic.css';
+
+@import './tokens.css';
+@import './base.css' layer(base);
 
 /* Code without markup. */
 @source not '../cymatics';
@@ -42,127 +58,124 @@
 }
 @custom-variant split (@media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem));
 @custom-variant split-fine (@media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) and (pointer: fine));
-@custom-variant strip (@media not ((width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem)));
 @custom-variant compact (@media (height <= 34rem) and (orientation: landscape) and (width >= 40rem));
 @custom-variant narrow (@media (width < 30rem));
 @custom-variant tiny (@media (width < 380px));
 
 /* Container queries on the card (`@container-size/card`), the picker nav (`@container/nav`) and
-   the Listen gate (`@container-size/gate`). The card's thresholds are rem (ui.md §4's px values at
-   the default 16px), so a larger default text size moves a card into its more compact layouts
-   instead of overprinting. The nav's and the gate's are px (the gate measures px text). */
-@custom-variant card-h-lt-420 (@container card (height < 26.25rem));
-@custom-variant card-h-lt-560 (@container card (height < 35rem));
-@custom-variant card-h-lt-460 (@container card (height < 28.75rem));
-@custom-variant card-w-le-360 (@container card (width <= 22.5rem));
-@custom-variant card-captioned (@container card (width >= 23.75rem) and (height >= 37.5rem));
-@custom-variant card-captioned-tall (@container card (width >= 23.75rem) and (height >= 47.5rem));
-@custom-variant card-w-gt-520 (@container card (width > 32.5rem));
-@custom-variant card-w-ge-600 (@container card (width >= 37.5rem));
-@custom-variant card-h-le-400 (@container card (height <= 25rem));
-@custom-variant card-h-le-360 (@container card (height <= 22.5rem));
-@custom-variant card-h-le-340 (@container card (height <= 21.25rem));
+   the Listen gate (`@container-size/gate`). The card's thresholds are rem, so a larger default
+   text size moves a card into its shorter forms instead of clipping it; the nav's and the
+   gate's are px (the gate measures px text).
+
+   Stacked and Split set the label on the night: beside the photo when the card is wide
+   (`card-side`), under it otherwise. Stacked's card goes beside past an aspect of 1.15, Split's
+   only past 1.6 (a short, wide window): most photos are landscape, and a portrait crop would
+   cut them. Under the photo the label may take half the card, so as the card gets short it
+   drops the description's third line, then the description, then the facts; beside it, the
+   label has the card's whole height and drops them later (under 26, 24 and 22rem, sized for
+   the longest name and credits). Under the photo, a card wider than 30rem sets the name on one
+   line and the figures beside the credits, so its shorter label keeps two lines of description
+   until the card is under 30rem tall. Field sets the label on the photo; a short phone's photo
+   (`card-short`) keeps only the name, the scientific name, the status and Details. */
+@custom-variant card-side {
+  @media not ((width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem)) {
+    @container card (width > 30rem) and (aspect-ratio > 1.15) {
+      @slot;
+    }
+  }
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) {
+    @container card (width > 30rem) and (aspect-ratio > 1.6) {
+      @slot;
+    }
+  }
+}
+@custom-variant card-name-lg (@container card (width >= 30rem) and (height >= 40rem) and (aspect-ratio <= 1.6));
+@custom-variant card-desc-2 {
+  @media not ((width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem)) {
+    @container card (((width <= 30rem) or (aspect-ratio <= 1.15)) and (height < 44rem)) or (height < 26rem) {
+      @slot;
+    }
+  }
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) {
+    @container card (((width <= 30rem) or (aspect-ratio <= 1.6)) and (height < 44rem)) or (height < 26rem) {
+      @slot;
+    }
+  }
+}
+@custom-variant card-no-desc {
+  @media not ((width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem)) {
+    @container card ((width <= 30rem) and (height < 40rem)) or ((aspect-ratio <= 1.15) and (height < 30rem)) or (height < 24rem) {
+      @slot;
+    }
+  }
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) {
+    @container card ((width <= 30rem) and (height < 40rem)) or ((aspect-ratio <= 1.6) and (height < 30rem)) or (height < 24rem) {
+      @slot;
+    }
+  }
+}
+@custom-variant card-no-facts {
+  @media not ((width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem)) {
+    @container card ((width <= 30rem) and (height < 30rem)) or ((aspect-ratio <= 1.15) and (height < 25rem)) or (height < 22rem) {
+      @slot;
+    }
+  }
+  @media (width >= 64rem) and (min-aspect-ratio: 5/4) and (height > 34rem) {
+    @container card ((width <= 30rem) and (height < 30rem)) or ((aspect-ratio <= 1.6) and (height < 25rem)) or (height < 22rem) {
+      @slot;
+    }
+  }
+}
+@custom-variant card-short (@container card (height < 20rem));
 @custom-variant nav-le-640 (@container nav (max-width: 640px));
 @custom-variant nav-le-540 (@container nav (max-width: 540px));
 @custom-variant nav-le-430 (@container nav (max-width: 430px));
-@custom-variant gate-short (@container gate (height < 320px));
+@custom-variant nav-le-360 (@container nav (max-width: 360px));
+@custom-variant gate-short (@container gate (height < 360px));
+/* The song strip (`@container/song`): a narrow one (Split's bird column at 1024px) drops the
+   fader, as Field and Compact do, so the spectrum keeps its bed. */
+@custom-variant song-narrow (@container song (width < 28rem));
 
 /* ---------- Theme ---------- */
 
-/* Registered so the room cross-fades between birds (ui.md §4.7). */
+/* Registered so the room cross-fades between birds (ui.md §4.7). The initial values repeat the
+   defaults in tokens.css (an initial value can't be a var()). */
 @property --signal {
   syntax: '<color>';
   inherits: true;
-  initial-value: oklch(0.8 0.11 150);
+  initial-value: oklch(82% 0.095 68);
 }
 @property --ground {
   syntax: '<color>';
   inherits: true;
-  initial-value: oklch(0.19 0.014 150);
+  initial-value: oklch(19% 0.012 258);
 }
 @property --ground-raised {
   syntax: '<color>';
   inherits: true;
-  initial-value: oklch(0.23 0.014 150);
+  initial-value: oklch(23% 0.012 258);
 }
 @property --ground-sunken {
   syntax: '<color>';
   inherits: true;
-  initial-value: oklch(0.155 0.012 150);
+  initial-value: oklch(15.5% 0.01 258);
 }
 @property --scrim {
   syntax: '<color>';
   inherits: true;
-  initial-value: oklch(0.14 0.012 150);
+  initial-value: oklch(14% 0.012 258);
 }
 
-/* `static`: Spectrum.tsx reads --font-mono from the canvas's computed style. */
-@theme static {
-  --font-*: initial;
-  --font-sans:
-    'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Martian Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-}
-
+/* Type, tracking, radii, shadows and eases are in tokens.css, as `@theme static`: Spectrum.tsx
+   reads --font-sans from the canvas's computed style, so it must always be emitted. */
 @theme {
   --spacing: 4px;
 
-  --text-*: initial;
-  --text-2xs: 11px;
-  --text-xs: 12px;
-  --text-sm: 13px;
-  --text-md: 14px;
-  --text-base: 15px;
-  --text-lg: 16px;
-  --text-xl: 17px;
-  --text-2xl: 19px;
-  --text-3xl: 24px;
-  --text-4xl: 28px;
-
-  --font-weight-book: 450;
-  --font-weight-ui: 550;
-  --font-weight-display: 620;
-  --font-weight-sci: 640;
-  --font-weight-mark: 650;
-
-  --tracking-display: -0.02em;
-  --tracking-title: -0.01em;
-  --tracking-ui: 0.01em;
-  --tracking-lang: 0.02em;
-  --tracking-chip: 0.04em;
-  --tracking-label: 0.06em;
-  --tracking-sci: 0.07em;
-  --tracking-code: 0.08em;
-  --tracking-mark: 0.14em;
-
-  --radius-*: initial;
-  --radius-xs: 2px;
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-  --radius-2xl: 18px;
-
-  --shadow-*: initial;
-  --inset-shadow-*: initial;
-  --drop-shadow-*: initial;
-  --text-shadow-*: initial;
-  --shadow-plate: 0 40px 80px -24px oklch(0 0 0 / 0.7), 0 12px 24px -12px oklch(0 0 0 / 0.5);
-  --shadow-sheet: 0 -24px 48px -12px oklch(0 0 0 / 0.6);
-  --shadow-dialog: 0 32px 64px -16px oklch(0 0 0 / 0.65);
-
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
-  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
-  --default-transition-duration: 120ms;
-  --default-transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
-
   --animate-spin: spin 0.9s linear infinite;
   --animate-flow-dash: flow-dash 1.6s linear infinite;
-  --animate-gate-pulse: gate-pulse 2.4s cubic-bezier(0.23, 1, 0.32, 1) 3 both;
-  --animate-gate-pulse-2: gate-pulse 2.4s cubic-bezier(0.23, 1, 0.32, 1) 0.8s 3 both;
-  --animate-gate-pulse-3: gate-pulse 2.4s cubic-bezier(0.23, 1, 0.32, 1) 1.6s 3 both;
+  --animate-gate-pulse: gate-pulse 2.4s var(--ease-out) 3 both;
+  --animate-gate-pulse-2: gate-pulse 2.4s var(--ease-out) 0.8s 3 both;
+  --animate-gate-pulse-3: gate-pulse 2.4s var(--ease-out) 1.6s 3 both;
   @keyframes spin {
     to {
       rotate: 360deg;
@@ -185,28 +198,32 @@
   }
 }
 
-/* Colours resolve per element (`inline`): `bg-ground` compiles to `var(--ground)`, so a bird's
-   palette, set inline on .app by lib/theme.ts, reaches every utility under .app, including the
-   Radix portals mounted inside it. (A `--color-ground: var(--ground)` emitted on :root would
-   freeze the default green.) */
+/* Colours resolve per element (`inline`): `bg-ground` compiles to the color-mix itself, so a
+   bird's palette, set inline on .app by lib/theme.ts, reaches every utility under .app,
+   including the Radix portals mounted inside it (a `--color-ground` emitted on :root would
+   freeze the default bird). Each ground is the night with the bird's tinted ground mixed in at
+   --bird-tint. */
 @theme inline {
   --color-*: initial;
-  --color-white: #fff;
-  --color-black: #000;
 
-  /* Kyma palette (raw tokens in :root below) */
+  /* Ribbon palette (raw tokens in tokens.css) */
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
   --color-ink-4: var(--ink-4);
   --color-line: var(--line);
   --color-line-2: var(--line-2);
-  --color-ground: var(--ground);
-  --color-ground-raised: var(--ground-raised);
-  --color-ground-sunken: var(--ground-sunken);
+  --color-line-photo: var(--line-photo);
+  --color-ground: color-mix(in oklab, var(--ground) var(--bird-tint), var(--night));
+  --color-ground-raised: color-mix(in oklab, var(--ground-raised) var(--bird-tint), var(--night-2));
+  --color-ground-sunken: color-mix(in oklab, var(--ground-sunken) var(--bird-tint), var(--night-0));
   --color-scrim: var(--scrim);
   --color-signal: var(--signal);
   --color-on-signal: var(--on-signal);
+  --color-metal-hi: var(--metal-hi);
+  --color-metal-lo: var(--metal-lo);
+  --color-metal-hi-lift: var(--metal-hi-lift);
+  --color-metal-lo-lift: var(--metal-lo-lift);
   --color-plate-surface: var(--plate-surface);
   --color-plate-rim: var(--plate-rim);
   --color-plate-sand: var(--plate-sand);
@@ -219,21 +236,21 @@
   --color-iucn-ew: var(--iucn-ew);
   --color-iucn-ex: var(--iucn-ex);
   --color-iucn-dd: var(--iucn-dd);
-  --color-focus: var(--focus);
+  --color-focus: var(--signal);
   --color-focus-halo: var(--focus-halo);
   --color-backdrop: var(--backdrop);
 
-  /* shadcn/ui semantic tokens, mapped onto the Kyma palette. Kept whole for vendored shadcn
+  /* shadcn/ui semantic tokens, mapped onto the Ribbon roles. Kept whole for vendored shadcn
      components, so most are unused today. */
-  --color-background: var(--ground);
+  --color-background: color-mix(in oklab, var(--ground) var(--bird-tint), var(--night));
   --color-foreground: var(--ink);
-  --color-card: var(--ground-raised);
+  --color-card: color-mix(in oklab, var(--ground-raised) var(--bird-tint), var(--night-2));
   --color-card-foreground: var(--ink);
-  --color-popover: var(--ground-raised);
+  --color-popover: color-mix(in oklab, var(--ground-raised) var(--bird-tint), var(--night-2));
   --color-popover-foreground: var(--ink);
-  --color-primary: var(--ink);
-  --color-primary-foreground: var(--ground);
-  --color-secondary: var(--ground-raised);
+  --color-primary: var(--signal);
+  --color-primary-foreground: var(--on-signal);
+  --color-secondary: color-mix(in oklab, var(--ground-raised) var(--bird-tint), var(--night-2));
   --color-secondary-foreground: var(--ink);
   --color-muted: var(--line);
   --color-muted-foreground: var(--ink-3);
@@ -242,54 +259,44 @@
   --color-destructive: var(--iucn-cr);
   --color-border: var(--line);
   --color-input: var(--line-2);
-  --color-ring: var(--focus);
+  --color-ring: var(--signal);
 }
 
-/* ---------- Named utilities: halos, multi-stop gradients, order-sensitive pairs ---------- */
+/* ---------- Named utilities: type pairs, halos, multi-stop gradients ---------- */
 
-/* Halos for text over photos. Contrast is measured with these exact values (ui.md §4.3), so they are
+/* Instrument Sans and its weight in one class. tailwind-merge (lib/utils.ts) reads
+   `font-display` as a weight, so inside cn() `font-display font-medium` would drop the family:
+   use `font-display` alone (it inherits 400) or one of these. */
+@utility font-display-normal {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-normal);
+}
+@utility font-display-medium {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Halos for text over photos. Contrast is measured with these values (ui.md §4.3), so they are
    plain declarations, not theme shadows (Tailwind rewrites theme shadow colours). */
 @utility halo-label {
   text-shadow:
-    0 1px 2px oklch(0 0 0 / 0.5),
-    0 0 14px oklch(0 0 0 / 0.3);
+    0 1px 2px color-mix(in oklab, var(--shade) 50%, transparent),
+    0 0 14px color-mix(in oklab, var(--shade) 30%, transparent);
 }
 @utility halo-scrim {
   text-shadow:
-    0 1px 2px oklch(0 0 0 / 0.6),
+    0 1px 2px color-mix(in oklab, var(--shade) 60%, transparent),
     0 0 4px color-mix(in oklch, var(--scrim) 85%, transparent),
     0 0 10px color-mix(in oklch, var(--scrim) 80%, transparent),
     0 0 18px color-mix(in oklch, var(--scrim) 70%, transparent);
 }
 @utility halo-mast {
   text-shadow:
-    0 1px 2px oklch(0 0 0 / 0.6),
+    0 1px 2px color-mix(in oklab, var(--shade) 60%, transparent),
     0 0 6px color-mix(in oklch, var(--scrim) 85%, transparent),
     0 0 14px color-mix(in oklch, var(--scrim) 70%, transparent);
 }
-@utility halo-soft {
-  text-shadow: 0 1px 2px oklch(0 0 0 / 0.45);
-}
 
-/* Photo: bottom scrim under the overlaid caption (overlay card mode). */
-@utility scrim-photo {
-  background: linear-gradient(
-    to top,
-    color-mix(in oklch, var(--scrim) 90%, transparent),
-    color-mix(in oklch, var(--scrim) 72%, transparent) 30%,
-    color-mix(in oklch, var(--scrim) 30%, transparent) 60%,
-    transparent
-  );
-}
-/* Field label: corner scrim; --scrim-x (0% or 100%) and --scrim-a are set inline on the card. */
-@utility scrim-label {
-  background: radial-gradient(
-    140% 110% at var(--scrim-x, 100%) 0%,
-    color-mix(in oklch, var(--scrim) calc(var(--scrim-a, 0.72) * 100%), transparent) 0%,
-    color-mix(in oklch, var(--scrim) calc(var(--scrim-a, 0.72) * 78%), transparent) 40%,
-    transparent 72%
-  );
-}
 /* Masthead over a photo (Field, Compact landscape). */
 @utility scrim-mast {
   background: linear-gradient(
@@ -307,12 +314,6 @@
     transparent
   );
 }
-/* Scroll-driven parallax: `animation-timeline` must follow the `animation` shorthand. */
-@utility photo-drift {
-  scale: 1.08;
-  animation: drift linear both;
-  animation-timeline: view(inline);
-}
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {
@@ -320,65 +321,9 @@
   }
 }
 
-@keyframes drift {
-  from {
-    translate: 4% 0;
-  }
-  to {
-    translate: -4% 0;
-  }
-}
-
 /* ---------- Base ---------- */
 @layer base {
   :root {
-    color-scheme: dark;
-
-    /* Ink: warm sand-white, hue 95 */
-    --ink: oklch(0.955 0.008 95);
-    --ink-2: oklch(0.82 0.01 95);
-    --ink-3: oklch(0.7 0.012 95);
-    --ink-4: oklch(0.56 0.012 95); /* disabled and decoration only, never body text */
-    --line: oklch(0.955 0.008 95 / 0.12);
-    --line-2: oklch(0.955 0.008 95 / 0.24);
-
-    /* Bird-driven; overridden inline per bird on .app (lib/theme.ts) */
-    --ground: oklch(0.19 0.014 150);
-    --ground-raised: oklch(0.23 0.014 150);
-    --ground-sunken: oklch(0.155 0.012 150);
-    --scrim: oklch(0.14 0.012 150);
-    --signal: oklch(0.8 0.11 150);
-    --on-signal: oklch(0.18 0.015 60);
-
-    /* Plate (poster and fallback only; the renderer owns the real surface) */
-    --plate-surface: oklch(0.13 0.004 150);
-    --plate-rim: oklch(0.9 0.006 95);
-    --plate-sand: oklch(0.95 0.012 85);
-    --plate-sand-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.935 0 0 0 0 0.9 16 0 0 0 -10.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-
-    /* IUCN Red List: hues follow IUCN convention; dark text on every chip */
-    --on-status: oklch(0.18 0.015 60);
-    --iucn-lc: oklch(0.74 0.15 145);
-    --iucn-nt: oklch(0.84 0.15 120);
-    --iucn-vu: oklch(0.87 0.16 98);
-    --iucn-en: oklch(0.75 0.15 55);
-    --iucn-cr: oklch(0.66 0.19 28);
-    --iucn-ew: oklch(0.62 0.11 330);
-    --iucn-ex: oklch(0.82 0 0);
-    --iucn-dd: oklch(0.78 0.01 95);
-
-    /* Focus: neutral, never the signal colour */
-    --focus: var(--ink);
-    --focus-halo: oklch(0.12 0.01 150);
-    --backdrop: oklch(0.08 0.01 150 / 0.62);
-
-    /* Motion: durations stay variables because reduced motion shortens --dur-4 */
-    --dur-1: 120ms;
-    --dur-2: 200ms;
-    --dur-3: 320ms;
-    --dur-4: 480ms;
-    --dur-5: 700ms;
-
     /* Frame */
     --gutter: clamp(16px, 2.2vw, 32px);
     --gap: clamp(12px, 1.6vw, 24px);
@@ -388,91 +333,56 @@
     --safe-l: env(safe-area-inset-left, 0px);
     --safe-r: env(safe-area-inset-right, 0px);
 
-    /* Layout-mode sizes (ui.md §2). Field is the base. The photo keeps at least 330px; the
-       plate takes what is left under it less 116px for the foot, never below 200px. */
-    --photo-min: 330px;
-    --strip-h: 56px;
+    /* Layout-mode sizes (ui.md §2). Field is the base: the photo (the track), the song strip,
+       then the plate and its one-row foot; --field-chrome is the strip plus 96px of gaps and
+       foot. The plate keeps 300px while the photo keeps 200px (a short phone crops the photo to
+       a header), and grows toward 36svh once the photo has 300px; the photo takes the rest, up
+       to 62svh. */
+    --strip-h: 64px;
+    --field-chrome: calc(var(--strip-h) + 96px + var(--safe-b));
     --plate: min(
       100vw - 2 * var(--gutter),
       440px,
-      max(200px, min(36svh, 100svh - var(--photo-min) - 116px - var(--safe-b)))
+      max(
+        200px,
+        min(300px, 100svh - 200px - var(--field-chrome)),
+        min(36svh, 100svh - 300px - var(--field-chrome))
+      )
     );
+    --track-h: max(200px, min(62svh, 100svh - var(--plate) - var(--field-chrome)));
+    /* Stacked: the card row (--track-h), the picker row, the strip, the plate; 308px is the
+       masthead, the picker row, the strip, the foot and the gaps between them. */
     @variant stacked {
-      --strip-h: 64px;
-      --plate: min(100vw - 2 * var(--gutter), 36svh, 640px);
-    }
-    @variant split {
-      --zone-head: 40px;
-      --zone-foot: 48px;
-      --row-gap: 12px;
-      --pad-y: 24px;
-      --spine: clamp(104px, 7.5vw, 136px);
-      --chrome-y: calc(
-        var(--masthead-h) + 2 * var(--pad-y) + var(--zone-head) + var(--zone-foot) + 2 *
-          var(--row-gap)
-      );
+      --masthead-h: 64px;
+      --track-h: clamp(320px, 36svh, 480px);
       --plate: min(
-        100dvh - var(--chrome-y),
-        (100vw - 2 * var(--gutter) - var(--spine) - 2 * var(--gap)) * 0.58,
-        960px
+        100vw - 2 * var(--gutter),
+        max(280px, 100svh - var(--track-h) - 308px - var(--safe-b)),
+        640px
       );
+    }
+    /* Split: two columns (the bird, the plate) over two rows. The bird column holds the card
+       and its picker, then the song strip in the foot row; the plate column holds the plate,
+       then its status and controls level with the strip. The plate takes 60% of the width the
+       gap leaves, up to the height the masthead, the padding and the foot row leave. */
+    @variant split {
+      --row-gap: 16px;
+      --pad-y: 24px;
+      --gap: clamp(20px, 2vw, 32px);
+      --chrome-y: calc(var(--masthead-h) + 2 * var(--pad-y) + var(--strip-h) + var(--row-gap));
+      --plate: min(100dvh - var(--chrome-y), (100vw - 2 * var(--gutter) - var(--gap)) * 0.6, 960px);
     }
     /* The plate column holds 8px top, the plate, a 12px gap, the foot (about 71px) and 8px
        bottom; the foot's row of touch controls is about 284px wide. */
     @variant compact {
-      --strip-h: 56px;
+      --strip-h: 60px;
+      --track-h: max(220px, 100svh - var(--strip-h) - 40px - var(--safe-t) - var(--safe-b));
       --plate-landscape: min(100svh - 100px - var(--safe-t) - var(--safe-b), 50vw - var(--gutter));
       --plate-col: max(var(--plate-landscape), 284px);
       --plate: var(--plate-landscape);
     }
   }
 
-  @media (prefers-contrast: more) {
-    :root {
-      --ink-3: var(--ink-2);
-      --line: oklch(0.955 0.008 95 / 0.32);
-      --line-2: oklch(0.955 0.008 95 / 0.5);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :root {
-      --dur-4: 200ms;
-    }
-    *,
-    *::before,
-    *::after {
-      scroll-behavior: auto !important;
-    }
-  }
-
-  html {
-    font-size: 100%;
-    font-optical-sizing: auto;
-    text-size-adjust: 100%;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    background: var(--ground);
-    overflow-x: clip;
-  }
-  body {
-    min-height: 100dvh;
-    background: var(--ground);
-    color: var(--ink);
-    font-size: 15px;
-    line-height: 1.5;
-    overflow-x: clip;
-  }
-  h1,
-  h2,
-  h3 {
-    font-weight: 600;
-    line-height: 1.15;
-    text-wrap: balance;
-  }
-  p {
-    text-wrap: pretty;
-  }
   /* shadcn convention: a bare `border` draws a --line hairline, not currentColor. */
   *,
   ::before,
@@ -484,16 +394,14 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
-  ::selection {
-    background: var(--ink);
-    color: var(--ground);
-  }
 
-  /* A double ring that reads on photos, ink and ground alike (ui.md §8.6). The halo goes through
-     Tailwind's ring slot, so it composes with inset hairlines (`inset-ring`) and shadows. No
-     focusable element carries a ring offset, so that slot is left out. */
+  /* A double ring that reads on photos, ink and ground alike (ui.md §8.6): the bird's signal
+     outside, a dark halo inside. The signal is read here, on the focused element, so it is the
+     bird's own. The halo goes through Tailwind's ring slot, so it composes with inset hairlines
+     (`inset-ring`) and shadows. No focusable element carries a ring offset, so that slot is
+     left out. */
   :focus-visible {
-    outline: 2px solid var(--focus);
+    outline: 2px solid var(--signal);
     outline-offset: 2px;
     --tw-ring-shadow: 0 0 0 2px var(--focus-halo);
     box-shadow:

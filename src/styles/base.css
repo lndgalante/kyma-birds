@@ -1,0 +1,80 @@
+/*
+ * Element defaults, imported into Tailwind's base layer so every utility outranks them. The
+ * focus ring, the border colour and the scroll-lock fixes live in app.css's base layer.
+ */
+
+html,
+body {
+  overflow-x: clip;
+}
+html {
+  font-size: 100%;
+  font-optical-sizing: auto;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scrollbar-color: var(--ink-4) var(--night);
+  /* The night with :root's tint; inside .app, `bg-ground` takes the bird's. */
+  background: color-mix(in oklab, var(--ground) var(--bird-tint), var(--night));
+}
+body {
+  min-height: 100dvh;
+  background: color-mix(in oklab, var(--ground) var(--bird-tint), var(--night));
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: 1.55;
+  caret-color: var(--signal);
+}
+::selection {
+  background: color-mix(in oklab, var(--signal) 34%, transparent);
+  color: var(--ink);
+}
+
+/* Heads in Instrument Sans 400, set tight; a `text-*` gives the size. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.1;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+h3 {
+  letter-spacing: var(--tracking-title);
+}
+p {
+  text-wrap: pretty;
+}
+
+/* Preflight sets kbd, samp and code in a monospace stack; Kyma has no mono. */
+kbd,
+samp,
+code {
+  font-family: inherit;
+}
+/* Figures line up: key caps, table cells, and anything marked as a figure. */
+kbd,
+td,
+.num,
+.figure {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reduced motion cuts every transition and animation to an instant, except on an element that
+   handles it itself (`keep-motion`: the bird cross-fade, the dialogs' short fade). */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.keep-motion),
+  *:not(.keep-motion)::before,
+  *:not(.keep-motion)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

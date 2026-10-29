@@ -14,7 +14,7 @@ type Props = {
   shortcut?: { keys: ReactNode; spoken: string }
 } & Omit<ComponentProps<'button'>, 'aria-label' | 'aria-pressed'>
 
-/** A square icon-only button. `aria-disabled` keeps it focusable where a native `disabled` would not. */
+/** A round icon-only button. `aria-disabled` keeps it focusable where a native `disabled` would not. */
 export function IconButton({
   label,
   icon,

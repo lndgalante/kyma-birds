@@ -19,28 +19,13 @@ const STATUS: Record<IucnCode, string> = {
   NE: '[--status:var(--iucn-dd)]',
 }
 
-export function StatusChip({
-  code,
-  label,
-  size = 'md',
-  className,
-}: {
-  code: IucnCode
-  label: string
-  size?: 'sm' | 'md'
-  className?: string
-}) {
+export function StatusChip({ code, label }: { code: IucnCode; label: string }) {
   return (
-    <Badge
-      asChild
-      variant="iucn"
-      className={cn('status', `status--${size}`, STATUS[code], className)}
-      data-code={code}
-    >
+    <Badge asChild variant="iucn" className={cn('status', STATUS[code])} data-code={code}>
       <p>
         <span className="sr-only">{COPY.statusPrefix} </span>
         <span
-          className="status__code grid min-w-7 place-items-center bg-(--status) px-1.5 font-mono text-2xs leading-none font-semibold tracking-chip text-on-status"
+          className="status__code grid min-w-7 place-items-center bg-(--status) px-1.5 font-sans text-xs leading-none font-medium tabular-nums text-on-status"
           aria-hidden="true"
         >
           {code}
@@ -63,13 +48,16 @@ const SCALE: Array<{ code: IucnCode; label: string }> = [
   { code: 'EX', label: 'Extinct' },
 ]
 
-/** The status as a position on the Red List scale (Details sheet). */
+/**
+ * The status as a position on the Red List scale (Details sheet): a meter of seven segments, the
+ * current one lit in its colour, with the label and the step on two lines under it.
+ */
 export function IucnScale({ code }: { code: IucnCode }) {
   const current = SCALE.find((s) => s.code === code)
   return (
     <figure className="iucn-scale m-0">
       <ol
-        className="iucn-scale__steps grid max-w-[360px] grid-cols-[repeat(7,1fr)] gap-[3px]"
+        className="iucn-scale__steps grid max-w-[360px] grid-cols-[repeat(7,minmax(0,1fr))] gap-1"
         aria-hidden="true"
       >
         {SCALE.map((s) => (
@@ -77,19 +65,21 @@ export function IucnScale({ code }: { code: IucnCode }) {
             key={s.code}
             asChild
             variant="iucn-step"
-            className={STATUS[s.code]}
+            // Stretch the step's own grid track, so the bar spans the segment, not its code.
+            className={cn('justify-stretch', STATUS[s.code])}
             data-current={s.code === code || undefined}
           >
             <li data-code={s.code}>{s.code}</li>
           </Badge>
         ))}
       </ol>
-      <figcaption className="iucn-scale__caption mt-2 text-md text-ink">
+      <figcaption className="iucn-scale__caption mt-3.5 text-md leading-[1.4] text-ink">
         <span className="sr-only">{COPY.statusPrefix} </span>
         {current ? current.label : code}
-        <span className="iucn-scale__of text-ink-3">
-          {' '}
-          · IUCN Red List{current ? `, step ${SCALE.indexOf(current) + 1} of ${SCALE.length}` : ''}
+        <span className="iucn-scale__of mt-0.5 block text-sm leading-[1.5] text-ink-3">
+          {/* Spoken between the two lines, which sit on separate rows for the eye. */}
+          <span className="sr-only">. </span>
+          IUCN Red List{current ? `, step ${SCALE.indexOf(current) + 1} of ${SCALE.length}` : ''}
         </span>
       </figcaption>
     </figure>

@@ -4,9 +4,9 @@ import { cn } from '~/lib/utils'
 import { usePortalContainer } from './portal'
 
 /**
- * shadcn/ui Tooltip, Kyma-inverted (ink bubble, ground text, like the page's filled controls).
- * One TooltipProvider sits in __root.tsx. Tooltips never open on touch; they open on hover
- * (after 500ms) and on keyboard focus, and only ever repeat a visible label plus its shortcut.
+ * shadcn/ui Tooltip as a small raised part. One TooltipProvider sits in __root.tsx. Tooltips
+ * never open on touch; they open on hover (after 500ms) and on keyboard focus, and only ever
+ * repeat a visible label plus its shortcut.
  */
 function TooltipProvider({
   delayDuration = 500,
@@ -70,13 +70,13 @@ function TooltipContent({
         sideOffset={sideOffset}
         collisionPadding={collisionPadding}
         className={cn(
-          'pointer-events-none z-50 inline-flex w-fit max-w-[28ch] origin-(--radix-tooltip-content-transform-origin) items-center gap-1.5 rounded-md bg-ink px-2 py-1 text-xs leading-[1.2] font-ui text-balance text-ground transition-none duration-(--dur-1) ease-out animate-in fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:zoom-in-95 motion-safe:data-[state=closed]:zoom-out-95 forced-colors:border forced-colors:border-[CanvasText]',
+          'pointer-events-none z-(--z-tooltip) inline-flex w-fit max-w-[28ch] origin-(--radix-tooltip-content-transform-origin) items-center gap-2 rounded-part bg-ground-raised px-2.5 py-1.5 text-sm leading-[1.2] font-medium text-balance text-ink shadow-part transition-none duration-(--dur-1) ease-out animate-in fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:zoom-in-95 motion-safe:data-[state=closed]:zoom-out-95 forced-colors:border forced-colors:border-[CanvasText]',
           className,
         )}
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-ink fill-ink" />
+        <TooltipPrimitive.Arrow className="size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-ground-raised fill-ground-raised" />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )

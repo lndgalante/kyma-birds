@@ -1,55 +1,33 @@
-import { useModeKey } from '~/audio/useAudio'
-import { formatMode } from '~/lib/format'
-import { cn } from '~/lib/utils'
 import type { PlateCaption } from './usePlateCaption'
 
-const BASE = 'font-mono leading-[1.2] whitespace-nowrap tabular-nums'
-const READOUT = {
-  head: cn('mode-readout mode-readout--head', BASE, 'hidden text-sm split:block'),
-  foot: cn(
-    'mode-readout mode-readout--foot',
-    BASE,
-    'me-auto text-2xs font-medium tracking-label uppercase field-or-compact:me-0 split:hidden',
-  ),
-}
-
 const LABEL = 'mode-readout__label text-ink-3'
-const VALUE = 'mode-readout__value text-signal'
-const FOOT_VALUE = cn(VALUE, 'text-sm tracking-normal')
+/** Instrument Sans 400 inside the 500 label line. */
+const VALUE = 'mode-readout__value font-display-normal text-md tabular-nums text-signal'
 
 /**
- * Head: "Mode (3, 2)" in the signal colour, the reading the spine points at, repeated at the plate.
- * Foot (non-Split layouts, where the figure's own caption is hidden): the plate's status line.
+ * The plate's status in its foot row: the mode the sand shows or holds, in the signal colour the
+ * song strip's readout also wears, or the error. Before there is a mode the line stays empty: the
+ * Listen gate says the plate is waiting. The figure's own caption is visually hidden and keeps the
+ * full status; this line is for the eye.
  */
-export function ModeReadout({
-  placement,
-  caption,
-}: {
-  placement: 'head' | 'foot'
-  caption?: PlateCaption
-}) {
-  const mode = formatMode(useModeKey())
-  if (placement === 'foot' && caption) {
-    return (
-      <p className={READOUT.foot} aria-hidden="true" data-kind={caption.kind}>
-        {caption.kind === 'live' ? (
-          <>
-            <span className={LABEL}>Mode</span> <span className={FOOT_VALUE}>{caption.mode}</span>
-          </>
-        ) : caption.kind === 'held' && caption.mode ? (
-          <>
-            <span className={LABEL}>Held · mode</span>{' '}
-            <span className={FOOT_VALUE}>{caption.mode}</span>
-          </>
-        ) : (
-          <span className={LABEL}>{caption.text}</span>
-        )}
-      </p>
-    )
-  }
+export function ModeReadout({ caption }: { caption: PlateCaption }) {
   return (
-    <p className={READOUT[placement]} aria-hidden="true">
-      <span className={LABEL}>Mode</span> <span className={VALUE}>{mode || '—'}</span>
+    <p
+      className="mode-readout mode-readout--foot flex items-baseline gap-2 text-sm leading-[1.2] font-medium whitespace-nowrap me-auto empty:hidden field-or-compact:me-0"
+      aria-hidden="true"
+      data-kind={caption.kind}
+    >
+      {caption.kind === 'live' ? (
+        <>
+          <span className={LABEL}>Mode</span> <span className={VALUE}>{caption.mode}</span>
+        </>
+      ) : caption.kind === 'held' && caption.mode ? (
+        <>
+          <span className={LABEL}>Held</span> <span className={VALUE}>{caption.mode}</span>
+        </>
+      ) : caption.kind === 'error' ? (
+        <span className={LABEL}>{caption.text}</span>
+      ) : null}
     </p>
   )
 }
