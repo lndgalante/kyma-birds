@@ -4,7 +4,7 @@ import birdsJson from '../../../data/birds.json'
 import { createAudioEngine, type WebAudioEngine } from '../AudioEngine'
 import { FADE_IN } from '../fades'
 import { resolveLoopRegion } from '../loopRegion'
-import { AUDIO } from '../params'
+import { ANALYSIS, AUDIO } from '../params'
 import { SongAnalyzer, type AnalyzerHost } from '../SongAnalyzer'
 import { createDriveFrame, createSongFeatures, type BirdSongAsset } from '../types'
 
@@ -278,8 +278,8 @@ async function offlineAnalyze(slug: string, sampleRate = 48000, maxSec = 40, tra
     })
   }
   await ctx.startRendering()
-  // Skip the 0.6 s band glide / floor learning, then exactly one loop.
-  const from = t0 + 0.62
+  // Skip the band glide / floor learning and the fade-in, then exactly one loop.
+  const from = t0 + Math.max(ANALYSIS.bandGlideSec, AUDIO.xfInSec) + 0.02
   const loopSamples = samples.filter((s) => s.t >= from && s.t < from + b.audio.durationSec)
   return {
     slug,

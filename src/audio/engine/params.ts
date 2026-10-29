@@ -2,18 +2,24 @@
 
 export const AUDIO = {
   latencyHint: 'interactive',
-  xfInSec: 0.6,
-  xfOutSec: 0.24,
+  // A slow breath between birds: the old song exhales while the new one inhales.
+  xfInSec: 1.2,
+  xfOutSec: 0.9,
   startDelaySec: 0.02,
   stopPadSec: 0.05,
   slowLoadFadeMs: 700,
-  pauseTau: 0.03,
-  suspendDelayMs: 150,
-  resumeTau: 0.03,
+  // A soft release on pause. The suspend waits it out (at least 5 τ, about −43 dB, plus a
+  // margin), or suspending the context would cut the tail.
+  pauseTau: 0.12,
+  suspendDelayMs: 700,
+  resumeTau: 0.1,
   volumeTau: 0.02,
-  muteTau: 0.015,
+  muteTau: 0.015, // instant: mute means silence, not a release
   defaultVolume: 0.7,
   maxVoices: 3,
+  // A voice over the cap fades out this fast rather than stop dead (a cut clicks). At most
+  // stopPadSec, so its new stop time can only fall after the old one once its fade-out is silent.
+  capFadeSec: 0.04,
   byteCacheEntries: 6,
   decodedBudgetDesktop: 48 * 2 ** 20,
   decodedBudgetMobile: 24 * 2 ** 20,
@@ -35,7 +41,9 @@ export const ANALYSIS = {
   bandHiFactor: 1.6,
   taperLo: 0.85,
   taperHi: 1.25,
-  bandGlideSec: 0.6,
+  // At least AUDIO.xfOutSec + stopPadSec: the old voice has stopped before the band narrows to
+  // the new one and the floor and loudness peak re-learn, so it can't seed them.
+  bandGlideSec: 1.0,
   floorFallTau: 0.25,
   floorRiseDbPerSec: 6,
   floorK: 2,

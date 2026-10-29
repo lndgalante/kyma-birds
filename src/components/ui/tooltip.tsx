@@ -6,7 +6,9 @@ import { usePortalContainer } from './portal'
 /**
  * shadcn/ui Tooltip as a small raised part. One TooltipProvider sits in __root.tsx. Tooltips
  * never open on touch; they open on hover (after 500ms) and on keyboard focus, and only ever
- * repeat a visible label plus its shortcut.
+ * repeat a visible label plus its shortcut. The first one fades and grows in; one that opens
+ * at once, while the pointer moves between neighbours, just appears. A key cap at the end sits
+ * 6px in from the top, bottom and end, so the 12px corners stay concentric with the cap's 6.
  */
 function TooltipProvider({
   delayDuration = 500,
@@ -70,7 +72,7 @@ function TooltipContent({
         sideOffset={sideOffset}
         collisionPadding={collisionPadding}
         className={cn(
-          'pointer-events-none z-(--z-tooltip) inline-flex w-fit max-w-[28ch] origin-(--radix-tooltip-content-transform-origin) items-center gap-2 rounded-part bg-ground-raised px-2.5 py-1.5 text-sm leading-[1.2] font-medium text-balance text-ink shadow-part transition-none duration-(--dur-1) ease-out animate-in fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:zoom-in-95 motion-safe:data-[state=closed]:zoom-out-95 forced-colors:border forced-colors:border-[CanvasText]',
+          'pointer-events-none z-(--z-tooltip) inline-flex w-fit max-w-[28ch] origin-(--radix-tooltip-content-transform-origin) items-center gap-2 rounded-bed bg-ground-raised px-2.5 py-1.5 text-sm leading-[1.2] font-medium text-balance text-ink shadow-part transition-none duration-(--dur-1) ease-out has-[kbd]:pe-1.5 animate-in fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=instant-open]:animate-none motion-safe:zoom-in-95 motion-safe:data-[state=closed]:zoom-out-95 forced-colors:border forced-colors:border-[CanvasText]',
           className,
         )}
         {...props}

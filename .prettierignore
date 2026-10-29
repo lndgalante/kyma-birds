@@ -11,3 +11,5 @@ CREDITS.md
 scripts/assets/photo-config.json
 # Hallmark records, rewritten by sloplint on every run.
 .hallmark
+# Impeccable records (critiques), kept as the tool wrote them.
+.impeccable

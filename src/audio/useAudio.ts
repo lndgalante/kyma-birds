@@ -27,6 +27,17 @@ export function useAudioField<K extends keyof EngineSnapshot>(key: K): EngineSna
   )
 }
 
+/**
+ * True from the first Listen press on: the song strip and the plate's controls appear then and
+ * stay. The only error before that press is a browser without Web Audio, which is final, so an
+ * error wakes them too (the strip says why).
+ */
+export function useAwake(): boolean {
+  const unlocked = useAudioField('unlocked')
+  const state = useAudioField('state')
+  return unlocked || state === 'error'
+}
+
 const noMode = () => null
 
 /** The plate's dominant mode key, e.g. "(3,2)"; changes a few times per second at most. */

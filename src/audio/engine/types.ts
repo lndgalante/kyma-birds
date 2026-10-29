@@ -27,7 +27,7 @@ export interface EngineSnapshot {
   error: EngineErrorCode | null
 }
 
-/** Per-frame features for the UI (spectrum, readouts, loop ring). Mutated in place by readFeatures(). */
+/** Per-frame features for the UI (spectrum, loop ring). Mutated in place by readFeatures(). */
 export interface SongFeatures {
   songId: string | null
   loudness: number // 0..1 = drive D (smoothed, voiced-gated)

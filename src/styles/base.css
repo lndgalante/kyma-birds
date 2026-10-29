@@ -15,12 +15,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scrollbar-color: var(--ink-4) var(--night);
-  /* The night with :root's tint; inside .app, `bg-ground` takes the bird's. */
-  background: color-mix(in oklab, var(--ground) var(--bird-tint), var(--night));
+  /* The night; inside .app, `bg-ground` takes the bird's room. */
+  background: var(--ground);
 }
 body {
   min-height: 100dvh;
-  background: color-mix(in oklab, var(--ground) var(--bird-tint), var(--night));
+  background: var(--ground);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--text-md);

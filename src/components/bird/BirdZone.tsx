@@ -6,7 +6,7 @@ import { cn } from '~/lib/utils'
 import { ZoneHead } from '../shell/Zone'
 import { BirdCard } from './BirdCard'
 import type { PhotoPriority } from './BirdPhoto'
-import { PickerPager } from './PickerPager'
+import { PagerButton } from './PickerPager'
 import { PickerRail } from './PickerRail'
 import type { SnapController } from './useSnapIndex'
 
@@ -101,23 +101,30 @@ export function BirdZone({
         <ScriptOnce>
           {`(function(t){if(t&&t.clientWidth)t.scrollTo({left:${committedIndex}*t.clientWidth,behavior:'instant'})})(document.getElementById('bird-track'))`}
         </ScriptOnce>
-        {/* Field and Compact: the pager floats at the photo's bottom end, level with the
-            label's Details pill. Stacked and Split: a row under the card, above the song
-            strip. */}
-        <div
-          className={cn(
-            'picker-nav absolute end-[max(12px,var(--safe-r))] bottom-3 z-3 flex min-w-0 items-center gap-4 @container/nav',
-            'field:@container-normal',
-            'stacked:static stacked:h-12',
-            'compact:absolute compact:end-3 compact:bottom-3 compact:h-auto compact:@container-normal',
-          )}
-        >
-          <PickerRail birds={birds} selectedIndex={viewIndex} onSelect={(i) => goTo(i, 'rail')} />
-          <PickerPager
-            index={viewIndex}
-            total={total}
-            onPrev={() => goTo(viewIndex - 1, 'button')}
-            onNext={() => goTo(viewIndex + 1, 'button')}
+        {/* Stacked and Split: a row under the card, above the song strip, the arrows at the
+            rail's ends. Field and Compact have no rail; routes/index.tsx places their pager. */}
+        <div className="picker-nav hidden h-12 min-w-0 items-center @container/nav stacked:flex compact:hidden">
+          <PickerRail
+            birds={birds}
+            selectedIndex={viewIndex}
+            onSelect={(i) => goTo(i, 'rail')}
+            prev={
+              <PagerButton
+                dir="prev"
+                index={viewIndex}
+                total={total}
+                onClick={() => goTo(viewIndex - 1, 'button')}
+                className="-ms-2.5"
+              />
+            }
+            next={
+              <PagerButton
+                dir="next"
+                index={viewIndex}
+                total={total}
+                onClick={() => goTo(viewIndex + 1, 'button')}
+              />
+            }
           />
         </div>
       </div>

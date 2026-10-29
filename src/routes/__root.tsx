@@ -18,7 +18,7 @@ export const Route = createRootRoute({
       { name: 'description', content: SITE_DESCRIPTION },
       { name: 'color-scheme', content: 'dark' },
       // The night (tokens.css --night); the bird routes set their own in lib/head.ts.
-      { name: 'theme-color', content: '#040810' },
+      { name: 'theme-color', content: '#07080a' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

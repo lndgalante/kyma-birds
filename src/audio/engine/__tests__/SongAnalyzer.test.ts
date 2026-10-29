@@ -78,10 +78,10 @@ describe('SongAnalyzer', () => {
     expect(f.songId).toBe('bird')
   })
 
-  it('re-learns the floor at t0 + 0.6 even when the first frame was digital silence', () => {
+  it('re-learns the floor at t0 + the glide even when the first frame was digital silence', () => {
     const s = setup()
     s.set([], -400).run(0.1) // fade-in start: nothing but −∞ bins
-    s.set([], -60).run(1)
+    s.set([], -60).run(ANALYSIS.bandGlideSec + 0.3)
     // A floor stuck at −160 dB would read 90+ dB of SNR on plain noise.
     expect(s.an.debug.snrDb).toBeLessThan(6)
     expect(s.out.voiced).toBe(false)
@@ -150,9 +150,9 @@ describe('SongAnalyzer', () => {
     s.set([]).run(1)
     s.set([{ hz: 3000, db: -30 }]).run(1)
     s.an.onVoiceStart({ bandHz: { p10: 576, p50: 630, p90: 698 } }, s.host.currentTime)
-    s.run(0.3)
-    expect(s.out.voiced).toBe(true) // 3 kHz still inside the union
-    s.set([]).run(0.5) // glide ends; the floor re-learns on the new voice
+    s.run(0.9)
+    expect(s.out.voiced).toBe(true) // 3 kHz still inside the union through the 0.9 s fade-out
+    s.set([]).run(0.3) // glide ends at t0 + 1.0; the floor re-learns on the new voice
     expect(s.out.voiced).toBe(false)
     s.set([{ hz: 3000, db: -30 }]).run(1)
     expect(s.out.voiced).toBe(false) // out of the new band
@@ -167,8 +167,8 @@ describe('SongAnalyzer', () => {
     s.set([{ hz: 3000, db: -12 }]).run(3) // a loud bird
     const t0 = s.host.currentTime
     s.an.onVoiceStart({ bandHz: { p10: 2000, p50: 3000, p90: 4000 } }, t0)
-    s.run(0.2) // the crossfade still plays the old voice
-    s.set([]).run(0.6) // the floor re-learns once the new voice is alone
+    s.run(0.9) // the crossfade plays the old voice until its fade-out ends (0.9 s)
+    s.set([]).run(0.3) // the floor and peak re-learn at t0 + 1.0, once the new voice is alone
     // 24 dB below the old peak: loud would read 0 for about 7 s if the peak carried over.
     let voicedAt = -1
     let maxLoud = 0

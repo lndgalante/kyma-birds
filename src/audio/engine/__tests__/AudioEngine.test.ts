@@ -196,23 +196,24 @@ describe('WebAudioEngine', () => {
     ctx.autoDecode = (bytes) => bufferFor(FakeAudioContext.tagOf(bytes))
     await engine.listen()
     engine.load(song('a'))
-    await tick(100) // A is 80 ms into its 600 ms fade-in
+    await tick(100) // A is 80 ms into its 1.2 s fade-in
     engine.load(song('b'))
     await tick(50)
     engine.load(song('c'))
     await tick(30)
-    engine.load(song('a'))
+    engine.load(song('a')) // a fourth voice: the first A is over the cap and fades out in 40 ms
     await tick(1000)
     expect(voices()).toHaveLength(4)
     for (const g of ctx.gains) expect(g.gain.curveCount).toBeLessThanOrEqual(1)
-    const fadeIns = ctx.gains.filter((g) =>
-      g.gain.log.some((e) => e.type === 'curve' && e.curve[0] === 0),
-    )
-    const fadeOuts = ctx.gains.filter((g) =>
-      g.gain.log.some((e) => e.type === 'curve' && e.curve[0] === 1),
-    )
+    const curved = (sec: number) =>
+      ctx.gains.filter((g) =>
+        g.gain.log.some((e) => e.type === 'curve' && Math.abs(e.duration - sec) < 1e-9),
+      )
+    const fadeIns = curved(1.2)
+    const fadeOuts = curved(0.9)
     expect(fadeIns).toHaveLength(4)
     expect(fadeOuts).toHaveLength(3)
+    expect(curved(0.04)).toHaveLength(1) // the first A's trim
     const [aIn] = fadeIns
     const [aOut] = fadeOuts
     const inCurve = aIn.gain.log[0] as { time: number; duration: number }
@@ -229,7 +230,7 @@ describe('WebAudioEngine', () => {
     expect(engine.getSnapshot().state).toBe('loading')
     expect(a.stopTime).toBeNull()
     await tick(20)
-    expect(a.stopTime).not.toBeNull() // fading out over 240 ms
+    expect(a.stopTime).not.toBeNull() // fading out over 900 ms
     expect(engine.getSnapshot().playingId).toBeNull()
     await decode('b')
     expect(engine.getSnapshot()).toMatchObject({ state: 'playing', playingId: 'b' })
@@ -243,7 +244,7 @@ describe('WebAudioEngine', () => {
     await tick(200)
     expect(a.stopTime).toBeNull()
     await decode('b')
-    expect(a.stopTime).toBeCloseTo(voices()[1].startTime! + 0.24 + 0.05, 9)
+    expect(a.stopTime).toBeCloseTo(voices()[1].startTime! + 0.9 + 0.05, 9)
     expect(engine.getSnapshot().playingId).toBe('b')
   })
 
@@ -251,7 +252,7 @@ describe('WebAudioEngine', () => {
     const { engine, ctx, tick, decode, voices, tagOf, playing } = setup()
     await playing('a')
     engine.pause()
-    await tick(200)
+    await tick(750)
     expect(ctx.state).toBe('suspended')
     engine.load(song('b'))
     await flush()
@@ -266,15 +267,15 @@ describe('WebAudioEngine', () => {
     expect(voices().map(tagOf)).toEqual(['/birds/a/song.m4a', '/birds/b/song.m4a'])
   })
 
-  it('leaves no half-faded voice behind when load() lands within 150 ms of pause()', async () => {
+  it('leaves no half-faded voice behind when load() lands within 700 ms of pause()', async () => {
     const { engine, ctx, tick, decode, playing } = setup()
     await playing('a')
     engine.pause()
-    await tick(60)
+    await tick(300)
     engine.load(song('b'))
     await flush()
     expect(engine.inspect().voices).toMatchObject([{ id: 'a', retiring: true }]) // still running
-    await tick(120)
+    await tick(420)
     expect(ctx.state).toBe('suspended')
     expect(engine.inspect().voices).toHaveLength(0) // stopped behind pauseGain, not frozen mid-fade
     await decode('b')
@@ -289,7 +290,7 @@ describe('WebAudioEngine', () => {
     const suspend = ctx.suspend.bind(ctx)
     ctx.suspend = () => new Promise<void>((r) => (land = () => void suspend().then(r)))
     engine.pause()
-    await tick(160)
+    await tick(710)
     expect(ctx.state).toBe('running') // suspend() requested, not landed
     engine.load(song('b'))
     expect(engine.inspect().voices).toHaveLength(0)
@@ -305,7 +306,7 @@ describe('WebAudioEngine', () => {
     const { engine, tick, decode, playing } = setup()
     await playing('a')
     engine.pause()
-    await tick(200)
+    await tick(750)
     engine.load(song('b'))
     await flush()
     void engine.play()
@@ -319,32 +320,32 @@ describe('WebAudioEngine', () => {
     expect(engine.getSnapshot()).toMatchObject({ state: 'playing', playingId: 'b' })
   })
 
-  it('makes isAudible() false synchronously on pause() and suspends after 150 ms', async () => {
+  it('makes isAudible() false synchronously on pause() and suspends after 700 ms', async () => {
     const { engine, ctx, tick, graphGain, playing } = setup()
     await playing('a')
     expect(engine.driveSource.isAudible()).toBe(true)
     engine.pause()
     expect(engine.driveSource.isAudible()).toBe(false)
     expect(engine.getSnapshot().state).toBe('paused')
-    expect(graphGain('pause').gain.lastTarget()).toBe(0)
-    await tick(145)
-    expect(ctx.suspendCalls).toBe(0)
+    expect(graphGain('pause').gain.events.at(-1)).toMatchObject({ target: 0, tau: 0.12 })
+    await tick(695)
+    expect(ctx.suspendCalls).toBe(0) // the release (5 τ = 600 ms) plays out first
     await tick(10)
     expect(ctx.suspendCalls).toBe(1)
     expect(ctx.state).toBe('suspended')
     expect(engine.getSnapshot().interrupted).toBe(false) // our own suspend is not an interruption
     await engine.play()
     expect(engine.getSnapshot().state).toBe('playing')
-    expect(graphGain('pause').gain.lastTarget()).toBe(1)
+    expect(graphGain('pause').gain.events.at(-1)).toMatchObject({ target: 1, tau: 0.1 })
   })
 
-  it('does not suspend when play() follows pause() within 150 ms', async () => {
+  it('does not suspend when play() follows pause() within 700 ms', async () => {
     const { engine, ctx, tick, playing } = setup()
     await playing('a')
     engine.pause()
-    await tick(50)
+    await tick(650)
     engine.toggle()
-    await tick(300)
+    await tick(1000)
     expect(ctx.suspendCalls).toBe(0)
     expect(engine.getSnapshot().state).toBe('playing')
     expect(engine.inspect().voices).toHaveLength(1) // same voice continues
@@ -382,7 +383,7 @@ describe('WebAudioEngine', () => {
     engine.setVolume(0.8)
     expect(graphGain('volume').gain.lastTarget()).toBeCloseTo(0.64, 12)
     engine.setMuted(true)
-    expect(graphGain('mute').gain.lastTarget()).toBe(0)
+    expect(graphGain('mute').gain.events.at(-1)).toMatchObject({ target: 0, tau: 0.015 }) // instant
     expect(engine.getSnapshot()).toMatchObject({ volume: 0.8, muted: true })
     expect(graphGain('volume').gain.lastTarget()).toBeCloseTo(0.64, 12)
     engine.setMuted(false)
@@ -411,8 +412,40 @@ describe('WebAudioEngine', () => {
         .slice(0, 2)
         .every((s) => s.stopTime !== null),
     ).toBe(true)
-    await tick(500)
+    await tick(1000)
     expect(engine.inspect().voices.map((v) => v.id)).toEqual(['e'])
+  })
+
+  it('fades a voice over the cap out in 40 ms instead of cutting it', async () => {
+    const { engine, ctx, tick, voices } = setup()
+    ctx.autoDecode = (bytes) => bufferFor(FakeAudioContext.tagOf(bytes))
+    await engine.listen()
+    engine.load(song('a', { gainDb: -6 }))
+    await tick(100)
+    const [a] = voices()
+    const gainsBefore = ctx.gains.length
+    for (const id of ['b', 'c']) {
+      engine.load(song(id))
+      await tick(100)
+    }
+    expect(a.ended).toBe(false) // still in its 0.9 s tail
+    const capAt = ctx.currentTime
+    engine.load(song('d'))
+    await flush()
+    expect(engine.inspect().voices.map((v) => v.id)).toEqual(['b', 'c', 'd'])
+    // A's trim (the first gain it created) ramps from its own level to silence, then it stops.
+    const trim = ctx.gains[gainsBefore - 3]
+    const ramp = trim.gain.log.find((e) => e.type === 'curve')
+    expect(ramp).toMatchObject({ time: capAt, duration: 0.04 })
+    const curve = (ramp as { curve: Float32Array }).curve
+    expect(curve[0]).toBeCloseTo(10 ** (-6 / 20), 6)
+    expect(curve.at(-1)).toBeCloseTo(0, 9)
+    expect(a.stopTime).toBeCloseTo(capAt + 0.04, 9)
+    expect(a.connected).toBe(true) // still fading
+    await tick(50)
+    expect(a.ended).toBe(true)
+    expect(a.connected).toBe(false)
+    for (const g of ctx.gains) expect(g.gain.curveCount).toBeLessThanOrEqual(1)
   })
 
   it('closes the context on dispose()', async () => {
@@ -493,6 +526,30 @@ describe('WebAudioEngine', () => {
     expect(engine.readFeatures(0, createSongFeatures()).spectrum).toBeNull()
     await engine.listen()
     expect(engine.getSnapshot()).toMatchObject({ state: 'error', error: 'unsupported' })
+  })
+
+  it('keeps unsupported final through a bird change, a retry and another play', async () => {
+    const net = createFakeFetch()
+    const createContext = vi.fn((): AudioContext => {
+      throw new Error('unsupported')
+    })
+    const engine = createAudioEngine({ createContext, fetch: net.fetch })
+    engine.load(song('a'))
+    await engine.listen()
+    expect(engine.getSnapshot()).toMatchObject({ state: 'error', error: 'unsupported' })
+    engine.load(song('b'))
+    expect(engine.getSnapshot()).toMatchObject({
+      state: 'error',
+      error: 'unsupported',
+      songId: 'b',
+    })
+    engine.retry()
+    await engine.play()
+    expect(engine.getSnapshot()).toMatchObject({ state: 'error', error: 'unsupported' })
+    expect(engine.getSnapshot().unlocked).toBe(false)
+    // Nothing to play the bytes with, so none are fetched after the first try.
+    expect(createContext).toHaveBeenCalledTimes(1)
+    expect(net.calls.filter((c) => c.url === '/birds/b/song.m4a')).toHaveLength(0)
   })
 
   it('aborts a superseded fetch but keeps prefetched bytes', async () => {

@@ -5,14 +5,15 @@ import { cn } from '~/lib/utils'
 import { usePortalContainer } from './portal'
 
 /**
- * shadcn/ui Dialog (Radix) with the Kyma surfaces and motion (ui.md §7.4). The panel is lit from
- * above. Two layouts: `dialog` is always centred (About); `sheet` is centred from 40rem up and a
- * bottom sheet below it (Details in Field), which slides without fading. Transforms run only
- * under motion-safe: with reduced motion the centred dialog fades in 150ms linear and the bottom
- * sheet just appears (`keep-motion` exempts both from base.css's reduced-motion collapse). Radix
- * needs CSS *animations* (tw-animate-css) to delay unmount on close; while they run, the closed
- * overlay and dialog let the pointer through to the page (`!`, because Radix sets pointer-events
- * inline). `transition-none`: the durations are for the animations only.
+ * shadcn/ui Dialog (Radix) with the Kyma surfaces and motion (ui.md §7.4). The panel is the
+ * room's raised step. Two layouts: `dialog` is always centred (About); `sheet` is centred from
+ * 40rem up and a bottom sheet below it (Details in Field), which slides without fading. Both enter
+ * in 320ms and leave in 200ms, each easing out, so a close starts at once and settles. Transforms
+ * run only under motion-safe: with reduced motion the centred dialog fades in 150ms linear and the
+ * bottom sheet just appears (`keep-motion` exempts both from base.css's reduced-motion collapse).
+ * Radix needs CSS *animations* (tw-animate-css) to delay unmount on close; while they run, the
+ * closed overlay and dialog let the pointer through to the page (`!`, because Radix sets
+ * pointer-events inline). `transition-none`: the durations are for the animations only.
  */
 
 function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -24,7 +25,7 @@ function DialogClose(props: React.ComponentProps<typeof DialogPrimitive.Close>) 
 }
 
 const dialogContentVariants = cva(
-  'keep-motion fixed z-(--z-modal) flex flex-col overflow-hidden bg-linear-to-b from-ground-raised to-ground text-ink ring-1 ring-line transition-none data-[state=open]:animate-in data-[state=closed]:pointer-events-none! data-[state=closed]:animate-out motion-safe:data-[state=open]:duration-(--dur-3) motion-safe:data-[state=open]:ease-out motion-safe:data-[state=closed]:duration-200 motion-safe:data-[state=closed]:ease-in motion-reduce:duration-150 motion-reduce:ease-linear',
+  'keep-motion fixed z-(--z-modal) flex flex-col overflow-hidden bg-ground-raised text-ink ring-1 ring-line transition-none data-[state=open]:animate-in data-[state=closed]:pointer-events-none! data-[state=closed]:animate-out motion-safe:data-[state=open]:duration-(--dur-3) motion-safe:data-[state=open]:ease-out motion-safe:data-[state=closed]:duration-200 motion-safe:data-[state=closed]:ease-out motion-reduce:duration-150 motion-reduce:ease-linear',
   {
     variants: {
       layout: {

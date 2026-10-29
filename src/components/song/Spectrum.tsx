@@ -6,25 +6,20 @@ import type { BandHz } from '~/lib/manifest'
 // Log-frequency axis, low enough for the Kākāpō's ~305 Hz booms.
 export const F_MIN = 125
 export const F_MAX = 12000
-const TICKS: Array<[number, string]> = [
-  [250, '250'],
-  [500, '500'],
-  [1000, '1k'],
-  [2000, '2k'],
-  [4000, '4k'],
-  [8000, '8k'],
-]
-const NARROW_TICKS = new Set([500, 2000, 8000])
+// Faint gridlines an octave apart, unlabelled: the figures live in Details.
+const GRID_HZ = [250, 500, 1000, 2000, 4000, 8000]
 const LOG_SPAN = Math.log(F_MAX / F_MIN)
 const LOG_1_6 = Math.log(1.6) / LOG_SPAN
-const TWEEN_MS = 480
+const TWEEN_MS = 900
+// The room's colours fade between birds on .app (AppShell); the canvas follows --signal.
+const FADE_EVENTS = ['transitionrun', 'transitionend'] as const
 
 /** 0..1 position of `hz` on the log axis. */
 export const axisPos = (hz: number) =>
   Math.min(1, Math.max(0, Math.log(Math.max(hz, 1) / F_MIN) / LOG_SPAN))
 const posHz = (p: number) => F_MIN * Math.exp(p * LOG_SPAN)
 
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
+const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2
 
 // The engine's 0..1 spectrum is (dB + 100) / 80. Each bar subtracts its own slowly rising floor,
 // so steady hiss and encoder noise drop out and the bird's syllables stand alone.
@@ -52,8 +47,8 @@ interface SpectrumProps {
 
 /**
  * The live spectrum on a log-frequency axis (ui.md §5.3), low to high from left to right along
- * the song strip's bed: gridlines with their labels, the bars, and the bird's band as a bracket
- * under them, notched at its peak.
+ * the song strip's bed: faint gridlines, the bars, and the bird's band as a bracket along the
+ * bed's foot, notched at its peak.
  */
 export function Spectrum({ band, peakHz, label }: SpectrumProps) {
   const api = useAudioApi()
@@ -71,6 +66,10 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
   const drawRef = useRef<(f: LiveFeatures | null, now: number) => boolean>(() => false)
   const stateRef = useRef(state)
   stateRef.current = state
+  // When the room's colour fade ends.
+  const fadeUntil = useRef(0)
+  // Starts the idle loop; null while the live loop draws.
+  const startIdle = useRef<(() => void) | null>(null)
 
   // Drawing lives in a ref so the rAF loop never needs React to re-render.
   drawRef.current = (f, now) => {
@@ -82,17 +81,15 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     const col = {
       signal: cs.getPropertyValue('--signal').trim() || '#9fd6a5',
       ink: cs.getPropertyValue('--ink').trim() || '#f2f0ea',
-      ink3: cs.getPropertyValue('--ink-3').trim() || '#a19e96',
       line: cs.getPropertyValue('--line').trim() || 'rgba(242,240,234,.12)',
-      font: `500 12px ${cs.getPropertyValue('--font-sans').trim() || 'sans-serif'}`,
     }
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     const live = stateRef.current === 'playing'
 
-    // Band bracket tween (log space, 480 ms ease-in-out).
+    // Band bracket tween, in log space.
     const tw = tween.current
     const k = tw.t0 === 0 || reduced ? 1 : Math.min(1, (now - tw.t0) / TWEEN_MS)
-    const e = easeInOut(k)
+    const e = easeInOutSine(k)
     const bp: BandPos = {
       lo: tw.from.lo + (tw.to.lo - tw.from.lo) * e,
       hi: tw.from.hi + (tw.to.hi - tw.from.hi) * e,
@@ -101,32 +98,21 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
 
     ctx.setTransform(g.dpr, 0, 0, g.dpr, 0, 0)
     ctx.clearRect(0, 0, g.w, g.h)
-    ctx.font = col.font
-    ctx.textBaseline = 'middle'
 
-    // Layout: the bar field on top, the bracket under it, then a gutter for tick labels.
-    const labelGutter = 14
-    const fieldH = g.h - labelGutter - 6
+    // Layout: the bar field fills the bed; the bracket runs along its foot.
+    const fieldH = g.h - 6
+    const base = fieldH + 4
     // Position along the frequency axis in CSS px.
     const at = (p: number) => p * g.w
 
-    // Ticks and grid.
-    ctx.fillStyle = col.ink3
     ctx.strokeStyle = col.line
     ctx.lineWidth = 1
-    ctx.textAlign = 'center'
-    // A narrow bed keeps three ticks (500, 2k, 8k) so the bracket still reads against a scale; a
-    // sliver drops the labels rather than overprint them.
-    const narrow = g.w < 260
-    const labelled = g.w >= 80
-    for (const [hz, text] of TICKS) {
-      if (narrow && !NARROW_TICKS.has(hz)) continue
+    for (const hz of GRID_HZ) {
       const q = Math.round(at(axisPos(hz))) + 0.5
       ctx.beginPath()
       ctx.moveTo(q, 0)
       ctx.lineTo(q, fieldH)
       ctx.stroke()
-      if (labelled) ctx.fillText(text, Math.min(g.w - 10, Math.max(10, q)), g.h - labelGutter / 2)
     }
 
     // The bird's band as a faint glow rising from its bracket, sounding or not: at rest the bed
@@ -181,7 +167,6 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     const a = at(bp.lo)
     const b = at(bp.hi)
     const pk = at(bp.peak)
-    const base = fieldH + 4
     ctx.beginPath()
     ctx.moveTo(a, base - 6)
     ctx.lineTo(a, base)
@@ -191,7 +176,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     ctx.lineTo(pk, base - 4)
     ctx.stroke()
 
-    // Dominant-frequency hairline, ending in an arrowhead on the bracket.
+    // Dominant-frequency hairline, its arrowhead resting on the bracket.
     const hz = live ? (f?.dominantHz ?? null) : null
     if (hz != null) {
       const q = Math.round(at(axisPos(hz))) + 0.5
@@ -200,12 +185,12 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(q, 0)
-      ctx.lineTo(q, fieldH + 6)
+      ctx.lineTo(q, base - 6)
       ctx.stroke()
       ctx.beginPath()
-      ctx.moveTo(q, fieldH + 10)
-      ctx.lineTo(q - 3.5, fieldH + 5)
-      ctx.lineTo(q + 3.5, fieldH + 5)
+      ctx.moveTo(q, base - 1)
+      ctx.lineTo(q - 3.5, base - 6)
+      ctx.lineTo(q + 3.5, base - 6)
       ctx.closePath()
       ctx.fill()
     }
@@ -218,7 +203,7 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     const next = toPos(band, peakHz)
     if (tw.to.lo === next.lo && tw.to.hi === next.hi && tw.to.peak === next.peak) return
     const now = performance.now()
-    const k = tw.t0 === 0 ? 1 : easeInOut(Math.min(1, (now - tw.t0) / TWEEN_MS))
+    const k = tw.t0 === 0 ? 1 : easeInOutSine(Math.min(1, (now - tw.t0) / TWEEN_MS))
     tween.current = {
       from: {
         lo: tw.from.lo + (tw.to.lo - tw.from.lo) * k,
@@ -228,16 +213,10 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
       to: next,
       t0: now,
     }
-    if (stateRef.current === 'playing') return
-    let raf = 0
-    const step = (t: number) => {
-      if (drawRef.current(null, t)) raf = requestAnimationFrame(step)
-    }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
+    startIdle.current?.()
   }, [band, peakHz])
 
-  // Size and DPR; one static frame after every change.
+  // Size and DPR, with one static frame after every change.
   useEffect(() => {
     const c = canvasRef.current
     if (!c) return
@@ -257,20 +236,42 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
     const ro = new ResizeObserver(measure)
     ro.observe(c)
     measure()
-    // Tick labels drawn before Figtree arrived would stay in the fallback font.
-    void document.fonts?.ready.then(() => drawRef.current(null, performance.now()))
-    return () => ro.disconnect()
+    // While --signal fades between two birds the idle canvas keeps drawing, so a resting bracket
+    // lands on the new bird's colour (under reduced motion too, where the fade is shorter); its
+    // end draws once more.
+    const app = c.closest<HTMLElement>('.app')
+    const onFade = (e: TransitionEvent) => {
+      if (!app || e.target !== app || e.propertyName !== '--signal') return
+      if (e.type === 'transitionrun') fadeUntil.current = performance.now() + longestTransition(app)
+      startIdle.current?.()
+    }
+    for (const type of FADE_EVENTS) app?.addEventListener(type, onFade)
+    return () => {
+      ro.disconnect()
+      for (const type of FADE_EVENTS) app?.removeEventListener(type, onFade)
+    }
   }, [])
 
-  // The live loop runs only while playing; otherwise one static frame.
+  // The live loop runs only while playing. Otherwise one static frame, then frames only while the
+  // bracket tweens or the room's colours fade.
   useEffect(() => {
+    let raf = 0
     if (state !== 'playing') {
-      drawRef.current(null, performance.now())
-      return
+      const step = (now: number) => {
+        raf = 0
+        if (drawRef.current(null, now) || now < fadeUntil.current) raf = requestAnimationFrame(step)
+      }
+      startIdle.current = () => {
+        if (!raf) raf = requestAnimationFrame(step)
+      }
+      step(performance.now())
+      return () => {
+        cancelAnimationFrame(raf)
+        startIdle.current = null
+      }
     }
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     const minDt = reduced ? 1000 / 15 - 2 : 0
-    let raf = 0
     let last = 0
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
@@ -297,6 +298,16 @@ export function Spectrum({ band, peakHz, label }: SpectrumProps) {
 
 function toPos(band: BandHz, peakHz: number): BandPos {
   return { lo: axisPos(band.p10), hi: axisPos(band.p90), peak: axisPos(peakHz) }
+}
+
+/** An element's longest transition in ms (.app's colours share one duration). */
+function longestTransition(el: Element): number {
+  return Math.max(
+    0,
+    ...getComputedStyle(el)
+      .transitionDuration.split(',')
+      .map((d) => parseFloat(d) * (d.includes('ms') ? 1 : 1000) || 0),
+  )
 }
 
 /** Peak magnitude over [f0, f1); narrow low bands interpolate between neighbouring bins. */

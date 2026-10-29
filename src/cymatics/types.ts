@@ -56,6 +56,9 @@ export interface CymaticsPlateProps {
 
 /** What the shell can ask of a mounted plate. */
 export interface PlateHandle {
-  /** The plate as drawn now, at the canvas's pixel size, transparent outside the plate; null when nothing can be drawn. */
+  /**
+   * The sand as drawn now, at the canvas's pixel size, transparent elsewhere: the circle's surface and
+   * rim are the page's (tokens.css --plate-*), so the caller paints them. null when nothing can be drawn.
+   */
   capture(): HTMLCanvasElement | null
 }

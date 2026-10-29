@@ -92,10 +92,7 @@ export function Sheet({ open, onClose, variant = 'dialog', children }: SheetProp
   )
 }
 
-/**
- * A section heading inside a sheet. Add no weight class to it in cn(): tailwind-merge reads
- * `font-display` as a weight and would drop it.
- */
+/** A section heading inside a sheet: Instrument Sans 400, set as a title. */
 export const SHEET_HEADING = 'mt-8 mb-3 font-display text-lg leading-[1.2] tracking-title text-ink'
 
 export function SheetTitle({ className, ...props }: ComponentProps<typeof DialogTitle>) {
@@ -114,8 +111,6 @@ export function SheetCloseButton({ className }: { className?: string }) {
     </DialogClose>
   )
 }
-
-export { DialogClose as SheetClose }
 
 /**
  * Radix's focus trap wraps Tab but not Option+Tab, Safari's key for reaching links; at either end

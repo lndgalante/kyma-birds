@@ -3,9 +3,11 @@ import { PortalContainerProvider } from '~/components/ui/portal'
 import { cn } from '~/lib/utils'
 
 /**
- * The page root (`.app`): the bird's palette inline (lib/theme.ts), the cross-fade between
- * birds through the registered colour properties, and the mount point for Radix portals. A fade
- * is not motion, so `keep-motion` keeps it under reduced motion, where --dur-4 shortens.
+ * The page root (`.app`): the bird's palette inline (lib/theme.ts), the room's drift from one
+ * bird to the next (--dur-room on --ease-breath, a sine) through the registered colour
+ * properties, which turn toward a new bird mid-drift, and the mount point for Radix portals. The
+ * drift is a fade, not motion, so `keep-motion` keeps it under reduced motion, where --dur-room
+ * shortens.
  */
 export function AppShell({
   theme,
@@ -22,7 +24,7 @@ export function AppShell({
     <div
       ref={setEl}
       className={cn(
-        'app keep-motion min-h-dvh bg-ground text-ink transition-[--signal,--ground,--ground-raised,--ground-sunken,--scrim] duration-(--dur-4) ease-in-out',
+        'app keep-motion min-h-dvh bg-ground text-ink transition-[--signal,--ground,--ground-raised,--ground-sunken,--scrim] duration-(--dur-room) ease-breath',
         className,
       )}
       style={theme}

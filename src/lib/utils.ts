@@ -29,10 +29,7 @@ const COLOURS = [
   'scrim',
   'signal',
   'on-signal',
-  'plate-surface',
-  'plate-rim',
   'plate-sand',
-  'on-status',
   'iucn-lc',
   'iucn-nt',
   'iucn-vu',
@@ -65,21 +62,23 @@ const COLOURS = [
 ]
 
 /**
- * tailwind-merge, taught the Kyma theme scales (app.css @theme): without them, it reads
- * `text-2xs` as a colour and drops it next to `text-ink-2`, and keeps both `font-ui` and
- * `font-medium`. Kyma's text sizes set no line-height, so a later `text-*` must not drop an
- * earlier `leading-*`.
+ * tailwind-merge, taught the Kyma theme scales (tokens.css `@theme static`, app.css `@theme`):
+ * without them it keeps both `shadow-sheet` and `shadow-dialog`, or `ease-out` and
+ * `ease-breath`. Weights stay Tailwind's own (400 and 500), so `font-display` reads as the family
+ * and stays beside `font-medium`. Kyma's text sizes set no line-height, so a later `text-*` must
+ * not drop an earlier `leading-*`.
  */
 const twMerge = extendTailwindMerge({
   override: { theme: { color: COLOURS }, conflictingClassGroups: { 'font-size': [] } },
   extend: {
     theme: {
-      text: ['2xs', 'xs', 'sm', 'md', 'base', 'lg', 'xl', '2xl', '3xl', '4xl'],
-      'font-weight': ['book', 'ui', 'display', 'sci', 'mark'],
-      tracking: ['display', 'title', 'ui', 'lang', 'chip', 'label', 'sci', 'code', 'mark'],
-      shadow: ['plate', 'sheet', 'dialog'],
-      ease: ['sheet'],
-      animate: ['flow-dash', 'gate-pulse', 'gate-pulse-2', 'gate-pulse-3'],
+      text: ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'],
+      tracking: ['display', 'title'],
+      radius: ['part', 'bed', 'card'],
+      shadow: ['part', 'bed', 'sheet', 'dialog'],
+      'inset-shadow': ['lit'],
+      ease: ['sheet', 'breath'],
+      animate: ['breathe', 'shutter'],
     },
   },
 })

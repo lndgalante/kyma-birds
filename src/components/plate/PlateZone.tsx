@@ -7,8 +7,8 @@ import type { Bird } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 import { useAnnounce } from '../shell/SrStatus'
 import { ZoneHead } from '../shell/Zone'
-import { ModeReadout } from './ModeReadout'
 import { PlateControls } from './PlateControls'
+import { PlateErrorLine } from './PlateErrorLine'
 import { PlateFigure } from './PlateFigure'
 import { savePlatePhoto } from './platePhoto'
 import { usePlateCaption } from './usePlateCaption'
@@ -77,9 +77,9 @@ export function PlateZone({ bird }: PlateZoneProps) {
           captionKind={caption.kind}
         />
       </div>
-      {/* Status at the start, controls at the end. Phones centre the two as one row (the status
-          shows only once there is a mode); compact landscape stacks them in its narrow column; in
-          Split the row is level with the song strip. */}
+      {/* An error at the start, the controls at the end. Phones centre the two as one row;
+          compact landscape stacks them in its narrow column; in Split the row is level with the
+          song strip. */}
       <div
         className={cn(
           'plate-foot flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2.5 narrow:gap-x-3',
@@ -88,7 +88,7 @@ export function PlateZone({ bird }: PlateZoneProps) {
           'split:h-auto',
         )}
       >
-        <ModeReadout caption={caption} />
+        <PlateErrorLine caption={caption} />
         <PlateControls
           held={held}
           onHeldChange={setHeld}

@@ -136,6 +136,7 @@ uniform sampler2D uState;
 uniform int uStateW;
 uniform vec2 uScale;
 uniform float uPointPx, uAlpha, uFade, uClock, uFrame, uJitter, uFlicker, uBoltR, uShapeMix, uGrainFade;
+uniform float uRestLift, uRestAlpha, uRestFalloff;
 uniform vec2 uSizeRange, uAlphaRange;
 varying float vAlpha;
 varying float vSoft;
@@ -152,7 +153,9 @@ void main() {
   vSoft = smoothstep(1.5, 2.5, size);
   float vis = clamp((uClock - s.w) / uGrainFade, 0.0, 1.0);
   float bolt = uShapeMix > 0.5 && length(s.xy) < uBoltR ? 0.0 : 1.0;
-  vAlpha = uAlpha * uFade * vis * bolt * mix(uAlphaRange.x, uAlphaRange.y, c.y)
+  // Resting sand is dim dust, thinner toward the rim; the song lifts it (uRestLift 0 → 1).
+  float rest = mix(uRestAlpha * (1.0 - uRestFalloff * dot(s.xy, s.xy)), 1.0, uRestLift);
+  vAlpha = uAlpha * uFade * vis * bolt * rest * mix(uAlphaRange.x, uAlphaRange.y, c.y)
          * (1.0 + uFlicker * hop * (j.z - 0.5));
 }
 `
@@ -171,23 +174,23 @@ void main() {
 `
 
 /**
- * The plate surface, rim (circle) or bevel + bolt (square), and the debug field heat. Writes premultiplied
- * display-sRGB colour directly (no colorspace chunk), with alpha 0 outside the plate.
+ * The square's surface, bevel and bolt (the plate lab), and the debug field heat. The circle's surface
+ * and rim are the page's (PlateFigure's frame), so the canvas stays clear there and the room shows
+ * through; the square's surface fades in as the shape morphs. Writes premultiplied display-sRGB colour
+ * directly (no colorspace chunk), with alpha 0 outside the plate.
  */
 export const PLATE_FRAG = /* glsl */ `
 uniform vec2 uViewportPx, uScale;
-uniform float uPxPerUnit, uShapeMix, uBoltR, uRimW, uGmax, uFieldExt, uDebug;
+uniform float uPxPerUnit, uShapeMix, uBoltR, uGmax, uFieldExt, uDebug;
 uniform sampler2D uField;
-uniform vec3 uAccent, uRim, uCircleIn, uCircleOut, uSquareIn, uSquareOut;
+uniform vec3 uAccent, uSquareIn, uSquareOut;
 float sdBox(vec2 p) { vec2 d = abs(p) - 1.0; return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0); }
 void main() {
   vec2 p = (gl_FragCoord.xy / uViewportPx * 2.0 - 1.0) / uScale;
   float aa = 1.0 / uPxPerUnit, rl = length(p);
   float sd = mix(rl - 1.0, sdBox(p), uShapeMix);
   float body = 1.0 - smoothstep(-aa, aa, sd);
-  vec3 cIn = mix(uCircleIn, uSquareIn, uShapeMix);
-  vec3 cOut = mix(uCircleOut, uSquareOut, uShapeMix);
-  vec3 col = mix(cIn, cOut, clamp(dot(p, p), 0.0, 1.0));
+  vec3 col = mix(uSquareIn, uSquareOut, clamp(dot(p, p), 0.0, 1.0));
   col *= 1.0 + 0.024 * (rand3(uvec3(uvec2(gl_FragCoord.xy), 7u)).x - 0.5);
   float bevel = max(1.0 - smoothstep(0.0, 2.0 * aa, 1.0 - p.y), 1.0 - smoothstep(0.0, 2.0 * aa, 1.0 + p.x));
   col += 0.06 * bevel * uShapeMix;
@@ -197,14 +200,14 @@ void main() {
   vec3 boltCol = vec3(0.28) + vec3(0.14) * nz + vec3(0.6) * spec;
   float outline = smoothstep(uBoltR - 2.0 * aa, uBoltR, rl) * (1.0 - smoothstep(uBoltR, uBoltR + aa, rl));
   col = mix(col, boltCol * (1.0 - 0.7 * outline), inBolt);
+  float a = body * uShapeMix;
+  vec3 rgb = col * a;
   if (uDebug > 0.5) {
+    // Added light (premultiplied, no coverage), so it also shows over the page's circle.
     vec4 F = texture(uField, p / (2.0 * uFieldExt) + 0.5);
-    col += uAccent * 0.35 * smoothstep(0.0, 8.0, uGmax * length(F.xy));
+    rgb += body * uAccent * 0.35 * smoothstep(0.0, 8.0, uGmax * length(F.xy));
   }
-  float d = rl - 1.0;
-  float rimA = smoothstep(aa, 2.0 * aa, d) * (1.0 - smoothstep(uRimW - aa, uRimW, d)) * (1.0 - uShapeMix);
-  vec3 rim = uRim * (0.85 + 0.15 * dot(p / max(rl, 1e-4), normalize(vec2(-0.55, 0.62))));
-  gl_FragColor = vec4(rim * rimA + col * body * (1.0 - rimA), rimA + body * (1.0 - rimA));
+  gl_FragColor = vec4(rgb, a);
 }
 `
 

@@ -5,10 +5,8 @@ import {
   formatDuration,
   formatHz,
   formatHzShort,
-  formatIndex,
   formatMode,
   platePhotoName,
-  splitHz,
   truncate,
 } from '~/lib/format'
 
@@ -23,8 +21,6 @@ describe('format', () => {
     expect(formatHzShort(2131)).toBe(`2.1${NB}kHz`)
     expect(formatHzShort(2000)).toBe(`2${NB}kHz`)
     expect(formatHzShort(305)).toBe(`305${NB}Hz`)
-    expect(splitHz(2840)).toEqual({ value: '2.84', unit: 'kHz' })
-    expect(splitHz(630.4)).toEqual({ value: '630', unit: 'Hz' })
   })
 
   it('formats bands with an en dash, in one unit when it can', () => {
@@ -41,11 +37,10 @@ describe('format', () => {
     expect(formatMode('weird')).toBe('weird')
   })
 
-  it('formats durations, indices and truncation', () => {
+  it('formats durations and truncation', () => {
     expect(formatDuration(24)).toBe('0:24')
     expect(formatDuration(27.22)).toBe('0:27')
     expect(formatDuration(65)).toBe('1:05')
-    expect(formatIndex(2, 12)).toBe('03 / 12')
     expect(truncate('short', 10)).toBe('short')
     const t = truncate('Ringing, bell-like tolls and liquid notes mixed with clicks', 30)
     expect(t.length).toBeLessThanOrEqual(30)

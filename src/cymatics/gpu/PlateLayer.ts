@@ -1,5 +1,6 @@
-// The plate itself (docs/specs/engine.md §8.3): a full-screen quad that shades the surface, rim, bevel and
-// bolt, drawn first with no blending so its alpha also cuts the plate out of the transparent canvas.
+// The plate itself (docs/specs/engine.md §8.3): a full-screen quad that shades the square's surface, bevel
+// and bolt, drawn first with no blending so its alpha also cuts the plate out of the transparent canvas.
+// The circle's surface and rim are the page's (PLATE_FRAG), so over the circle it only clears.
 import {
   Mesh,
   NoBlending,
@@ -26,15 +27,11 @@ export class PlateLayer {
       uPxPerUnit: { value: 1 },
       uShapeMix: { value: 0 },
       uBoltR: { value: LOOK.boltR },
-      uRimW: { value: LOOK.rimWidth },
       uGmax: { value: SIM.gMax },
       uFieldExt: { value: SIM.fieldExt },
       uDebug: { value: 0 },
       uField: { value: field },
       uAccent: { value: new Vector3(1, 1, 1) },
-      uRim: { value: rgb(LOOK.rim) },
-      uCircleIn: { value: rgb(LOOK.plate.circleIn) },
-      uCircleOut: { value: rgb(LOOK.plate.circleOut) },
       uSquareIn: { value: rgb(LOOK.plate.squareIn) },
       uSquareOut: { value: rgb(LOOK.plate.squareOut) },
     }

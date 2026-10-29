@@ -31,15 +31,14 @@ export function CreditsPage({ birds, highlight }: { birds: readonly Bird[]; high
     <AppShell className="app--page" theme={birdTheme(themeBird)}>
       <SkipLink href="#main">Skip to the credits</SkipLink>
       <Masthead variant="page" bird={highlight} />
-      {/* Wider than PAGE: each entry sets its two works side by side. */}
-      <main id="main" className={cn('page credits', PAGE, 'max-w-[1080px]')} tabIndex={-1}>
+      <main id="main" className={cn('page credits', PAGE)} tabIndex={-1}>
         <header className="page__head mb-10">
           <h1 className={PAGE_TITLE}>{COPY.creditsTitle}</h1>
           <p className="page__lede mt-4 max-w-[58ch] text-lg leading-[1.55] text-ink-2">
             {COPY.creditsIntro}
           </p>
         </header>
-        <ol className="credit-list border-t border-line">
+        <ol className="credit-list max-w-[64rem] border-t border-line">
           {birds.map((b, i) => (
             <CreditEntry
               key={b.slug}

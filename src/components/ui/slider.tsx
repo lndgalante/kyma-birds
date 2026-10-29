@@ -1,14 +1,13 @@
 import { Slider as SliderPrimitive } from 'radix-ui'
 import type * as React from 'react'
 import { cn } from '~/lib/utils'
-import { METAL } from './surface'
 
 /**
  * One-thumb Kyma fader (the volume), behaving like a native range: the signal glows in a sunk
- * track up to the level, and a metal thumb with a lit index line follows the pointer, its centre
- * 7px (half its width) in from each end; a press beside the thumb moves it there. The thumb is
- * the element with role="slider" that gets `aria-label` and `aria-valuetext`. `muted` empties
- * the glow and dims the index without moving the thumb.
+ * track up to the level, and an opaque sand thumb with a dark index line follows the pointer, its
+ * centre 7px (half its width) in from each end; a press beside the thumb moves it there. The
+ * thumb is the element with role="slider" that gets `aria-label` and `aria-valuetext`. `muted`
+ * empties the glow and dims the thumb without moving it.
  *
  * The caller's className sizes the outer span. Radix maps the pointer over the root, so the root
  * is inset 7px; its ::before still takes presses there and 10px above and below (a 44px target),
@@ -77,10 +76,9 @@ function Slider({
           aria-valuetext={ariaValueText}
           style={{ '--fraction': fraction } as React.CSSProperties}
           className={cn(
-            METAL,
-            'relative block h-[22px] w-3.5 translate-x-[calc(var(--fraction)*14px-7px)] rounded-part',
-            'before:absolute before:inset-y-[5px] before:start-1/2 before:w-0.5 before:-translate-x-1/2 before:rounded-full before:bg-signal group-data-muted/slider:before:bg-ink-4',
-            'forced-colors:bg-[CanvasText] forced-colors:bg-none forced-colors:before:bg-[Canvas]',
+            'relative block h-[22px] w-3.5 translate-x-[calc(var(--fraction)*14px-7px)] rounded-part bg-ink-2 transition-[background-color] duration-(--dur-2) ease-out group-data-muted/slider:bg-ink-3',
+            'before:absolute before:inset-y-[5px] before:start-1/2 before:w-0.5 before:-translate-x-1/2 before:rounded-full before:bg-ground-sunken',
+            'forced-colors:bg-[CanvasText] forced-colors:before:bg-[Canvas]',
           )}
         />
       </SliderPrimitive.Root>

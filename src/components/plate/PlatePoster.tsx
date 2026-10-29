@@ -1,43 +1,23 @@
 export const POSTER_MESSAGE =
-  'plate-poster__msg relative max-w-[26ch] rounded-bed bg-plate-surface/88 px-3.5 py-2.5 text-center text-sm leading-[1.4] text-ink-2 inset-ring inset-ring-line'
+  'plate-poster__msg relative max-w-[26ch] rounded-bed bg-ground/88 px-3.5 py-2.5 text-center text-sm leading-[1.4] text-ink-2 inset-ring inset-ring-line'
 
 /**
- * The plate before (or without) the renderer: SSR, no JS, and WebGL failure. Same box and the
- * same render extents as the renderer (engine.md §8.4), so nothing shifts when the canvas takes
- * over. The resting sand is a CSS noise tile (--plate-sand-noise in tokens.css), drawn at device
- * resolution.
+ * The plate's resting sand before (or without) the renderer: SSR, no JS, and WebGL failure. The
+ * surface and rim under it are the frame's (plate-disc), shared with the renderer, so only the
+ * sand changes hands, and it fades out while the renderer pours its own. The sand is a CSS noise
+ * tile (--plate-sand-noise in tokens.css), drawn at device resolution and dimmed to the
+ * renderer's resting dust (LOOK.restAlpha, thinning toward the rim by LOOK.restFalloff).
  */
 export function PlatePoster({ message }: { message?: string }) {
-  // 1000 units per canvas; the circle's plate radius is 1 / 1.035 of the half-canvas.
-  const r = 500 / 1.035
+  // The fade lasts as long as the renderer's first pour (SIM.pourSec + grainFadeSec), on the sine
+  // that pour's average follows, so the two sands cross-fade at an even brightness.
   return (
-    <div className="plate-poster absolute inset-0 grid size-full place-items-center transition-opacity duration-(--dur-3) ease-out group-data-ready/figure:opacity-0">
+    <div className="plate-poster absolute inset-0 grid size-full place-items-center transition-opacity duration-[950ms] ease-breath group-data-ready/figure:opacity-0">
+      {/* Sand stops at 0.985 of the radius, which is 1 / 1.035 of the half-canvas. */}
       <span
-        className="plate-poster__sand absolute inset-[2.2%] rounded-[50%] bg-(image:--plate-sand-noise) bg-size-[180px_180px] opacity-85"
+        className="plate-poster__sand absolute inset-[2.4%] rounded-[50%] bg-(image:--plate-sand-noise) bg-size-[180px_180px] opacity-38 [mask-image:radial-gradient(closest-side,#000,rgb(0_0_0/0.94)_50%,rgb(0_0_0/0.76))]"
         aria-hidden="true"
       />
-      <svg
-        className="plate-poster__svg absolute inset-0 size-full"
-        viewBox="0 0 1000 1000"
-        aria-hidden="true"
-      >
-        <defs>
-          <radialGradient id="poster-bolt" cx="38%" cy="34%" r="70%">
-            <stop offset="0" stopColor="#fbfaf6" />
-            <stop offset="0.55" stopColor="#a9a69e" />
-            <stop offset="1" stopColor="#4d4b46" />
-          </radialGradient>
-        </defs>
-        <circle
-          cx="500"
-          cy="500"
-          r={r * 1.015}
-          fill="none"
-          stroke="var(--plate-rim)"
-          strokeWidth={r * 0.03}
-        />
-        <circle cx="500" cy="500" r={r * 0.024} fill="url(#poster-bolt)" />
-      </svg>
       {message && <p className={POSTER_MESSAGE}>{message}</p>}
     </div>
   )

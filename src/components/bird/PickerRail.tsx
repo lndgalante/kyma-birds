@@ -1,6 +1,5 @@
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { COPY } from '~/lib/copy'
-import { formatHzShort } from '~/lib/format'
 import type { Bird } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 
@@ -10,16 +9,20 @@ interface PickerRailProps {
   birds: readonly Bird[]
   selectedIndex: number
   onSelect(i: number): void
+  /** The pager's arrows, at the rail's two ends and outside its tablist. */
+  prev?: ReactNode
+  next?: ReactNode
 }
 
 /**
- * The index as a frequency scale: one tick per bird, from low voices to high. APG tabs with
- * automatic activation; the commit dwell upstream keeps audio from thrashing while arrowing.
- * Each tick is one 22px line scaled down: the selected one stands full height in the signal,
- * a hovered one grows part way. The bird's name and band show beside the rail only while a tick
- * is hovered or focused (the card already names the selected bird).
+ * The index as a frequency scale: one tick per bird, from low voices to high, between the
+ * previous and next arrows. APG tabs with automatic activation; the commit dwell upstream keeps
+ * audio from thrashing while arrowing. Each tick is one 22px line scaled down in a 24px-wide
+ * target: the selected one stands full height in the signal, a hovered one grows part way. The
+ * bird's name shows beside the rail only while a tick is hovered or focused (the card already
+ * names the selected bird).
  */
-export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) {
+export function PickerRail({ birds, selectedIndex, onSelect, prev, next }: PickerRailProps) {
   const [hover, setHover] = useState<number | null>(null)
   const tabs = useRef<Array<HTMLButtonElement | null>>([])
   const shown = birds[hover ?? selectedIndex]
@@ -43,13 +46,8 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
   }
 
   return (
-    <div
-      className={cn(
-        'picker-rail hidden min-w-0 flex-auto items-center gap-1.5 [--tick-w:24px]',
-        'stacked:flex compact:hidden',
-        'nav-le-640:[--tick-w:20px] nav-le-430:gap-0.5 nav-le-430:[--tick-w:16px] nav-le-360:[--tick-w:12px]',
-      )}
-    >
+    <div className="picker-rail hidden min-w-0 flex-auto items-center gap-1.5 stacked:flex compact:hidden nav-le-430:gap-0.5">
+      {prev}
       <span className={RAIL_CAP} aria-hidden="true">
         {COPY.railLow}
       </span>
@@ -71,8 +69,8 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
             role="tab"
             id={`tab-${b.slug}`}
             className={cn(
-              'rail-tab relative h-10 w-(--tick-w) rounded-part focus-visible:-outline-offset-2 pointer-coarse:h-11',
-              'before:absolute before:top-1/2 before:left-1/2 before:h-[22px] before:w-px before:-translate-1/2 before:scale-y-[0.5] before:rounded-full before:bg-ink-4 before:transition-[scale,background-color] before:duration-(--dur-2) before:ease-out',
+              'rail-tab relative h-10 w-6 rounded-part focus-visible:-outline-offset-2 pointer-coarse:h-11',
+              'before:absolute before:top-1/2 before:left-1/2 before:h-[22px] before:w-px before:-translate-1/2 before:scale-y-[0.5] before:rounded-full before:bg-ink-4 before:transition-[scale,background-color] before:duration-(--dur-1) before:ease-out',
               'hover:before:scale-y-[0.7] hover:before:bg-ink-2',
               'aria-selected:before:w-0.5 aria-selected:before:scale-y-100 aria-selected:before:bg-signal',
               'forced-colors:before:bg-[CanvasText] forced-colors:before:forced-color-adjust-none forced-colors:aria-selected:before:bg-[Highlight]',
@@ -91,20 +89,16 @@ export function PickerRail({ birds, selectedIndex, onSelect }: PickerRailProps) 
       <span className={RAIL_CAP} aria-hidden="true">
         {COPY.railHigh}
       </span>
+      {next}
       <span id="rail-desc" className="sr-only">
         {COPY.railDesc}
       </span>
       <p
-        className="rail-label ms-3 flex min-w-0 flex-auto items-baseline gap-2 overflow-hidden text-sm leading-[1.5] whitespace-nowrap text-ink-3 opacity-0 transition-opacity duration-(--dur-2) ease-out data-hover:opacity-100 nav-le-540:hidden"
+        className="rail-label ms-3 min-w-0 flex-auto truncate text-sm leading-[1.5] font-medium text-ink opacity-0 transition-opacity duration-(--dur-2) ease-out data-hover:opacity-100 nav-le-540:hidden"
         aria-hidden="true"
         data-hover={hover != null || undefined}
       >
-        <span className="rail-label__name min-w-[3ch] truncate font-medium text-ink">
-          {shown.commonName}
-        </span>
-        <span className="rail-label__hz flex-none font-display tabular-nums nav-le-640:hidden">
-          {formatHzShort(shown.audio.bandHz.p50)}
-        </span>
+        {shown.commonName}
       </p>
     </div>
   )

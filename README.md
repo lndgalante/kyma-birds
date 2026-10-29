@@ -23,7 +23,7 @@ follow the signal from the photo, through the live spectrum, to the sand.
    volume never change the plate. Once per frame, `SongAnalyzer` learns the noise floor, gates on
    signal-to-noise, finds the dominant pitch syllable by syllable, and detects onsets. The result
    is a drive level `D`, one or two spectral lines and an onset pulse (`DriveFrame`). The same
-   analysis feeds the spectrum and the Hz readout.
+   analysis feeds the spectrum.
 4. **Plate modes.** Each plate has a bank of twelve resonant modes. Circles use Bessel modes with a
    free edge, in one of four symmetry families (3 to 6) chosen per bird. The square uses guided
    modes driven from a centre bolt. The app always shows the circle; the square stays in the plate
@@ -94,7 +94,7 @@ src/
   routes/            __root.tsx (document, fonts, AudioProvider), index.tsx (the instrument), credits.tsx
   components/
     bird/            picker track, rail, pager, card, field label, photo, details sheet
-    song/            play button, spectrum, Hz/mode readout, volume, flow line
+    song/            play button, spectrum, volume
     plate/           plate zone, figure, poster, Listen gate, controls, lazy plate wrapper
     shell/           app shell, masthead, About dialog, sheet, zone heads, icons, skip link, polite status region
     credits/         /credits page

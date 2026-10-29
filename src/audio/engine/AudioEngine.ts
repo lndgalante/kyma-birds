@@ -20,6 +20,7 @@ interface Voice {
   id: string
   src: AudioBufferSourceNode
   nodes: AudioNode[]
+  trim: GainNode
   fadeOut: GainNode
   t0: number
   region: LoopRegion
@@ -83,6 +84,8 @@ export class WebAudioEngine implements AudioEngine {
   private queue: Promise<void> = Promise.resolve()
   private detach: (() => void) | null = null
   private disposed = false
+  // The browser has no Web Audio. Final: no later load, retry or play clears the error.
+  private unsupported = false
 
   constructor(options: EngineOptions = {}) {
     this.opts = {
@@ -106,12 +109,13 @@ export class WebAudioEngine implements AudioEngine {
   // ── Public API ────────────────────────────────────────────────────────────────────────────
 
   listen(): Promise<void> {
-    if (this.disposed) return Promise.resolve()
+    if (this.disposed || this.unsupported) return Promise.resolve()
     let ctx = this.ctx
     if (!ctx) {
       try {
         ctx = this.opts.createContext()
       } catch {
+        this.unsupported = true
         this.patch({ state: 'error', error: 'unsupported' })
         return Promise.resolve()
       }
@@ -168,7 +172,7 @@ export class WebAudioEngine implements AudioEngine {
         if (this.wantPlaying || this.disposed || ctx.state !== 'running') return
         this.suspendRequested = true
         // A voice retired since pause() would freeze mid-fade and finish it audibly on play().
-        // pauseGain is ~−43 dB by now, so stopping it is inaudible.
+        // pauseGain is ~−50 dB by now (5.8 τ), so stopping it is inaudible.
         for (const v of this.voices.slice()) if (v.retiring) this.hardStop(v)
         try {
           await ctx.suspend()
@@ -185,7 +189,7 @@ export class WebAudioEngine implements AudioEngine {
   }
 
   retry(): void {
-    if (this.disposed || !this.song || this.snap.state !== 'error') return
+    if (this.disposed || this.unsupported || !this.song || this.snap.state !== 'error') return
     this.commit(this.song)
   }
 
@@ -358,6 +362,11 @@ export class WebAudioEngine implements AudioEngine {
     this.loadCtrl = ctrl
     this.clearSlowTimer()
     this.pending = null
+    // No Web Audio: the error stands for every bird.
+    if (this.unsupported) {
+      this.patch({ songId: song.id })
+      return
+    }
     this.patch({ songId: song.id, error: null })
     const cache = this.getCache()
     const ctx = this.ctx
@@ -506,6 +515,7 @@ export class WebAudioEngine implements AudioEngine {
       id: song.id,
       src,
       nodes: [src, trim, fadeIn, fadeOut],
+      trim,
       fadeOut,
       t0,
       region,
@@ -514,7 +524,9 @@ export class WebAudioEngine implements AudioEngine {
     src.onended = () => this.removeVoice(v)
     this.voices.push(v)
     this.current = v
-    while (this.voices.length > AUDIO.maxVoices) this.hardStop(this.voices[0])
+    // Fast bird changes stack up long fade-out tails, and the oldest may still be audible: fade
+    // it out, don't cut it.
+    while (this.voices.length > AUDIO.maxVoices) this.softStop(this.voices[0], ctx.currentTime)
     an.onVoiceStart(song, t0)
     this.patch({ playingId: song.id })
   }
@@ -543,10 +555,28 @@ export class WebAudioEngine implements AudioEngine {
     this.removeVoice(v)
   }
 
+  /** Drops `v` from the voices now and fades it to silence in capFadeSec; onended frees it. */
+  private softStop(v: Voice, t: number): void {
+    this.voices.splice(this.voices.indexOf(v), 1)
+    // trim is the one gain no fade curve touches, so this curve never overlaps another.
+    const level = v.trim.gain.value
+    v.trim.gain.setValueCurveAtTime(
+      FADE_OUT.map((g) => g * level),
+      t,
+      AUDIO.capFadeSec,
+    )
+    try {
+      v.src.stop(t + AUDIO.capFadeSec)
+    } catch {
+      // already stopped
+    }
+  }
+
   private removeVoice(v: Voice): void {
+    // A soft-stopped voice left the list before it ended but still needs disconnecting.
     const i = this.voices.indexOf(v)
-    if (i < 0) return
-    this.voices.splice(i, 1)
+    if (i >= 0) this.voices.splice(i, 1)
+    if (this.current === v) this.current = null
     for (const n of v.nodes) {
       try {
         n.disconnect()
@@ -554,7 +584,6 @@ export class WebAudioEngine implements AudioEngine {
         // already disconnected
       }
     }
-    if (this.current === v) this.current = null
   }
 
   private rampPause(target: 0 | 1): void {

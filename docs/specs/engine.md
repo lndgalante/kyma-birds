@@ -37,7 +37,7 @@ All three.js evidence is from `npm pack three@0.186.1`, unpacked at `scratchpad/
 | Calibration | Engineering's 3 anchors (p10 → rank 1, peak → rank 3, p90 → rank 7), plus the visual spec's geometric Λ(ρ) along ranks. | All five banks have hero index 3 (Appendix A). |
 | What the plate shows before Listen | **Scattered, still sand.** No pre-warmed pattern. | UI spec §1.2 #7: "That moment is the signature of the page." |
 | Background tab | **Audio keeps playing.** Only the plate loop sleeps. | UI spec §5.1. |
-| Crossfade | **240 ms out, 600 ms in, equal power. Each voice has two fade gains, and each gain gets exactly one `setValueCurveAtTime`.** | UI spec §5.1. `setValueCurveAtTime` throws if curves overlap; Firefox lacks `cancelAndHoldAtTime`. |
+| Crossfade | **900 ms out, 1.2 s in, equal power. Each voice has two fade gains, and each gain gets exactly one `setValueCurveAtTime`.** A voice over the cap fades out in 40 ms on its trim gain. | UI spec §5.1, slowed to a breath (2026-10-29: the old song exhales while the new one inhales, with the 1.4 s room fade). `setValueCurveAtTime` throws if curves overlap; Firefox lacks `cancelAndHoldAtTime`. |
 | iOS silent switch | Set `navigator.audioSession.type = 'playback'` only. **No hidden `<audio>` hack.** | UI spec §5.1 forbids the hack. Safari has had `audioSession` since 16.4. |
 
 ---
@@ -325,7 +325,7 @@ export function primeInGesture(ctx: AudioContext): Promise<void> {
   2. `primeInGesture(ctx)`.
   3. Set `unlocked = true` and `wantPlaying = true`.
 - Async part: if `songId` is set, decode it (state `loading`) and start it (state `playing`). Otherwise state is `paused`.
-- If `createAudioContext` throws: state `error`, error `unsupported`.
+- If `createAudioContext` throws: state `error`, error `unsupported`. It is final: later `load()`, `retry()`, `play()` and `listen()` calls keep it (only `songId` follows the bird), and nothing is fetched.
 
 ### 4.3 Loading and loop region
 
@@ -373,19 +373,19 @@ interface Voice { id: string; src: AudioBufferSourceNode; nodes: AudioNode[]; fa
 
 private startVoice(song: BirdSongAsset, buffer: AudioBuffer, fadeInSec = AUDIO.xfInSec) {
   const ctx = this.ctx!, t0 = ctx.currentTime + AUDIO.startDelaySec               // 0.02
-  for (const v of this.voices) this.retire(v, t0, AUDIO.xfOutSec)                 // 0.24
+  for (const v of this.voices) this.retire(v, t0, AUDIO.xfOutSec)                 // 0.9
   const region = resolveLoopRegion(song, buffer.duration)
   const src = new AudioBufferSourceNode(ctx, { buffer, loop: true, loopStart: region.start, loopEnd: region.end })
   const trim = new GainNode(ctx, { gain: dbToGain(song.gainDb ?? 0) })
   const fadeIn = new GainNode(ctx, { gain: 0 })
   const fadeOut = new GainNode(ctx, { gain: 1 })
   src.connect(trim).connect(fadeIn).connect(fadeOut).connect(this.bus!)
-  fadeIn.gain.setValueCurveAtTime(FADE_IN, t0, fadeInSec)        // the ONLY automation fadeIn ever gets
+  fadeIn.gain.setValueCurveAtTime(FADE_IN, t0, fadeInSec)        // 1.2; the ONLY automation fadeIn ever gets
   src.start(t0, region.start)
   const v: Voice = { id: song.id, src, nodes: [src, trim, fadeIn, fadeOut], fadeOut, t0, region, retiring: false }
   src.onended = () => { v.nodes.forEach((n) => n.disconnect()); this.voices = this.voices.filter((x) => x !== v) }
   this.voices.push(v); this.current = v
-  while (this.voices.length > AUDIO.maxVoices) this.hardStop(this.voices[0])     // cap 3
+  while (this.voices.length > AUDIO.maxVoices) this.softStop(this.voices[0], ctx.currentTime) // cap 3
   this.analyzer!.onVoiceStart(song, t0)                                           // band glide + floor re-init (§5.2)
   this.patch({ playingId: song.id })
 }
@@ -397,9 +397,17 @@ private retire(v: Voice, t0: number, dur: number) {
 }
 private hardStop(v: Voice) { v.retiring = true; try { v.src.stop() } catch { /* already stopped */ } v.nodes.forEach((n) => n.disconnect())
   this.voices = this.voices.filter((x) => x !== v) }
+private softStop(v: Voice, t: number) {                          // over the cap: fade, don't cut
+  this.voices = this.voices.filter((x) => x !== v)               // off the books now; onended disconnects
+  const k = v.trim.gain.value
+  v.trim.gain.setValueCurveAtTime(FADE_OUT.map((g) => g * k), t, AUDIO.capFadeSec) // 0.04; trim's only automation
+  try { v.src.stop(t + AUDIO.capFadeSec) } catch { /* already stopped */ }
+}
 ```
 
 - A voice retired mid-fade-in plays at `sin(·)·cos(·)`, which is smooth. No param ever holds two curves.
+- Arrowing fast stacks up 0.9 s tails, so the voice over the cap is often still audible. A hard stop there clicks; `softStop` fades it out in 40 ms on `trim`, the one gain no fade curve touches. `capFadeSec ≤ stopPadSec`, so the new stop time only ever ends the voice sooner, or after its fade-out is already silent.
+- `hardStop` stays for silent cases only: in a suspended context, behind a ~−50 dB `pauseGain`, and on `dispose`.
 - `load(song)` uses a generation token `gen = ++this.gen` and aborts the previous `AbortController`.
   - A decode that finishes after a newer `load` is cached but not played.
   - The UI already debounces commits by 250 ms (UI §3.4), so the engine adds no settle delay of its own.
@@ -410,11 +418,11 @@ private hardStop(v: Voice) { v.retiring = true; try { v.src.stop() } catch { /* 
 |---|---|---|---|
 | `idle` | `load(s)` | `songId = s.id`; fetch bytes only (no context) | `idle` |
 | `idle` | `listen()` | sync unlock; if `songId`: decode, then `startVoice` | `loading` → `playing` (or `paused` if no song) |
-| `loading` / `playing` | `load(s)` with a different id | Old voice keeps playing. Decode. If the decode takes **> 700 ms**, retire old voices (0.24 s). On decode: `startVoice`. | `loading` → `playing` |
+| `loading` / `playing` | `load(s)` with a different id | Old voice keeps playing. Decode. If the decode takes **> 700 ms**, retire old voices (0.9 s). On decode: `startVoice`. | `loading` → `playing` |
 | `playing` | `load(s)` with the same id | no-op | — |
-| `playing` | `pause()` | `wantPlaying = false`; `pauseGain` → 0 with τ 0.03; after 150 ms, `ctx.suspend()` unless resumed | `paused` |
+| `playing` | `pause()` | `wantPlaying = false`; `pauseGain` → 0 with τ 0.12 (a soft release, ~0.6 s); after 700 ms (5.8 τ, ~−50 dB), `ctx.suspend()` unless resumed | `paused` |
 | `paused` | `load(s)` | Decode silently. Hard-stop the old voices (the context is suspended, so this is inaudible). `pending = s`. | `paused` |
-| `paused` | `play()` | `await ctx.resume()`; `pauseGain` → 1 with τ 0.03; if `pending`, `startVoice(pending)` | `playing` |
+| `paused` | `play()` | `await ctx.resume()`; `pauseGain` → 1 with τ 0.1; if `pending`, `startVoice(pending)` | `playing` |
 | any | fetch/decode failure for the current gen | `error = code` | `error` |
 | `error` | `load(other)` / `retry()` | clear the error, then follow the normal flow | `loading` / `idle` |
 | `playing` | `ctx.onstatechange` → `'interrupted'`, or `'suspended'` not requested by us | `interrupted = true`, `wantPlaying = false` | `paused` |
@@ -422,7 +430,7 @@ private hardStop(v: Voice) { v.retiring = true; try { v.src.stop() } catch { /* 
 | `paused` and interrupted | `play()` from a gesture | `primeInGesture`, then the normal `play` | `playing` |
 
 - **Volume:** `volumeGain.gain.cancelScheduledValues(t); volumeGain.gain.setTargetAtTime(volumeTaper(v), t, 0.02)`. The default volume is 0.7.
-- **Mute:** a separate `muteGain`, with τ 0.015.
+- **Mute:** a separate `muteGain`, with τ 0.015. It stays near-instant on purpose: mute is for silence now, while pause gets the soft release.
 - **Pause and resume** use only `setTargetAtTime` on `pauseGain`, preceded by `cancelScheduledValues`.
 - `pause`, `play` and `toggle` are **serialised through a promise queue**, so suspend and resume never interleave.
 - **`isAudible()`** = `state === 'playing' && ctx.state === 'running' && !pausing`. `pausing` turns on synchronously in `pause()`.
@@ -473,9 +481,9 @@ export function loopPosition(heard: number, t0: number, region: { start: number;
 Run only if `nowMs − lastNowMs ≥ 4` (this dedupes the UI and plate rAF loops). Then `dt = clamp((nowMs − lastNowMs)/1000, 0, 0.1)` and `α(τ) = 1 − exp(−dt/τ)`.
 
 **Band**
-- From the current song's band: `lo = max(250, p10/1.6)`, `hi = min(12000, 0.45·sr, 1.6·p90)`.
+- From the current song's band: `lo = max(150, p10/1.6)`, `hi = min(12000, 0.45·sr, 1.6·p90)`.
 - Weight `w_b` is 0 at `lo`. It rises with a raised cosine to 1 at `0.85·p10`, stays 1 up to `1.25·p90`, then falls with a raised cosine to 0 at `hi`.
-- On `onVoiceStart(song, t0)`, the band becomes the union of the old and new bands until `t0 + 0.6`, then the new band.
+- On `onVoiceStart(song, t0)`, the band becomes the union of the old and new bands until `t0 + 1.0`, then the new band. The glide outlasts the old voice's fade-out (`xfOutSec + stopPadSec` = 0.95 s), so the old song is gone before the band narrows and before the floor and loudness peak re-learn; a loud old bird can't seed a quiet new bird's peak.
 
 **If not audible:**
 - `voiced = false`; `D += (0 − D)·α(0.2)`; `onset *= exp(−dt/0.09)`.
@@ -487,7 +495,7 @@ Run only if `nowMs − lastNowMs ≥ 4` (this dedupes the UI and plate rAF loops
 1. **Power:** `P_b = 10^(db_b/10)` for b in the band.
 2. **Noise floor** (`NoiseFloor`):
    - If `P_b < N_b`: `N_b += (P_b − N_b)·α(0.25)`. Otherwise `N_b *= 10^(0.6·dt)` (a +6 dB/s creep).
-   - Re-initialise with `N_b = P_b` on the first audible frame after `t0 + 0.6` of each new voice.
+   - Re-initialise with `N_b = P_b` on the first audible frame after `t0 + 1.0` of each new voice (the loudness peak restarts there too).
 3. **Clean power:** `X_b = max(0, P_b − 2·N_b)·w_b`.
 4. **Levels:**
    - `snrDb = 10·log10(Σ P_b w_b / Σ N_b w_b)`.
@@ -1046,6 +1054,8 @@ void main() {
 }
 ```
 
+The circle's surface and rim are the page's, not the shader's: app.css `plate-disc` paints a translucent near-black shade (tokens.css `--plate-surface` → `--plate-surface-edge`) that the bird's room shows through, a stone hairline rim (`--plate-rim`, 1.1 % of the radius, at least 1.5 px) and a soft contact shadow (`--plate-shadow`), under the poster and the canvas alike. `PLATE_FRAG` leaves the circle transparent and paints only the square (lab) surface, with no rim or circle uniforms (`uRim`, `uRimW`, `uCircleIn`, `uCircleOut`), and debug heat is additive. `PlateHandle.capture()` returns only the sand, and the shell's `platePhoto` paints the room, the disc and the shadow under it. The listing below is the v1 shader, kept for the square path and the bolt; its circle rim (`uRimW`) is not in the code.
+
 ```glsl
 // ===== PLATE_VERT: void main() { gl_Position = vec4(position.xy, 0.0, 1.0); }
 // ===== PLATE_FRAG (premultiplied output) =====
@@ -1097,9 +1107,9 @@ void main() {
 
 **Look constants**, in `params.ts` `LOOK`:
 - sand `#F3EFE6`
-- rim width 0.03, rim colour `#DEDBD3`
-- bolt r 0.024
-- `uFlicker` 0.5 (0 under reduced motion)
+- the circle's rim is the page's (§8.3); bolt r 0.024
+- `uFlicker` 0.15, jitter 0.3 px (both 0 under reduced motion)
+- **resting sand is settled dust:** until a song first moves it, and again after a Scatter, each grain shows at `restAlpha` 0.45, thinning by `restFalloff`·r² (0.35) toward the rim; the song lifts it to full with a time constant of `restLiftSec` 0.5 s (`uRestLift`, `uRestAlpha`, `uRestFalloff` on the grain pass; an instant jump under reduced motion)
 - **no bloom, no glow** (UI anti-pattern list)
 
 ### 8.5 Transitions
@@ -1109,8 +1119,8 @@ void main() {
   - Grain `uFade` goes 1 → 0 over the first 0.16 s.
   - At t = 0.42: `modeBank.configure(newShape, …)` (which resets), set `fieldPass`'s `uShape` and `uBoltR`, `sim.scatter(seed++, clock, 0.5)`, and set `uFade = 1`. The grains then pour in over 0.5 s.
   - Reduced motion: an instant swap with no pour.
-- **Bird change:** nothing is reset. A new family takes the other A/B slot and the old one releases (τ 0.6 s), so the sand migrates (UI §5.1).
-- **Scatter** (`scatterToken` increments): `sim.scatter(seed++, clock, reducedMotion ? 0 : 0.6)`; the loop stays awake for 1.0 s.
+- **Bird change:** nothing is reset. A new family takes the other A/B slot and the old one releases (τ 1.8 s), so the sand migrates (UI §5.1).
+- **Scatter** (`scatterToken` increments): `sim.scatter(seed++, clock, reducedMotion ? 0 : 1.2)`, and the sand drops back to rest until the song wakes it; the loop stays awake for the pour.
 - **First mount:** scatter with pour 0.6 s (0 under reduced motion). The sand then lies **still** until audio drives it.
 
 ### 8.6 Reduced motion and accessibility
@@ -1297,23 +1307,30 @@ export const MAPPING_SENTENCE =
 
 ```ts
 export const AUDIO = {
-  latencyHint: 'interactive', xfInSec: 0.6, xfOutSec: 0.24, startDelaySec: 0.02, stopPadSec: 0.05, slowLoadFadeMs: 700,
-  pauseTau: 0.03, suspendDelayMs: 150, resumeTau: 0.03, volumeTau: 0.02, muteTau: 0.015, defaultVolume: 0.7,
-  maxVoices: 3, byteCacheEntries: 6, decodedBudgetDesktop: 48 * 2 ** 20, decodedBudgetMobile: 24 * 2 ** 20,
+  latencyHint: 'interactive', xfInSec: 1.2, xfOutSec: 0.9, startDelaySec: 0.02, stopPadSec: 0.05, slowLoadFadeMs: 700,
+  pauseTau: 0.12, suspendDelayMs: 700, resumeTau: 0.1, volumeTau: 0.02, muteTau: 0.015, defaultVolume: 0.7,
+  maxVoices: 3, capFadeSec: 0.04, byteCacheEntries: 6, decodedBudgetDesktop: 48 * 2 ** 20, decodedBudgetMobile: 24 * 2 ** 20,
+  aacPrimingFrames: 2112, aacPrimingRate: 44100,
 } as const
 export const ANALYSIS = {
   fftSize: 2048, minDb: -100, maxDb: -20, floorDb: -160,
-  bandLoMinHz: 250, bandHiMaxHz: 12000, bandLoFactor: 1 / 1.6, bandHiFactor: 1.6, taperLo: 0.85, taperHi: 1.25, bandGlideSec: 0.6,
+  bandLoMinHz: 150, bandHiMaxHz: 12000, bandLoFactor: 1 / 1.6, bandHiFactor: 1.6, taperLo: 0.85, taperHi: 1.25, bandGlideSec: 1.0,
   floorFallTau: 0.25, floorRiseDbPerSec: 6, floorK: 2,
   snrOpenDb: 9, snrCloseDb: 6, loudOpen: 0.3, loudClose: 0.15, openHoldSec: 0.02, closeHoldSec: 0.06,
-  peakDecayDbPerSec: 1.0, loudRangeDb: 24, tonalCrest: 8,
+  peakDecayDbPerSec: 1.0, loudRangeDb: 24, tonalCrest: 8, crestMinBins: 32,
   secondMinOct: 1 / 3, secondMinRel: 0.35, secondMaxW: 0.6, harmonicTol: 0.03,
   pitchRawTau: 0.03, pitchJumpOct: 0.5, pitchJumpHoldSec: 0.03, medianWindowSec: 0.4, medianMax: 64, glideBeta: 0.35, line2Tau: 0.04,
   driveAttack: 0.025, driveRelease: 0.2,
-  onsetRing: 32, onsetMadK: 3, onsetBiasDb: 1.0, onsetRefractorySec: 0.06, onsetDecay: 0.09,
+  onsetRing: 32, onsetMadK: 3, onsetBiasDb: 1.0, onsetRefractorySec: 0.06, onsetDecay: 0.09, onsetPendingSec: 0.1,
   historySize: 48, dedupeMs: 4, maxLatencySec: 0.3,
 } as const
 ```
+
+Relations `__tests__/params.test.ts` holds (2026-10-29, the slower fades):
+- `suspendDelayMs ≥ 5·pauseTau + 50 ms`: the suspend never cuts the pause release (5 τ ≈ −43 dB; 700 ms is 5.8 τ, ~−50 dB).
+- `bandGlideSec ≥ xfOutSec + stopPadSec`: the union band outlasts the old voice (§5.2).
+- `0.03 ≤ capFadeSec ≤ min(0.05, stopPadSec)`: an over-cap voice fades out fast, and its new stop time can't make it sound longer (§4.4).
+- `muteTau < pauseTau / 4`: mute stays instant.
 
 ### 12.2 `src/cymatics/params.ts`
 
@@ -1321,20 +1338,22 @@ export const ANALYSIS = {
 export const SIM = {
   dt: 1 / 60, maxSubsteps: 3, gMax: 6, sigma: 0.09, kappa: 4e-4, w: 0.3, gSat: 4, driftMax: 0.02,
   thetaLo: 0.6, thetaHi: 1.4, heavyMul: 3, heavyFrac: { circle: 0.2, square: 0.04 },
-  rim: 0.985, trickleRate: 0.004, onsetKick: 0.8,
+  rim: 0.985, trickleRate: 0.004, onsetKick: 0.2,
   fieldRes: 256, fieldExt: 1.05, lutWidth: 1024, lutRMax: 1.05, boltFlatR: 0.15,
-  pourSec: 0.6, scatterPourSec: 0.6, shapeSwapPourSec: 0.5, grainFadeSec: 0.35,
+  pourSec: 0.6, scatterPourSec: 1.2, shapeSwapPourSec: 0.5, grainFadeSec: 0.35,
 } as const
 export const DRIVE = {
   bankSize: 12, hero: 3, anchors: [1, 3, 7] as const, beta: 0.3, qMin: 10, qMax: 120, topK: 6, gamma: 0.5,
-  coefAttack: 0.08, coefReleaseMorph: 0.6, coefReleaseGap: 0.3, coefReleaseStop: 0.12,
-  maxSlots: 24, slotEps: 1e-3, fieldDirtyEps: 2e-4, dominanceRatio: 1.3, dominanceHoldSec: 0.1,
+  // Breath-paced: the figure swells in over ~0.6 s and lets go over ~1.8 s, so trills read as waves.
+  coefAttack: 0.6, coefReleaseMorph: 1.8, coefReleaseGap: 1.8, coefReleaseStop: 0.3,
+  maxSlots: 24, slotEps: 1e-3, fieldDirtyEps: 2e-4, dominanceRatio: 1.3, dominanceHoldSec: 1.5,
   phiMax: 4.5, telemetryHz: 8, circleTheta0: Math.PI / 2,
   family: { nMax: 12, deadMax: 0.52 }, symmetryChoices: [3, 4, 5, 6] as const,
 } as const
 export const LOOK = {
   extent: { circle: 1.035, square: 1.0 }, coat: { circle: 0.16, square: 0.07 },
-  sand: '#F3EFE6', rim: '#DEDBD3', rimWidth: 0.03, boltR: 0.024, jitterPx: 0.6, flicker: 0.5,
+  restAlpha: 0.45, restFalloff: 0.35, restLiftSec: 0.5,
+  sand: '#F3EFE6', boltR: 0.024, jitterPx: 0.3, flicker: 0.15,
   shapeSec: 0.42, shapeEase: [0.77, 0, 0.175, 1] as const, grainFadeOutSec: 0.16,
 } as const
 export const TIERS = {
@@ -1414,10 +1433,10 @@ export const TIERS = {
 - **No param ever gets two curves**, including a retire during a fade-in.
 - A 700 ms slow decode retires the old voice.
 - `load` while paused stays paused and plays `pending` on `play()`.
-- `pause` makes `isAudible()` false synchronously, and suspend happens after 150 ms.
+- `pause` makes `isAudible()` false synchronously, releases with τ 0.12, and suspend happens after 700 ms.
 - An `interrupted` state change gives `paused` + `interrupted`; `running` again → `playing`.
 - Volume uses the `v²` taper; mute keeps the volume.
-- More than 3 voices are capped.
+- More than 3 voices are capped; the voice over the cap fades out on its trim in 40 ms (from its own trim level to 0), then stops and disconnects.
 - `dispose` closes the context.
 - Fetch 404 → `network`; decode rejection → tries `fallbackSrc`, then `decode`.
 

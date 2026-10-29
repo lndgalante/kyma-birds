@@ -15,7 +15,7 @@ interface PlateFigureProps {
   bird: Bird
   held: boolean
   scatterToken: number
-  /** Each increment flashes the plate, as a camera shutter would. */
+  /** Each increment lightens the plate for a moment, as a camera shutter would. */
   photoToken: number
   plateRef: Ref<PlateHandle>
   caption: string
@@ -78,7 +78,8 @@ export function PlateFigure({
   }, [gate, settled, blocked])
   useEffect(() => {
     if (gate !== 'exiting') return
-    const id = window.setTimeout(() => setGate('gone'), reducedMotion ? 0 : 320)
+    // The gate's own fade (ListenGate, --dur-5).
+    const id = window.setTimeout(() => setGate('gone'), reducedMotion ? 0 : 700)
     return () => window.clearTimeout(id)
   }, [gate, reducedMotion])
 
@@ -99,7 +100,9 @@ export function PlateFigure({
       aria-labelledby="plate-caption"
       data-ready={(ready && !failed) || undefined}
     >
-      <div className="plate-frame absolute inset-0 overflow-clip rounded-[50%] bg-plate-surface shadow-plate">
+      {/* The frame paints the plate's surface and rim (plate-disc) for the poster and the canvas
+          alike; the canvas draws only the sand over it. */}
+      <div className="plate-frame absolute inset-0 overflow-clip rounded-[50%] plate-disc">
         <PlatePoster message={failed ? COPY.plateFallbackWebgl : undefined} />
         <noscript>
           <div
@@ -163,7 +166,7 @@ export function PlateFigure({
           onListen={onListen}
         />
       )}
-      {/* The figure's accessible caption; the foot row's status line is the one the eye reads. */}
+      {/* The plate's full status, for screen readers; the foot row shows the eye only an error. */}
       <figcaption id="plate-caption" className="plate-caption sr-only" data-kind={captionKind}>
         {caption}
       </figcaption>

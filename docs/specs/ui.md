@@ -652,7 +652,7 @@ Measured contrast: an accent with L ≥ 0.76 on any tinted ground (L 0.19, C ≤
 `muted` is a flag, not a state. The state text then reads "Muted" (playing continues, and the plate keeps moving because analysis runs before the output gain).
 
 **Switching birds:**
-- `playing` → fade the old gain to 0 over 240ms (ease-in). Start the new buffer at gain 0 and ramp it to the target over 600ms (equal-power). If the new buffer isn't ready, show `loading` between the two. Abort the previous fetch with `AbortController` if the user moves on again.
+- `playing` → fade the old gain to 0 over 900ms. Start the new buffer at gain 0 and ramp it to the target over 1.2s (equal-power), so the old song exhales while the new one inhales alongside the 1.4s room fade. If the new buffer isn't ready, show `loading` between the two. Abort the previous fetch with `AbortController` if the user moves on again.
 - `paused` → load the new bird silently and stay paused.
 - `idle` → fetch the new bird's bytes (no decode, no AudioContext) so the first Listen is fast.
 - The spine's band bracket tweens from the old band to the new over 480ms (`--ease-in-out`).
@@ -678,13 +678,13 @@ The disc is centered on the plate: its center sits exactly on the plate's center
             │   ( ▶ )      │   112px disc (88px in Field): solid --ink, play glyph in --ground
             └──────────────┘
                 Listen            Archivo 600, 17px, --ink
-   Sound on. Each song plays on a loop.   Archivo 400, 13px, --ink-2, max 28ch
+   Sound on. Watch the sand follow the song.   Archivo 400, 13px, --ink-2, max 28ch
 ```
 
 - **Layout:** `.gate` fills the plate figure and is a size container (`container: gate / size`). `.gate__stack` (the button plus the sub-line) sits at `top: 50%` and is lifted by half the disc plus the button's 6px padding (`translate: 0 calc(var(--disc) / -2 - 6px)`), so the disc's center lands on the plate's center whatever the text below it measures. `--disc` is 112px, or 88px under 40rem. Under `@container gate (height < 320px)` the sub-line is visually hidden, because it would run off the plate; it stays the button's `aria-describedby` description. The cut-off is in px like the gate's text, so a larger default font size doesn't hide the line where it fits.
 - It is a single `<button>`. The visible text "Listen" is contained in the accessible name `aria-label="Listen to the Gray Antwren"`, and the sub-line is referenced with `aria-describedby`.
 - Behind it, the plate shows resting sand dimmed by a radial scrim (`--scrim` at 0.5 alpha toward the center).
-- Pulse: three 1px `--ink` rings expand from the disc to 1.8× and fade (2.4s, `--ease-out`). They play **3 times and then stop**. Under reduced motion there is no pulse.
+- Breath: a soft pool of the bird's `--signal` behind the disc swells and settles (11s a breath, 4.5s in and 6.5s out, `--ease-breath`). It breathes **3 times and then rests**. The disc itself never moves until it is pressed. Under reduced motion the pool is still.
 - `:active` → `scale: 0.96` (120ms). While the first decode runs (>150ms), the disc shows the loading arc and the label reads "Loading…".
 
 ### 5.3 Transport and Song zone
@@ -906,14 +906,13 @@ Concentric radii: the photo inside the captioned card shares the card's top radi
 | Bird change | Native scroll is the transition. The theme crossfades over `--dur-4`. No text animation. |
 | Long jump (rail, distance > 2) | Track opacity dips 1 → 0 → 1 (100ms out, 160ms in) around an instant scroll |
 | Button press | `scale: 0.96` over `--dur-1` `--ease-out` on `:active`. Never on the rail ticks. |
-| Gate exit | Opacity plus scale 0.98 over `--dur-3` `--ease-out`, then unmount |
-| Sheet / dialog | Enter: `translate: 0 100%` → 0 over `--dur-3` `--ease-sheet` (sheet), or opacity + `scale: 0.98` (dialog), as tw-animate-css enter/exit animations (Radix keeps the dialog mounted until the exit ends). Exit over 200ms `--ease-in`. |
-| Flow hairline | Dash offset loop at 1.6s linear, only while playing |
+| Gate exit | Opacity only over `--dur-5` `--ease-out` while the sand wakes under it, inert while it fades, then unmount |
+| Sheet / dialog | Enter: `translate: 0 100%` → 0 over `--dur-3` `--ease-sheet` (sheet), or opacity + `scale: 0.98` (dialog), as tw-animate-css enter/exit animations (Radix keeps the dialog mounted until the exit ends). Exit over 200ms `--ease-out`. |
 | Readouts | None. Numbers change in place. |
 
 **Reduced motion** (`prefers-reduced-motion: reduce`):
 - Programmatic carousel moves are instant with no opacity dip, and `scroll-behavior` is `auto`.
-- No parallax, no gate pulse, no flow-dash animation, and no sheet slide (opacity only, 150ms).
+- No parallax, no moving gate breath (the pool stays still), and no sheet slide (opacity only, 150ms).
 - Color and theme crossfades stay, shortened to 200ms.
 - The loading spinner becomes a static dashed ring plus the text "Loading".
 - The plate gets `reducedMotion` (the renderer calms grain jitter and resettles with a fade). The spectrum still updates (it's information) but at 15 fps with no smoothing trails.
@@ -1055,7 +1054,7 @@ src/
                                         priority: 'high' | 'auto' | 'lazy'; onDetails(): void }
       BirdPhoto.tsx                   { bird: Bird; priority }
       FieldLabel.tsx                  { bird: Bird }
-      StatusChip.tsx                  { code: IucnCode; label: string; size?: 'sm' | 'md' }
+      IucnStatus.tsx                  StatusNote { code; label } (a threatened bird's status in words), IucnScale { code } (Details)
       IucnScale.tsx                   { code: IucnCode }
       SongFacts.tsx                   { character: string; band: { p10: number; p50: number; p90: number }; peakHz: number; durationSec: number }
       CreditLine.tsx                  { credits: Bird['credits']; slug: string; variant: 'full' | 'compact' }
@@ -1069,15 +1068,13 @@ src/
       PlayButton.tsx                  { size: 48 | 56 }   (reads status from useAudio; draws the loop ring via rAF on an SVG circle)
       VolumeControl.tsx               { showSlider: boolean }
       Spectrum.tsx                    { band: BandHz; peakHz: number; label: string }   (2D canvas, rAF, reads useLiveFeatures ref; axis from CSS --spectrum-axis)
-      SignalReadout.tsx               {}   (8 Hz snapshot; layout from CSS)
-      FlowLine.tsx                    decorative hairline + arrow + dash animation (aria-hidden)
     plate/
       PlateZone.tsx                   { bird: Bird }
       PlateFigure.tsx                 { bird; held: boolean; scatterToken: number }   (passes plateShape="circle")
       PlatePoster.tsx                 { message?: string }   SSR/no-JS/WebGL-fail poster (circular)
       ListenGate.tsx                  { birdName: string; status: AudioStatus; onListen(): void }
       PlateControls.tsx               { held; onHeldChange(b: boolean): void; onScatter(): void; onDescribe(): void }
-      ModeReadout.tsx                 { placement: 'head' | 'foot' }
+      PlateErrorLine.tsx              { caption }   (the plate's foot line, for an error only)
       CymaticsPlate.tsx               (owned by the plate workstream; lazy-imported)
     credits/
       CreditsPage.tsx                 { birds: Bird[]; highlight?: string }
@@ -1301,7 +1298,7 @@ Everything is in sentence case. Bird names keep the manifest's capitalization (I
 |---|---|
 | `gate.button` | Listen |
 | `gate.aria` | Listen to the {commonName} |
-| `gate.sub` | Sound on. Each song plays on a loop. |
+| `gate.sub` | Sound on. Watch the sand follow the song. |
 | `gate.loading` | Loading… |
 | `play.aria` / `pause.aria` | Play song / Pause song |
 | `state.ready` / `state.loading` / `state.playing` / `state.paused` / `state.muted` / `state.error` | Ready / Loading / Playing / Paused / Muted / Can't play |
@@ -1310,8 +1307,6 @@ Everything is in sentence case. Bird names keep the manifest's capitalization (I
 | `mute.aria` | Mute |
 | `volume.aria` | Volume |
 | `volume.valuetext` | {n}% |
-| `readout.empty.sr` | No sound yet |
-| `readout.label.sr` | Strongest frequency |
 | `spectrum.aria` | Live spectrum. Song band {p10} to {p90}, peak {peak}. |
 | `noscript.audio` | Play the song |
 | `nowplaying.aria` | Pause {commonName} |
@@ -1397,7 +1392,7 @@ Everything is in sentence case. Bird names keep the manifest's capitalization (I
 7. Every card shows the photo author, license and source, and the song recordist, license and source, as working links. `/credits` lists all of them, with change notes.
 8. A screen reader hears "3 of 12: …" once per committed bird (not when moving through the rail). Live Hz and mode values are never announced automatically.
 9. Every focusable control shows the double focus ring. With keyboard alone you can listen, pause, mute, change birds, hold, scatter and open both dialogs.
-10. Under reduced motion there's no smooth scroll, parallax, pulse, or flow-dash, while the color crossfade and the spectrum updates remain.
+10. Under reduced motion there's no smooth scroll, parallax or moving gate breath, while the color crossfade and the spectrum updates remain.
 11. Lighthouse on `/` (mobile): LCP element = the committed photo, CLS < 0.05. Three.js isn't in the initial JS chunk.
 12. The design avoids every listed anti-pattern: no gradients except the photo scrims, no backdrop blur, no emoji, no neon glow, and the accent only on signal elements.
 

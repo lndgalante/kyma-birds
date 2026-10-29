@@ -4,49 +4,29 @@ import type { IucnCode } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 
 /**
- * Each code's colour as `--status`, for the chip and the scale's steps. Whole class names, as
- * Tailwind only finds classes written out in full.
+ * The status on the card, in plain words after the scientific name ("Endangered"), and only for
+ * a threatened bird: Least concern, and a status still unknown, wait in Details with the scale.
  */
-const STATUS: Record<IucnCode, string> = {
-  LC: '[--status:var(--iucn-lc)]',
-  NT: '[--status:var(--iucn-nt)]',
-  VU: '[--status:var(--iucn-vu)]',
-  EN: '[--status:var(--iucn-en)]',
-  CR: '[--status:var(--iucn-cr)]',
-  EW: '[--status:var(--iucn-ew)]',
-  EX: '[--status:var(--iucn-ex)]',
-  DD: '[--status:var(--iucn-dd)]',
-  NE: '[--status:var(--iucn-dd)]',
-}
-
-export function StatusChip({ code, label }: { code: IucnCode; label: string }) {
+export function StatusNote({
+  code,
+  label,
+  className,
+}: {
+  code: IucnCode
+  label: string
+  className?: string
+}) {
+  if (!THREATENED.has(code)) return null
   return (
-    <Badge asChild variant="iucn" className={cn('status', STATUS[code])} data-code={code}>
-      <p>
-        <span className="sr-only">{COPY.statusPrefix} </span>
-        <span
-          className="status__code grid min-w-7 place-items-center bg-(--status) px-1.5 font-sans text-xs leading-none font-medium tabular-nums text-on-status"
-          aria-hidden="true"
-        >
-          {code}
-        </span>
-        <span className="status__label self-center px-2 font-sans text-sm leading-none font-medium text-ink">
-          {label}
-        </span>
-      </p>
-    </Badge>
+    <p className={cn('status text-md leading-[1.4] text-ink-2', className)} data-code={code}>
+      <span className="sr-only">{COPY.statusPrefix} </span>
+      {label}
+    </p>
   )
 }
 
-const SCALE: Array<{ code: IucnCode; label: string }> = [
-  { code: 'LC', label: 'Least concern' },
-  { code: 'NT', label: 'Near threatened' },
-  { code: 'VU', label: 'Vulnerable' },
-  { code: 'EN', label: 'Endangered' },
-  { code: 'CR', label: 'Critically endangered' },
-  { code: 'EW', label: 'Extinct in the wild' },
-  { code: 'EX', label: 'Extinct' },
-]
+/** Near threatened and worse: a status worth a word on the card. */
+const THREATENED = new Set<IucnCode>(['NT', 'VU', 'EN', 'CR', 'EW', 'EX'])
 
 /**
  * The status as a position on the Red List scale (Details sheet): a meter of seven segments, the
@@ -84,4 +64,30 @@ export function IucnScale({ code }: { code: IucnCode }) {
       </figcaption>
     </figure>
   )
+}
+
+const SCALE: Array<{ code: IucnCode; label: string }> = [
+  { code: 'LC', label: 'Least concern' },
+  { code: 'NT', label: 'Near threatened' },
+  { code: 'VU', label: 'Vulnerable' },
+  { code: 'EN', label: 'Endangered' },
+  { code: 'CR', label: 'Critically endangered' },
+  { code: 'EW', label: 'Extinct in the wild' },
+  { code: 'EX', label: 'Extinct' },
+]
+
+/**
+ * Each code's colour as `--status`, for the scale's steps. Whole class names, as Tailwind only
+ * finds classes written out in full.
+ */
+const STATUS: Record<IucnCode, string> = {
+  LC: '[--status:var(--iucn-lc)]',
+  NT: '[--status:var(--iucn-nt)]',
+  VU: '[--status:var(--iucn-vu)]',
+  EN: '[--status:var(--iucn-en)]',
+  CR: '[--status:var(--iucn-cr)]',
+  EW: '[--status:var(--iucn-ew)]',
+  EX: '[--status:var(--iucn-ex)]',
+  DD: '[--status:var(--iucn-dd)]',
+  NE: '[--status:var(--iucn-dd)]',
 }

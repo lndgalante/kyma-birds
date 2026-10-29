@@ -6,7 +6,6 @@ import { cn } from '~/lib/utils'
 import { BirdPhoto, type PhotoPriority } from './BirdPhoto'
 import { CreditLine } from './CreditLine'
 import { FieldLabel } from './FieldLabel'
-import { SongFacts } from './SongFacts'
 
 interface BirdCardProps {
   bird: Bird
@@ -20,10 +19,10 @@ interface BirdCardProps {
 
 /**
  * One slide: the photograph, then the bird's label. Stacked and Split set the label on the night,
- * under the photo or, on a wide landscape card, beside it (`card-side`); as the card gets short
- * the label clamps its description, then drops its facts (app.css). Field and Compact set a
- * shorter label on the photo's scrim, with the compact credits and a Details pill; a short
- * phone's photo is a header, so its credits wait in Details.
+ * under the photo or, on a wide landscape card, beside it (`card-side`): the names, the song's
+ * description (clamped as the card gets short, app.css), one quiet credit line and the way to
+ * Details. Field and Compact set only the names and a Details pill on the photo, over a scrim
+ * that rises just past them; the figures, the status and the credits wait in Details.
  */
 export const BirdCard = memo(function BirdCard({
   bird: b,
@@ -35,14 +34,15 @@ export const BirdCard = memo(function BirdCard({
   onDetails,
 }: BirdCardProps) {
   const side = labelSideOf(b)
-  // From the manifest: a pale photo takes a deeper scrim.
-  const style = { '--scrim-a': b.photo.scrim } as CSSProperties
+  // From the manifest: a pale photo takes a deeper scrim. Set as its own property, so the class
+  // below can still raise it for more contrast (an inline --scrim-a would win over any class).
+  const style = { '--scrim-bird': b.photo.scrim } as CSSProperties
   return (
     <article
       id={`slide-${b.slug}`}
       // On the night the track's padding holds a focus ring at the card's edge, so only a card
       // on the photo clips.
-      className="bird-card relative h-full min-h-0 snap-center snap-always overflow-clip @container-size/card data-initial:[scroll-initial-target:nearest] stacked-or-split:overflow-visible contrast-more:[--scrim-a:0.92]"
+      className="bird-card relative h-full min-h-0 snap-center snap-always overflow-clip @container-size/card data-initial:[scroll-initial-target:nearest] stacked-or-split:overflow-visible [--scrim-a:var(--scrim-bird,0.6)] contrast-more:[--scrim-a:0.92]"
       role="tabpanel"
       aria-roledescription="slide"
       aria-labelledby={`tab-${b.slug}`}
@@ -70,8 +70,13 @@ export const BirdCard = memo(function BirdCard({
         <div
           className={cn(
             'card-label relative z-1 col-start-1 row-start-2 flex min-w-0 flex-col gap-4 pt-5',
-            'field-or-compact:row-start-1 field-or-compact:gap-3 field-or-compact:self-end field-or-compact:px-4 field-or-compact:pt-0 field-or-compact:pb-4',
-            'field:card-short:gap-2.5 field:card-short:pb-3',
+            // On the photo: the name across the card's whole width (so only a name too long for
+            // it wraps), then the scientific name with the Details pill at its end. Under them a
+            // scrim in the bird's own dark (app.css scrim-label) that eases out over --ramp above
+            // the name, so it stays in the photo's bottom third.
+            'field-or-compact:row-start-1 field-or-compact:grid field-or-compact:grid-cols-[minmax(0,1fr)_auto] field-or-compact:items-center field-or-compact:gap-x-3 field-or-compact:gap-y-2 field-or-compact:self-end field-or-compact:px-4 field-or-compact:pt-0 field-or-compact:pb-4 field:card-short:pb-3',
+            '[--ramp:2rem] field-or-compact:card-short:[--ramp:1rem]',
+            'field-or-compact:before:absolute field-or-compact:before:inset-x-0 field-or-compact:before:-top-(--ramp) field-or-compact:before:bottom-0 field-or-compact:before:-z-1 field-or-compact:before:scrim-label',
             'stacked-or-split:card-side:col-start-2 stacked-or-split:card-side:row-start-1 stacked-or-split:card-side:pt-1',
           )}
         >
@@ -79,42 +84,24 @@ export const BirdCard = memo(function BirdCard({
           <p
             className={cn(
               'song-desc line-clamp-3 max-w-[60ch] text-md leading-[1.6] text-ink-2',
-              'card-desc-2:line-clamp-2 card-no-desc:hidden field-or-compact:hidden',
+              'card-desc-4:line-clamp-4 card-desc-2:line-clamp-2 card-no-desc:hidden field-or-compact:hidden',
             )}
           >
             {b.songDescription}
           </p>
-          <div className="card-foot flex min-w-0 flex-wrap items-start gap-x-10 gap-y-4 field-or-compact:hidden">
-            <SongFacts
-              band={b.audio.bandHz}
-              peakHz={b.audio.peakHz}
-              durationSec={b.audio.durationSec}
-              className="flex-none card-no-facts:hidden"
-            />
-            <div className="min-w-0 flex-[1_1_15rem]">
-              <CreditLine
-                credits={b.credits}
-                slug={b.slug}
-                variant="full"
-                onDetails={() => onDetails(b.slug)}
-              />
-            </div>
+          <div className="card-foot min-w-0 field-or-compact:hidden">
+            <CreditLine credits={b.credits} onDetails={() => onDetails(b.slug)} />
           </div>
-          {/* The pager floats at the photo's bottom end, beside the Details pill. */}
-          <div className="hidden min-w-0 flex-col items-start gap-3 halo-scrim field-or-compact:flex">
-            <div className="contents field:card-short:hidden">
-              <CreditLine credits={b.credits} slug={b.slug} variant="compact" />
-            </div>
-            {/* No JS: nothing would open the sheet. */}
-            <Button
-              variant="scrim"
-              size="pill"
-              className="details-btn flex-none text-shadow-none no-js:hidden"
-              onClick={() => onDetails(b.slug)}
-            >
-              {COPY.detailsButton}
-            </Button>
-          </div>
+          {/* No JS: nothing would open the sheet. On the photo a negative margin takes back the
+              pill's overhang, so its row stays a line of text tall. */}
+          <Button
+            variant="scrim"
+            size="pill"
+            className="details-btn hidden flex-none text-shadow-none js:field-or-compact:inline-flex field-or-compact:-my-1.5"
+            onClick={() => onDetails(b.slug)}
+          >
+            {COPY.detailsButton}
+          </Button>
         </div>
       </div>
     </article>

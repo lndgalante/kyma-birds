@@ -1,13 +1,13 @@
 /*
- * Kyma Birds' tokens, named by role (Hallmark Ribbon, colourway two-in-the-morning): a
- * blue-black night, warm sand-white ink, cool grey for what is muted, machined parts lit from
- * above, and one signal, each bird's own colour.
+ * Kyma Birds' tokens, named by role (Hallmark Ribbon, habitat light): a near-neutral night that
+ * each bird's habitat colour fills, warm sand-white ink with sand greys for what is muted, flat
+ * quiet parts, and one signal, each bird's own colour.
  *
  * `@theme static` holds the families Tailwind turns into utilities (type, tracking, radii,
  * shadows, eases), always emitted so hand-written CSS and canvas code can read them. `:root`
  * holds the rest. Colours live in :root only: app.css maps them in `@theme inline`, so the
- * colour utilities resolve on each element and pick up the bird's palette that lib/theme.ts
- * sets inline on .app.
+ * colour utilities resolve on each element and pick up the bird's room that lib/theme.ts sets
+ * inline on .app (the spectrum's canvas reads them from its own computed style).
  */
 
 @theme static {
@@ -41,37 +41,26 @@
   --tracking-title: -0.01em;
   --tracking-normal: 0em;
 
-  /* Controls are pills (`rounded-full`); parts, beds and panels nest concentrically. */
+  /* Controls are pills (`rounded-full`), and so is the song strip; parts, beds and the strip
+     nest concentrically. */
   --radius-*: initial;
   --radius-part: 6px; /* key caps, chips, thumbnails, small parts */
-  --radius-bed: 12px; /* a recessed bed or an image inside a card's 16px padding */
-  --radius-card: 20px; /* the photo, the song strip, dialogs */
+  --radius-bed: 12px; /* a recessed bed, a tooltip, an image inside a card's 16px padding */
+  --radius-card: 20px; /* the photo, dialogs */
 
-  /* One light, from above. Shadows fall in a near-black tinted toward the night's hue (258);
-     part, panel, dialog and sheet fold in a lit top edge. */
+  /* Shadows fall, in a near-neutral black, only under what floats (the Listen disc, tooltips,
+     dialogs, sheets), and a bed sinks. The plate's soft contact shadow is --plate-shadow,
+     below. */
   --shadow-*: initial;
   --inset-shadow-*: initial;
   --drop-shadow-*: initial;
   --text-shadow-*: initial;
-  --shadow-part:
-    inset 0 1px 0 oklch(93.5% 0.012 85 / 0.14), 0 1px 1px oklch(7% 0.018 258 / 0.55),
-    0 6px 14px -4px oklch(7% 0.018 258 / 0.6);
-  --shadow-panel:
-    inset 0 1px 0 oklch(93.5% 0.012 85 / 0.08), 0 0 0 1px oklch(7% 0.018 258 / 0.55),
-    0 1px 2px oklch(7% 0.018 258 / 0.4), 0 24px 48px -16px oklch(7% 0.018 258 / 0.7);
+  --shadow-part: 0 1px 1px oklch(7% 0.005 258 / 0.55), 0 6px 14px -4px oklch(7% 0.005 258 / 0.6);
   --shadow-bed:
-    inset 0 2px 6px oklch(6% 0.018 258 / 0.65), inset 0 0 0 1px oklch(6% 0.018 258 / 0.4),
-    0 1px 0 oklch(93.5% 0.012 85 / 0.05);
-  --shadow-key: 0 1px 0 oklch(7% 0.018 258 / 0.8);
+    inset 0 1px 4px oklch(6% 0.005 258 / 0.55), inset 0 0 0 1px oklch(6% 0.005 258 / 0.35);
   --shadow-dialog:
-    inset 0 1px 0 oklch(93.5% 0.012 85 / 0.08), 0 32px 64px -16px oklch(6% 0.018 258 / 0.75),
-    0 12px 24px -12px oklch(6% 0.018 258 / 0.5);
-  --shadow-sheet:
-    inset 0 1px 0 oklch(93.5% 0.012 85 / 0.08), 0 -24px 48px -12px oklch(6% 0.018 258 / 0.65);
-  --shadow-plate:
-    0 40px 80px -24px oklch(6% 0.018 258 / 0.75), 0 12px 24px -12px oklch(6% 0.018 258 / 0.55);
-  /* The lit top edge alone, for a surface with a shadow of its own. */
-  --inset-shadow-edge: inset 0 1px 0 oklch(93.5% 0.012 85 / 0.12);
+    0 32px 64px -16px oklch(6% 0.005 258 / 0.75), 0 12px 24px -12px oklch(6% 0.005 258 / 0.5);
+  --shadow-sheet: 0 -24px 48px -12px oklch(6% 0.005 258 / 0.65);
   /* The lit primary's highlight, light from inside the signal. */
   --inset-shadow-lit: inset 0 1px 0 oklch(98% 0.012 85 / 0.55);
 
@@ -80,6 +69,8 @@
   --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  /* A breath (sine in-out): the room's drift between birds, and whatever breathes with it. */
+  --ease-breath: cubic-bezier(0.37, 0, 0.63, 1);
   --default-transition-duration: var(--dur-micro);
   --default-transition-timing-function: var(--ease-out);
 }
@@ -88,50 +79,51 @@
   :root {
     color-scheme: dark;
 
-    /* The night, hue 258: the page, a panel's top, a bed. The utilities mix in the bird's tinted
-       ground (below) at --bird-tint, so the room shifts with each bird. */
-    --night: oklch(13.2% 0.022 258);
-    --night-2: oklch(17.4% 0.024 258);
-    --night-0: oklch(10.4% 0.02 258);
-    --bird-tint: 16%;
+    /* The night, near-neutral, in three steps: the page, a raised surface, a bed. It is the room
+       only where no bird is chosen (the 404, /credits); for a bird, lib/theme.ts sets the whole
+       room (--ground and its steps, below) in the bird's habitat colour at about these
+       lightnesses. */
+    --night: oklch(13.2% 0.005 258);
+    --night-2: oklch(17.4% 0.005 258);
+    --night-0: oklch(10.4% 0.005 258);
 
-    /* Ink: warm sand-white, then cool greys. */
+    /* Ink: warm sand-white, then sand greys, warm so they sit in every habitat. Every step down
+       to ink-3 reads at 4.5:1 or more on every bird's room (lib/__tests__/theme.test.ts). */
     --ink: oklch(93.5% 0.012 85);
-    --ink-2: oklch(83% 0.016 250); /* secondary text, links */
-    --ink-3: oklch(72% 0.02 255); /* labels, muted */
-    --ink-4: oklch(55% 0.02 255); /* disabled and decoration only, never text you must read */
+    --ink-2: oklch(83% 0.012 85); /* secondary text, links */
+    --ink-3: oklch(72% 0.012 85); /* labels, muted */
+    --ink-4: oklch(55% 0.01 85); /* disabled and decoration only, never text you must read */
 
-    /* Hairlines, opaque on the night; photographs take a faint ink ring instead. */
-    --line: oklch(27% 0.022 258);
-    --line-2: oklch(36% 0.022 258);
-    --line-photo: oklch(93.5% 0.012 85 / 0.08);
+    /* Hairlines: the ink, translucent, so they take each room's hue and drift with it.
+       Photographs take a faint pure-white ring. */
+    --line: oklch(93.5% 0.012 85 / 0.13);
+    --line-2: oklch(93.5% 0.012 85 / 0.23);
+    --line-photo: oklch(1 0 0 / 0.1);
 
-    /* Per bird: lib/theme.ts overrides these inline on .app. The defaults (the 404 page) are the
-       bare night and a lit-window amber signal. */
-    --ground: oklch(19% 0.012 258);
-    --ground-raised: oklch(23% 0.012 258);
-    --ground-sunken: oklch(15.5% 0.01 258);
-    --scrim: oklch(14% 0.012 258);
+    /* Per bird: lib/theme.ts overrides these inline on .app with the bird's room. The defaults
+       (the 404 page) are the bare night and a lit-window amber signal. */
+    --ground: var(--night);
+    --ground-raised: var(--night-2);
+    --ground-sunken: var(--night-0);
+    --scrim: oklch(12.2% 0.005 258);
     --signal: oklch(82% 0.095 68);
     --on-signal: oklch(18% 0.015 60); /* text and icons on a signal fill */
 
-    /* Metal, lit from above; the lift is the hover, one step lighter. */
-    --metal-hi: oklch(44% 0.012 255);
-    --metal-lo: oklch(27% 0.014 255);
-    --metal-hi-lift: oklch(48% 0.012 255);
-    --metal-lo-lift: oklch(30% 0.014 255);
-
     /* The near-black the text halos fall in (app.css). */
-    --shade: oklch(7% 0.018 258);
+    --shade: oklch(7% 0.005 258);
 
-    /* Plate (poster and fallback only; the renderer owns the real surface) */
-    --plate-surface: oklch(13% 0.004 150);
-    --plate-rim: oklch(90% 0.006 95);
+    /* Plate: the surface (a near-black shade, centre to edge), the stone rim and the soft
+       contact shadow that app.css's plate-disc paints. The sand is the renderer's grain colour;
+       the noise tile is the poster's resting sand, its alpha a soft ramp over the noise (many
+       dim grains, not a few bright ones), so it reads as the renderer's settled dust. */
+    --plate-surface: oklch(0% 0 0 / 0.3);
+    --plate-surface-edge: oklch(0% 0 0 / 0.42);
+    --plate-rim: oklch(54% 0.008 85);
+    --plate-shadow: 0 10px 28px -14px oklch(0% 0 0 / 0.55);
     --plate-sand: oklch(95% 0.012 85);
-    --plate-sand-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.935 0 0 0 0 0.9 16 0 0 0 -10.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --plate-sand-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.935 0 0 0 0 0.9 4 0 0 0 -2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
-    /* IUCN Red List: hues follow IUCN convention; dark text on every chip */
-    --on-status: oklch(18% 0.015 60);
+    /* IUCN Red List, for the Details meter: hues follow IUCN convention. */
     --iucn-lc: oklch(74% 0.15 145);
     --iucn-nt: oklch(84% 0.15 120);
     --iucn-vu: oklch(87% 0.16 98);
@@ -144,8 +136,8 @@
     /* Focus is the signal, read on the focused element (app.css): a `--focus: var(--signal)`
        here would resolve once, on :root, to the default bird. The halo is the dark ring inside
        it. */
-    --focus-halo: oklch(9.5% 0.02 258);
-    --backdrop: oklch(8% 0.01 258 / 0.62);
+    --focus-halo: oklch(9.5% 0.005 258);
+    --backdrop: oklch(8% 0.005 258 / 0.62);
 
     /* Space on Tailwind's 4px unit (`p-4` is --space-md, `gap-6` --space-lg, `p-10`
        --space-xl), named for hand-written CSS. */
@@ -160,13 +152,15 @@
     --space-3xl: 96px;
     --space-4xl: 144px;
 
-    /* Motion: calm. Components read --dur-1..5; micro, short and long are Ribbon's. Durations
-       are variables so reduced motion can shorten --dur-4. */
+    /* Motion: calm. Components read --dur-1..5; micro, short and long are Ribbon's; --dur-room
+       is the room's drift from one bird to the next. Durations are variables so reduced motion
+       can shorten --dur-4 and --dur-room. */
     --dur-1: 120ms;
     --dur-2: 200ms;
     --dur-3: 320ms;
     --dur-4: 480ms;
     --dur-5: 700ms;
+    --dur-room: 1400ms;
     --dur-micro: 120ms;
     --dur-short: 220ms;
     --dur-long: 420ms;
@@ -185,15 +179,16 @@
   @media (prefers-contrast: more) {
     :root {
       --ink-3: var(--ink-2);
-      --line: oklch(42% 0.022 258);
-      --line-2: oklch(56% 0.022 258);
-      --line-photo: oklch(93.5% 0.012 85 / 0.32);
+      --line: oklch(93.5% 0.012 85 / 0.3);
+      --line-2: oklch(93.5% 0.012 85 / 0.45);
+      --line-photo: oklch(1 0 0 / 0.32);
     }
   }
-  /* A fade is not motion: the bird cross-fade keeps a short one. */
+  /* A fade is not motion: the bird cross-fade and the room's drift keep short ones. */
   @media (prefers-reduced-motion: reduce) {
     :root {
       --dur-4: 200ms;
+      --dur-room: 400ms;
     }
   }
 }

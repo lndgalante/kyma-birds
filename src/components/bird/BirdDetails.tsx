@@ -8,7 +8,7 @@ import { localNameEntries, type Bird, type Credit } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 import { SHEET_HEADING, Sheet, SheetCloseButton, SheetTitle } from '../shell/Sheet'
 import { FACT_LABEL, SongFacts } from './SongFacts'
-import { IucnScale } from './StatusChip'
+import { IucnScale } from './IucnStatus'
 
 const HEADING = cn('details__h', SHEET_HEADING)
 const PARAGRAPH = 'details__p max-w-[62ch] text-md leading-[1.6] text-ink-2'

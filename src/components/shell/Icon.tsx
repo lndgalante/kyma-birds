@@ -78,12 +78,16 @@ export function Icon({
   )
 }
 
-/** An arrow key's glyph, drawn: U+2190–2192 are not in the Latin subsets of either font. */
-export function ArrowKey({ side }: { side: 'left' | 'right' }) {
+/**
+ * An arrow key's glyph, drawn: U+2190–2192 are not in the Latin subsets of either font. Stroke 2,
+ * so at 11–12px it holds the weight of the medium text on the caps beside it.
+ */
+export function ArrowKey({ side, size = 12 }: { side: 'left' | 'right'; size?: number }) {
   return (
     <Icon
       name={`arrow-${side}`}
-      size={12}
+      size={size}
+      strokeWidth={2}
       aria-label={side === 'left' ? 'Left arrow' : 'Right arrow'}
       role="img"
     />

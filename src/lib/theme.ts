@@ -109,23 +109,33 @@ const paletteCache = new Map<string, BirdPalette>()
 
 /**
  * The bird's palette (ui.md §4.7): one accent from the photo, clamped light enough to read on
- * any tinted ground, and a ground faintly tinted by the photo's dominant colour.
+ * any room, and the room itself: the photo's dominant colour (olive, ochre, moss) let into the
+ * night, at its hue and the night's lightness steps. A pale photo lifts the room a little, from
+ * 13.4% to 16%. The chroma follows the photo's, as high as sRGB allows that dark (about 0.04),
+ * with a floor that still reads as a colour, so two green habitats differ by how green they
+ * are, not only by hue.
  */
 export function birdPalette(b: Pick<Bird, 'slug' | 'photo'>): BirdPalette {
   const hit = paletteCache.get(b.slug)
   if (hit) return hit
   const dom = hexToOklch(b.photo.dominantColor)
   const acc = hexToOklch(b.photo.accentColor)
-  // A grey bird borrows its habitat's hue so the accent still means something.
+  // A grey bird borrows its habitat's hue so the accent still means something, and a grey
+  // habitat borrows the bird's so the room does.
   const hue = acc.c < 0.03 ? dom.h : acc.h
   const accent = fitSrgb({ l: clamp(acc.l, 0.76, 0.86), c: clamp(acc.c, 0.07, 0.15), h: hue })
-  const gc = clamp(dom.c * 0.35, 0.006, 0.03)
+  const roomHue = dom.c < 0.008 ? hue : dom.h
+  const l = 0.134 + 0.026 * dom.l
+  // fitSrgb lowers the chroma to what sRGB holds that dark (least for a dark yellow). The steps
+  // take the ground's chroma as it fits, so the raised strip is never more coloured than the room.
+  const ground = fitSrgb({ l, c: clamp(dom.c * 0.75, 0.024, 0.05), h: roomHue })
+  const step = (dl: number, k = 1) => fitSrgb({ l: l + dl, c: ground.c * k, h: roomHue })
   const palette: BirdPalette = {
     accent,
-    ground: fitSrgb({ l: 0.19, c: gc, h: dom.h }),
-    groundRaised: fitSrgb({ l: 0.23, c: gc, h: dom.h }),
-    groundSunken: fitSrgb({ l: 0.155, c: gc * 0.8, h: dom.h }),
-    scrim: fitSrgb({ l: 0.14, c: gc, h: dom.h }),
+    ground,
+    groundRaised: step(0.042),
+    groundSunken: step(-0.028, 0.85),
+    scrim: step(-0.01),
   }
   paletteCache.set(b.slug, palette)
   return palette
@@ -142,7 +152,7 @@ export function birdTheme(b: Pick<Bird, 'slug' | 'photo'>): CSSProperties {
   } as CSSProperties
 }
 
-/** The tinted ground as hex, for `<meta name="theme-color">`. */
+/** The bird's room (its ground) as hex, for `<meta name="theme-color">`. */
 export function themeColorHex(b: Pick<Bird, 'slug' | 'photo'>): string {
   return oklchToHex(birdPalette(b).ground)
 }

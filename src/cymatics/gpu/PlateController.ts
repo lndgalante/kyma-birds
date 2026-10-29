@@ -61,6 +61,8 @@ export interface PlateStats {
   shape: PlateShape
   shapeMix: number
   transition: boolean
+  /** Resting dust (0) → lifted sand (1). */
+  restLift: number
   clock: number
   steps: number
   renders: number
@@ -172,6 +174,9 @@ export class PlateController {
   }
   private fadeUntil = 0
   private awakeUntil = 0
+  // uRestLift: resting dust (0) → lifted sand (1).
+  private restLift = 0
+  private restLiftTarget = 0
   private fieldStale = true
   private needsRender = true
   private resizePending = true
@@ -393,8 +398,9 @@ export class PlateController {
   }
 
   /**
-   * The plate as it looks now, copied into a 2D canvas. The WebGL buffer is cleared once the page
-   * composites it (no preserveDrawingBuffer), so this draws a frame and copies it in the same task.
+   * The sand as it looks now, copied into a 2D canvas (PlateHandle.capture). The WebGL buffer is
+   * cleared once the page composites it (no preserveDrawingBuffer), so this draws a frame and copies
+   * it in the same task.
    */
   capture(): HTMLCanvasElement | null {
     if (this.disposed || this.lost || this.failed) return null
@@ -512,9 +518,21 @@ export class PlateController {
     }
     if (this.governor.sample(time, interval, stepped)) this.downgrade(time)
 
+    // The first song to move the sand lifts it from rest; it stays lifted until the next Scatter.
+    if (drive.canMove && !this.held) this.restLiftTarget = 1
+    const lifting = this.updateRestLift(dt)
+
     // 8 · draw only when something visible changed; an undrawn frame keeps the last picture
     const fading = this.clock < this.fadeUntil
-    if (stepped || this.trans.active || fading || resized || this.needsRender || this.debug) {
+    if (
+      stepped ||
+      this.trans.active ||
+      fading ||
+      lifting ||
+      resized ||
+      this.needsRender ||
+      this.debug
+    ) {
       this.draw()
       if (this.checkShaderError()) return
       if (!this.readyFired) {
@@ -529,6 +547,7 @@ export class PlateController {
       drive.canMove ||
       this.trans.active ||
       fading ||
+      lifting ||
       this.clock < this.awakeUntil ||
       this.resizePending
     this.idleFrames = busy ? 0 : this.idleFrames + 1
@@ -586,8 +605,22 @@ export class PlateController {
     const from = pour > 0 ? this.clock : this.clock - SIM.grainFadeSec
     this.sim.scatter(this.seed++, from, pour)
     this.fadeUntil = pour > 0 ? this.clock + pour + SIM.grainFadeSec : this.clock
+    // Fresh sand lands as resting dust (a pour starts every grain unseen, so the drop doesn't show).
+    this.restLift = 0
+    this.restLiftTarget = 0
+    this.grains.uniforms.uRestLift.value = 0
     this.substeps.reset()
     this.needsRender = true
+  }
+
+  /** Eases uRestLift toward its target (a jump under reduced motion). True while it changes. */
+  private updateRestLift(dt: number): boolean {
+    const target = this.restLiftTarget
+    if (this.restLift === target) return false
+    const next = this.restLift + (target - this.restLift) * -Math.expm1(-dt / LOOK.restLiftSec)
+    this.restLift = this.reducedMotion || Math.abs(target - next) < 0.002 ? target : next
+    this.grains.uniforms.uRestLift.value = this.restLift
+    return true
   }
 
   private downgrade(time: number): void {
@@ -785,6 +818,7 @@ export class PlateController {
       shape: this.shape,
       shapeMix: this.shapeMix,
       transition: this.trans.active,
+      restLift: this.restLift,
       clock: this.clock,
       steps: this.stepFrame,
       renders: this.renders,

@@ -25,8 +25,9 @@ export function CreditEntry({
         className={cn(
           'credit-entry relative grid scroll-mt-20 grid-cols-[96px_minmax(0,1fr)] gap-x-5 gap-y-6 border-b border-line py-6',
           'md:grid-cols-[152px_minmax(0,1fr)] md:gap-x-8 md:gap-y-4 md:py-7',
-          // The signal line sits in the gutter, never past it: on phones html clips x overflow.
-          'data-highlight:before:absolute data-highlight:before:inset-y-6 data-highlight:before:start-[calc(-1*min(18px,var(--gutter)-6px))] data-highlight:before:w-0.5 data-highlight:before:rounded-full data-highlight:before:bg-signal md:data-highlight:before:inset-y-7',
+          // The bird the page opened at: a hairline of its signal in the gutter, never past it (on
+          // phones html clips x overflow).
+          'data-highlight:before:absolute data-highlight:before:inset-y-6 data-highlight:before:start-[calc(-1*min(18px,var(--gutter)-6px))] data-highlight:before:w-px data-highlight:before:bg-signal md:data-highlight:before:inset-y-7',
         )}
         data-highlight={highlighted || undefined}
         aria-labelledby={`credit-${b.slug}`}
@@ -69,9 +70,11 @@ export function CreditEntry({
 }
 
 const LINK = 'inline-flex min-h-6 items-center pointer-coarse:min-h-11'
-const NOTE = 'work__note text-sm leading-[1.5] text-ink-3'
 
-/** One licensed work: the photo or the song. */
+/**
+ * One licensed work: the photo or the song. Its title, catalog entry and changes run together as
+ * one small note after the links.
+ */
 function Work({ label, credit }: { label: string; credit: Credit }) {
   return (
     <div className="work grid min-w-0 content-start border-t border-line pt-3 text-sm leading-[1.5]">
@@ -89,15 +92,11 @@ function Work({ label, credit }: { label: string; credit: Credit }) {
           </ExternalLink>
         </span>
       </p>
-      <p className={cn(NOTE, 'mt-1.5')}>
+      <p className="work__note mt-1.5 max-w-[68ch] text-xs leading-[1.55] text-ink-3">
         <span className="work__title wrap-anywhere">“{credit.title}”</span>
+        {credit.catalog && <span className="work__catalog"> · {credit.catalog}</span>}
+        <span className="work__changes"> · Changes: {credit.changes}</span>
       </p>
-      {credit.catalog && (
-        <p className={NOTE}>
-          <span className="work__catalog">{credit.catalog}</span>
-        </p>
-      )}
-      <p className={NOTE}>Changes: {credit.changes}</p>
     </div>
   )
 }

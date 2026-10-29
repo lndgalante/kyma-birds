@@ -4,9 +4,8 @@ import { cn } from '~/lib/utils'
 import { buttonVariants } from './button'
 
 /**
- * The pressed state: Radix sets aria-pressed, and the outline variant's `aria-pressed:` classes
- * sink the metal pill into a bed and light its label in the signal. Forced colours drop
- * gradients and shadows, so there the pill fills with Highlight.
+ * The pressed state: Radix sets aria-pressed, which the outline variant's `aria-pressed:` classes
+ * style (button.tsx). Forced colours drop fills and rings, so there the pill fills with Highlight.
  */
 const PRESSED =
   'forced-colors:data-[state=on]:forced-color-adjust-none forced-colors:data-[state=on]:bg-[Highlight] forced-colors:data-[state=on]:text-[HighlightText]'

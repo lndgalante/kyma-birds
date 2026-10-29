@@ -1,25 +1,31 @@
-import { useRef } from 'react'
-import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
+import { useEffect, useRef } from 'react'
+import { useAudioApi, useAudioSnapshot, useAwake } from '~/audio/useAudio'
 import { useFeatureFrames } from '~/audio/useLiveFeatures'
 import { Kbd } from '~/components/ui/kbd'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip'
-import { METAL } from '~/components/ui/surface'
+import { PART, PART_LIFT } from '~/components/ui/surface'
 import { COPY } from '~/lib/copy'
 import { cn } from '~/lib/utils'
-import { Icon } from '../shell/Icon'
+import { IconSwap } from '../shell/IconButton'
 
 const PLAY_BUTTON_ID = 'play-button'
+/** The strip's error line, which says why a disabled cap can't play. */
+export const SONG_ERROR_ID = 'song-error'
+const GLYPHS = ['play', 'pause', 'retry'] as const
 
 // True while focusPlayButton() moves focus; a prevented focus event keeps the tooltip shut.
 let focusingQuietly = false
+// Set when focusPlayButton() ran while the strip was hidden.
+let focusOnWake = false
 
 /**
- * The transport: a metal cap ringed by the loop's progress in the signal colour. Its state line is
- * for screen readers only; the cap's icon and the Listen gate already show the state.
+ * The transport: a cap ringed by the loop's progress in the signal colour. Its state line is for
+ * screen readers only; the cap's icon and the Listen gate already show the state.
  */
 export function PlayButton() {
   const api = useAudioApi()
   const snap = useAudioSnapshot()
+  const awake = useAwake()
   const ring = useRef<SVGCircleElement>(null)
   const { state } = snap
 
@@ -27,13 +33,20 @@ export function PlayButton() {
     ring.current?.setAttribute('stroke-dashoffset', String(1 - f.loopPosition))
   }, state === 'playing')
 
-  const label =
-    state === 'error'
-      ? COPY.errorRetry
-      : state === 'playing' || (state === 'loading' && snap.unlocked)
-        ? COPY.pauseAria
-        : COPY.playAria
-  const icon = state === 'error' ? 'retry' : label === COPY.pauseAria ? 'pause' : 'play'
+  useEffect(() => {
+    if (awake && focusOnWake) focusPlayButton()
+  }, [awake])
+
+  // A browser without Web Audio has nothing to retry: the cap stays Play, disabled, and the
+  // strip's line says why.
+  const unsupported = snap.error === 'unsupported'
+  const retry = state === 'error' && !unsupported
+  const label = retry
+    ? COPY.errorRetry
+    : state === 'playing' || (state === 'loading' && snap.unlocked)
+      ? COPY.pauseAria
+      : COPY.playAria
+  const icon = retry ? 'retry' : label === COPY.pauseAria ? 'pause' : 'play'
 
   return (
     <div className="transport flex flex-none flex-col items-center no-js:hidden">
@@ -42,10 +55,12 @@ export function PlayButton() {
           <button
             id={PLAY_BUTTON_ID}
             type="button"
-            className="play-btn group/play relative grid size-(--pb) flex-none place-items-center rounded-full [--pb:44px] focus-visible:outline-offset-8"
+            className="play-btn group/play relative grid size-(--pb) flex-none place-items-center rounded-full [--pb:44px] focus-visible:outline-offset-8 aria-disabled:cursor-default"
             data-state={state}
             aria-label={label}
-            onClick={() => (state === 'error' ? api.retry() : api.toggle())}
+            aria-disabled={unsupported || undefined}
+            aria-describedby={unsupported ? SONG_ERROR_ID : undefined}
+            onClick={unsupported ? undefined : () => (retry ? api.retry() : api.toggle())}
           >
             <svg
               className="play-btn__ring pointer-events-none absolute inset-[calc(var(--pb)*-0.0893)] size-[calc(100%+var(--pb)*0.1786)] max-w-none -rotate-90 overflow-visible fill-none"
@@ -79,22 +94,28 @@ export function PlayButton() {
             <span
               className={cn(
                 'play-btn__disc grid size-full place-items-center rounded-full',
-                METAL,
-                'transition-[translate,--tw-gradient-from,--tw-gradient-to] duration-(--dur-1) ease-out group-hover/play:from-metal-hi-lift group-hover/play:to-metal-lo-lift group-active/play:translate-y-px',
-                'forced-colors:border-[ButtonText]',
+                PART,
+                // Disabled, it loses its fill as the outline buttons do; pressed, the disc sinks
+                // inside its still ring.
+                unsupported
+                  ? 'bg-transparent text-ink-4'
+                  : [PART_LIFT, 'group-active/play:scale-96'],
+                'transition-[scale,background-color] duration-(--dur-1) ease-out',
               )}
             >
-              <Icon name={icon} size={22} className="size-[46%]" />
+              <IconSwap names={GLYPHS} active={icon} size={22} className="size-[46%]" />
             </span>
           </button>
         </TooltipTrigger>
         {/* Clears the 8px-offset focus ring by as much as the other tooltips clear theirs. */}
         <TooltipContent aria-label="Shortcut: Space" sideOffset={10}>
           {label}
-          <Kbd>Space</Kbd>
+          {!unsupported && <Kbd>Space</Kbd>}
         </TooltipContent>
       </Tooltip>
-      <p className="state-text sr-only" role="status">
+      {/* `visible` keeps the status in the accessibility tree while the strip is hidden, so the
+          Listen press's "Loading" is announced. */}
+      <p className="state-text visible sr-only" role="status">
         {stateText(state, snap.muted)}
       </p>
     </div>
@@ -103,12 +124,15 @@ export function PlayButton() {
 
 /**
  * Hands focus to the play button without its shortcut tooltip, which would otherwise stay open
- * over the strip for as long as focus rests there.
+ * over the strip for as long as focus rests there. During the Listen press React has not yet shown
+ * the strip, so the cap can't take focus; it takes it once the strip shows.
  */
 export function focusPlayButton() {
+  const button = document.getElementById(PLAY_BUTTON_ID)
   focusingQuietly = true
-  document.getElementById(PLAY_BUTTON_ID)?.focus()
+  button?.focus()
   focusingQuietly = false
+  focusOnWake = button != null && document.activeElement !== button
 }
 
 function stateText(state: string, muted: boolean): string {

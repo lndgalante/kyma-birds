@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMediaSession } from '~/audio/mediaSession'
-import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
+import { useAudioApi, useAudioSnapshot, useAwake } from '~/audio/useAudio'
 import { BirdDetails } from '~/components/bird/BirdDetails'
 import { BirdZone } from '~/components/bird/BirdZone'
+import { PickerPager } from '~/components/bird/PickerPager'
 import { useSnapIndex } from '~/components/bird/useSnapIndex'
 import { useWheelStep } from '~/components/bird/useWheelStep'
+import { GATE_BUTTON_ID } from '~/components/plate/ListenGate'
 import { PlateZone } from '~/components/plate/PlateZone'
 import { AppShell } from '~/components/shell/AppShell'
 import { Masthead } from '~/components/shell/Masthead'
@@ -35,6 +37,7 @@ function Instrument() {
   const navigate = Route.useNavigate()
   const audio = useAudioApi()
   const snap = useAudioSnapshot()
+  const awake = useAwake()
   const announce = useAnnounce()
 
   const committedIndex = committedIndexOf(birds, search.bird)
@@ -124,7 +127,15 @@ function Instrument() {
     else if (action === 'first') snapCtl.goTo(0, { source: 'key' })
     else if (action === 'last') snapCtl.goTo(birds.length - 1, { source: 'key' })
     else if (action === 'toggle') audio.toggle()
-    else if (action === 'mute') audio.setMuted(!audio.getSnapshot().muted)
+    else if (action === 'mute') {
+      const muted = !audio.getSnapshot().muted
+      audio.setMuted(muted)
+      // While a song plays the strip's status line says so; otherwise (before Listen the strip
+      // is hidden) nothing on screen would.
+      if (audio.getSnapshot().state !== 'playing') {
+        announce(muted ? COPY.stateMuted : COPY.stateSoundOn)
+      }
+    }
   })
 
   useMediaSession({
@@ -137,11 +148,35 @@ function Instrument() {
   })
 
   const detailsBird = birds.find((b) => b.slug === detailsSlug) ?? null
+  const pager = {
+    index: viewIndex,
+    total: birds.length,
+    onPrev: () => snapCtl.goTo(viewIndex - 1, { source: 'button' }),
+    onNext: () => snapCtl.goTo(viewIndex + 1, { source: 'button' }),
+  }
 
   return (
     <AppShell theme={birdTheme(birds[viewIndex])}>
+      {/* Until the first Listen, the first Tab offers it: Listen is the page's one first action
+          but sits last in the tab order, after the masthead, the caption's links and the pager.
+          Script moves focus itself, so no fragment lands in the address. */}
+      {!awake && (
+        <SkipLink
+          href={`#${GATE_BUTTON_ID}`}
+          className="no-js:hidden"
+          onClick={(e) => {
+            const listen = document.getElementById(GATE_BUTTON_ID)
+            if (!listen) return
+            e.preventDefault()
+            listen.focus()
+          }}
+        >
+          {COPY.skipListen}
+        </SkipLink>
+      )}
       <SkipLink href="#birds">{COPY.skip}</SkipLink>
-      <Masthead variant="instrument" bird={search.bird} />
+      {/* The committed bird even on a bare "/", so Credits and About open the credits at it. */}
+      <Masthead variant="instrument" bird={committed.slug} />
       <main
         id="main"
         className={cn(
@@ -160,8 +195,18 @@ function Instrument() {
           snap={snapCtl}
           onDetails={setDetailsSlug}
         />
-        <SongZone bird={committed} />
+        {/* Field and Compact have no rail to hold the arrows (BirdZone), so the pager sits low,
+            in thumb reach. Compact sets it at the end of the song strip's row (this box is a flex
+            row there and is otherwise transparent to the grid); Field sets it at the foot of the
+            screen, after the plate. Each sits in the tab order where it sits on screen. */}
+        <div className="song-row contents compact:col-start-1 compact:row-start-2 compact:flex compact:min-w-0 compact:items-center compact:gap-3 compact:[&>section]:min-w-0 compact:[&>section]:flex-auto">
+          <SongZone bird={committed} />
+          <PickerPager {...pager} className="hidden js:compact:flex" />
+        </div>
         <PlateZone bird={committed} />
+        <div className="pager-row hidden justify-center pt-3 js:field:flex">
+          <PickerPager {...pager} />
+        </div>
       </main>
       <BirdDetails bird={detailsBird} onClose={() => setDetailsSlug(null)} />
     </AppShell>

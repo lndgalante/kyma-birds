@@ -17,4 +17,4 @@ export function describeMode(shape: PlateShape, modeKey: string): string {
 }
 
 export const MAPPING_SENTENCE =
-  "Each song is spread over twelve resonant modes of the plate: the bird's most frequent note lands on the plate's signature pattern, lower notes reach simpler patterns and higher notes more intricate ones."
+  'Each song is spread over twelve resonant modes of the plate: the bird’s most frequent note lands on the plate’s signature pattern, lower notes reach simpler patterns and higher notes more intricate ones.'

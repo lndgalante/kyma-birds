@@ -2,13 +2,12 @@ import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
 import { Button } from '~/components/ui/button'
-import { Kbd } from '~/components/ui/kbd'
-import { METAL } from '~/components/ui/surface'
+import { PART } from '~/components/ui/surface'
 import { COPY, nowPlayingAria } from '~/lib/copy'
 import { getBirds } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 import { AboutDialog } from './AboutDialog'
-import { ArrowKey, Icon } from './Icon'
+import { IconSwap } from './IconButton'
 import { Wordmark } from './Wordmark'
 
 /**
@@ -28,7 +27,7 @@ const ON_PHOTO = 'field-or-compact:text-ink field-or-compact:halo-mast'
 interface MastheadProps {
   /** 'instrument' overlays the photo in Field and Compact and is a bar elsewhere; 'page' is always a bar. */
   variant: 'instrument' | 'page'
-  /** Bird to keep selected when following the wordmark home. */
+  /** Bird to keep selected when following the wordmark home, and to open the credits at. */
   bird?: string
 }
 
@@ -60,30 +59,11 @@ export function Masthead({ variant, bird }: MastheadProps) {
             bird={bird}
             className={instrument ? 'field-or-compact:halo-mast' : 'flex-none'}
           />
-          {instrument ? (
-            <p className="masthead__hint ms-auto hidden items-center gap-6 text-sm leading-none whitespace-nowrap text-ink-3 split-fine:inline-flex">
-              <span className="inline-flex items-center gap-2">
-                <Kbd>Space</Kbd> to play
-              </span>{' '}
-              <span className="inline-flex items-center gap-2">
-                <span className="inline-flex gap-1">
-                  <Kbd>
-                    <ArrowKey side="left" />
-                  </Kbd>
-                  <Kbd>
-                    <ArrowKey side="right" />
-                  </Kbd>
-                </span>{' '}
-                to change bird
-              </span>
-            </p>
-          ) : (
-            <NowPlaying />
-          )}
+          {!instrument && <NowPlaying />}
           <nav
             className={cn(
               'masthead__nav ms-auto -me-3 flex items-center gap-1',
-              instrument ? 'split-fine:ms-8' : 'flex-none [.now-playing+&]:ms-3',
+              !instrument && 'flex-none [.now-playing+&]:ms-3',
             )}
             aria-label="Site"
           >
@@ -126,10 +106,14 @@ function NowPlaying() {
       <span
         className={cn(
           'now-playing__icon grid size-[30px] flex-none place-items-center rounded-full',
-          METAL,
+          PART,
         )}
       >
-        <Icon name={playing ? 'pause' : 'play'} size={14} />
+        <IconSwap
+          names={['play', 'pause']}
+          active={playing ? 'pause' : 'play'}
+          className="size-3.5"
+        />
       </span>
       <span className="now-playing__name truncate narrow:hidden">{bird.commonName}</span>
     </Button>

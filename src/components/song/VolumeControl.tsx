@@ -16,14 +16,17 @@ export function VolumeControl() {
     <div className="volume flex flex-none items-center gap-1.5 no-js:hidden">
       <IconButton
         label={COPY.muteAria}
-        icon={muted ? 'muted' : 'volume'}
+        icons={['volume', 'muted']}
         pressed={muted}
         shortcut={{ keys: 'M', spoken: 'M' }}
         onClick={() => api.setMuted(!muted)}
-        className="volume__mute"
+        // Where it ends the strip, the 40px fine-pointer button moves 2px in, so its hover disc
+        // sits concentric with the capsule's end as the 44px touch target does.
+        className="volume__mute pointer-fine:field-or-compact:me-0.5 pointer-fine:song-narrow:me-0.5"
       />
       <Slider
-        className="range volume__slider w-24 field-or-compact:hidden song-narrow:hidden"
+        // The 6px margin sets the fader's end 16px in from the strip's end.
+        className="range volume__slider me-1.5 w-24 field-or-compact:hidden song-narrow:hidden"
         min={0}
         max={100}
         step={1}

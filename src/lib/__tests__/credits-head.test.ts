@@ -3,6 +3,7 @@ import { shortAuthor, shortLicense, sourceLabel, xcNumber } from '~/lib/credits'
 import { birdHead, creditsHead } from '~/lib/head'
 import { getBirds } from '~/lib/manifest'
 import { absoluteUrl, normalizeOrigin } from '~/lib/site'
+import { birdPalette, hexToOklch, oklchToHex } from '~/lib/theme'
 
 describe('credits helpers', () => {
   it('labels sources by host', () => {
@@ -65,6 +66,15 @@ describe('site and head', () => {
     expect(metaOf(h, 'og:url')).toBe('https://kyma.example/?bird=kakapo')
     expect(metaOf(h, 'og:image')).toBe('https://kyma.example/birds/kakapo/photo.webp')
     expect(h.links).toContainEqual({ rel: 'canonical', href: 'https://kyma.example/?bird=kakapo' })
+  })
+
+  it('colours the browser bar with each bird’s room', () => {
+    for (const b of birds) {
+      const color = metaOf(birdHead(birds, b.slug, undefined), 'theme-color')
+      expect(color).toBe(oklchToHex(birdPalette(b).ground))
+      // The room is dark: at most 16% lightness (theme.ts).
+      expect(hexToOklch(color!).l).toBeLessThanOrEqual(0.16)
+    }
   })
 
   it('uses the home title and the default bird when no bird is asked for', () => {

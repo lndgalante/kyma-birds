@@ -20,6 +20,7 @@ export function birdHead(
   const meta: Meta[] = [
     { title },
     { name: 'description', content: description },
+    // The bird's room, so the browser's own bar continues it.
     { name: 'theme-color', content: themeColorHex(b) },
     { property: 'og:type', content: 'website' },
     { property: 'og:site_name', content: SITE_TITLE },

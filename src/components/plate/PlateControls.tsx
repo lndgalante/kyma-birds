@@ -1,3 +1,4 @@
+import { useAwake } from '~/audio/useAudio'
 import { Button } from '~/components/ui/button'
 import { Toggle } from '~/components/ui/toggle'
 import { COPY } from '~/lib/copy'
@@ -12,6 +13,11 @@ interface PlateControlsProps {
   onDescribe(): void
 }
 
+/**
+ * Hold, Take photo and Scatter sand. Before the first Listen there is nothing to hold, photograph
+ * or scatter, so with JS they keep their place in the foot (nothing moves when they come) but stay
+ * invisible, out of the tab order, then fade in once and stay.
+ */
 export function PlateControls({
   held,
   onHeldChange,
@@ -19,12 +25,16 @@ export function PlateControls({
   onPhoto,
   onDescribe,
 }: PlateControlsProps) {
+  const awake = useAwake()
   return (
     <div
       className={cn(
         'plate-controls relative flex flex-wrap items-center justify-center gap-2 no-js:hidden narrow:gap-1.5',
         'foot-row:ms-auto',
+        // Visibility flips at once and the opacity fades (instant under reduced motion).
+        'transition-opacity duration-(--dur-5) ease-out js:not-data-awake:invisible js:not-data-awake:opacity-0',
       )}
+      data-awake={awake || undefined}
     >
       <Toggle className="btn btn--toggle narrow:px-3" pressed={held} onPressedChange={onHeldChange}>
         {COPY.hold}

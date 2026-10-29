@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type { LiveFeatures } from './AudioProvider'
-import { useAudioApi, useAudioField } from './useAudio'
+import { useAudioApi } from './useAudio'
 
 /**
  * Runs `draw` on every animation frame while `active`, handing it the latest features.
@@ -28,57 +28,4 @@ export function useFeatureFrames(
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [api, active, fps])
-}
-
-export interface FeatureSnapshot {
-  dominantHz: number | null
-  /** True once any voiced frame has been seen since the page loaded. */
-  heard: boolean
-  /** The last voiced value is being held through a silence longer than `holdMs`. */
-  stale: boolean
-}
-
-const EMPTY: FeatureSnapshot = { dominantHz: null, heard: false, stale: false }
-
-/**
- * An 8 Hz snapshot of the live readout values (ui.md §5.3): React re-renders only when a
- * displayed value changes. Silence longer than `holdMs` keeps the last value, marked stale.
- */
-export function useThrottledFeatures(hz = 8, holdMs = 400): FeatureSnapshot {
-  const api = useAudioApi()
-  const status = useAudioField('state')
-  const [snap, setSnap] = useState<FeatureSnapshot>(EMPTY)
-  const lastVoicedAt = useRef(0)
-  const held = useRef<number | null>(null)
-
-  useEffect(() => {
-    const sample = () => {
-      const f = api.features()
-      const now = performance.now()
-      if (f.dominantHz != null && status === 'playing') {
-        held.current = f.dominantHz
-        lastVoicedAt.current = now
-      }
-      const value = held.current
-      const stale = value == null || status !== 'playing' || now - lastVoicedAt.current > holdMs
-      const next: FeatureSnapshot = {
-        dominantHz: value == null ? null : Math.round(value / 10) * 10,
-        heard: value != null,
-        stale,
-      }
-      setSnap((prev) =>
-        prev.dominantHz === next.dominantHz &&
-        prev.heard === next.heard &&
-        prev.stale === next.stale
-          ? prev
-          : next,
-      )
-    }
-    sample()
-    if (status !== 'playing') return
-    const id = window.setInterval(sample, 1000 / hz)
-    return () => window.clearInterval(id)
-  }, [api, status, hz, holdMs])
-
-  return snap
 }

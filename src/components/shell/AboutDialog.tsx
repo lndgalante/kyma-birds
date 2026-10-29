@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { Button } from '~/components/ui/button'
 import { Kbd } from '~/components/ui/kbd'
 import { Separator } from '~/components/ui/separator'
 import { textLinkVariants } from '~/components/ui/text-link'
@@ -8,7 +7,7 @@ import { MAPPING_SENTENCE } from '~/cymatics'
 import { COPY } from '~/lib/copy'
 import { cn } from '~/lib/utils'
 import { ArrowKey } from './Icon'
-import { SHEET_HEADING, Sheet, SheetClose, SheetCloseButton, SheetTitle } from './Sheet'
+import { SHEET_HEADING, Sheet, SheetCloseButton, SheetTitle } from './Sheet'
 
 interface AboutDialogProps {
   open: boolean
@@ -35,16 +34,15 @@ export function AboutDialog({ open, onClose, bird }: AboutDialogProps) {
         <p className="max-w-[62ch]">
           The plate on this page is simulated. As each song loops, we follow its strongest frequency
           in real time. {MAPPING_SENTENCE} The sand reorganizes as the bird’s voice rises and falls.
-          Mode numbers like (3, 2) count the nodal lines in the pattern.
         </p>
         <h3 className={SHEET_HEADING}>{COPY.aboutKeyboardHeading}</h3>
-        {/* No line under the last row: the footer's separator closes the table of keys. */}
-        <dl className="keys divide-y divide-line border-t border-line">
+        {/* Two pairs to a row from 40rem, read across; one column on phones, where "first or
+            last bird" would not fit half the width. Each pair's box is transparent to the grid,
+            so a key column is as wide as its widest keys; a row's second pair stands 2rem off
+            the first. */}
+        <dl className="keys grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 stacked:grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)]">
           {KEYS.map(([keys, action]) => (
-            <div
-              key={action}
-              className="keys__row grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-4 py-2.5 field:grid-cols-[6.5rem_minmax(0,1fr)]"
-            >
+            <div key={action} className="keys__row contents stacked:even:[&>dt]:ps-5">
               <dt className="flex items-center gap-1">
                 {keys.map((k, i) => {
                   const [id, glyph] = typeof k === 'string' ? [k, k] : k
@@ -63,7 +61,7 @@ export function AboutDialog({ open, onClose, bird }: AboutDialogProps) {
         </dl>
       </div>
       <Separator className="mt-8" />
-      <footer className="sheet__foot flex items-center justify-between gap-4 pt-5 field:flex-wrap">
+      <footer className="sheet__foot flex items-center pt-5">
         <Link
           to="/credits"
           search={bird ? { bird } : {}}
@@ -76,9 +74,6 @@ export function AboutDialog({ open, onClose, bird }: AboutDialogProps) {
         >
           {COPY.aboutCreditsLink}
         </Link>
-        <SheetClose asChild>
-          <Button className="btn">{COPY.close}</Button>
-        </SheetClose>
       </footer>
     </Sheet>
   )
