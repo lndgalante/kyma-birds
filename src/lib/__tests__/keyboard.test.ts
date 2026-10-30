@@ -4,6 +4,7 @@ import {
   WIDGET_SELECTOR,
   isDialogOpen,
   isTypingOrWidgetTarget,
+  plateShortcutFor,
   shortcutFor,
 } from '~/lib/keyboard'
 
@@ -36,6 +37,24 @@ const key = (k: string, extra: Partial<Parameters<typeof shortcutFor>[0]> = {}) 
 })
 
 describe('keyboard', () => {
+  it('maps plate keys separately so navigation handlers leave them alone', () => {
+    for (const [letter, action] of [
+      ['h', 'hold'],
+      ['p', 'photo'],
+      ['s', 'scatter'],
+    ]) {
+      expect(plateShortcutFor(key(letter))).toBe(action)
+      expect(plateShortcutFor(key(letter.toUpperCase()))).toBe(action)
+      expect(plateShortcutFor(key(letter, { target: el('button') }))).toBe(action)
+      expect(shortcutFor(key(letter))).toBeNull()
+      for (const modifier of ['metaKey', 'ctrlKey', 'altKey', 'shiftKey']) {
+        expect(plateShortcutFor(key(letter, { [modifier]: true }))).toBeNull()
+      }
+      expect(plateShortcutFor(key(letter, { target: el('widget') }))).toBeNull()
+    }
+    for (const k of ['ArrowLeft', ' ', 'm', 'x']) expect(plateShortcutFor(key(k))).toBeNull()
+  })
+
   it('maps the instrument keys on non-interactive targets', () => {
     expect(shortcutFor(key('ArrowLeft'))).toBe('prev')
     expect(shortcutFor(key('ArrowRight'))).toBe('next')

@@ -42,7 +42,8 @@ appears in the plate header, under the spectrum and in the plate caption, and De
 reads it out.
 
 **Keyboard:** Space plays or pauses, ← → move to the previous or next bird, Home and End jump to
-the first or last, and M mutes. The shortcuts keep working after a mouse click on a button or link;
+the first or last, and M mutes. After Listen, H holds or releases the pattern, P takes a photo, and
+S scatters sand (unless the pattern is held). The shortcuts keep working after a click on a button or link;
 only text fields, sliders, the rail's tabs and open dialogs keep the keys for themselves.
 
 ## Stack

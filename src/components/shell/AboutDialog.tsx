@@ -90,4 +90,7 @@ const KEYS: Array<[keys: Array<string | [string, ReactNode]>, action: string]> =
   ],
   [['Home', 'End'], 'first or last bird'],
   [['M'], 'mute'],
+  [['H'], 'hold or release the pattern'],
+  [['P'], 'take a photo'],
+  [['S'], 'scatter sand'],
 ]

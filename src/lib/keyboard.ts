@@ -9,7 +9,7 @@ export const WIDGET_SELECTOR =
 
 /**
  * Targets with a native Space action (activation, or the link's page scroll). Arrows, Home, End
- * and M mean nothing to them, so those shortcuts still work while a button or link has focus
+ * and letter shortcuts mean nothing to them, so those shortcuts work while a button or link has focus
  * (Chrome and Firefox focus a button on mouse click).
  */
 export const ACTIVATABLE_SELECTOR = 'button, a, summary'
@@ -37,7 +37,8 @@ export function isDialogOpen(doc: Pick<Document, 'querySelector'>): boolean {
   return doc.querySelector('[role=dialog][data-state=open]') != null
 }
 
-export type ShortcutAction = 'prev' | 'next' | 'first' | 'last' | 'toggle' | 'mute'
+export type ShortcutAction =
+  'prev' | 'next' | 'first' | 'last' | 'toggle' | 'mute' | 'hold' | 'photo' | 'scatter'
 
 interface KeyLike {
   key: string
@@ -73,13 +74,28 @@ export function shortcutFor(e: KeyLike): ShortcutAction | null {
   }
 }
 
+export function plateShortcutFor(e: KeyLike): ShortcutAction | null {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return null
+  if (isTypingOrWidgetTarget(e.target)) return null
+  switch (e.key.toLowerCase()) {
+    case 'h':
+      return 'hold'
+    case 'p':
+      return 'photo'
+    case 's':
+      return 'scatter'
+    default:
+      return null
+  }
+}
+
 /**
- * One window keydown handler for the instrument. Actions run inside the key event, so the
- * first Space can unlock audio (it is a user gesture).
+ * Actions run inside the key event, so Space can unlock audio and P can open a save dialog.
  */
 export function useGlobalShortcuts(
   handler: (action: ShortcutAction, e: KeyboardEvent) => void,
   enabled = true,
+  resolve: (e: KeyLike) => ShortcutAction | null = shortcutFor,
 ): void {
   const ref = useRef(handler)
   ref.current = handler
@@ -88,15 +104,15 @@ export function useGlobalShortcuts(
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return
       if (isDialogOpen(document)) return
-      const action = shortcutFor(e)
+      const action = resolve(e)
       if (!action) return
       // Prevent first: a held Space must not scroll the page either.
       e.preventDefault()
-      // Holding an arrow walks the birds; holding Space must not flutter play/pause.
-      if (e.repeat && (action === 'toggle' || action === 'mute')) return
+      // Navigation may repeat; playback, captures and plate changes must fire only once.
+      if (e.repeat && !['prev', 'next', 'first', 'last'].includes(action)) return
       ref.current(action, e)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [enabled])
+  }, [enabled, resolve])
 }

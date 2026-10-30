@@ -52,7 +52,7 @@ export const COPY = {
     'Sand collects on the lines of the plate that stay still. As the song rises and falls, the pattern shifts between modes. Use Describe pattern to hear the current mode.',
   plateCaptionIdle: 'Waiting for sound',
   plateCaptionError: 'No sound',
-  hold: 'Hold',
+  hold: 'Hold pattern',
   takePhoto: 'Take photo',
   photoSaved: 'Photo saved.',
   photoFailed: 'This browser can’t take a photo of the plate.',

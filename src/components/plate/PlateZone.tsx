@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
-import { useAudioApi } from '~/audio/useAudio'
+import { useAudioApi, useAwake } from '~/audio/useAudio'
 import { describeMode, type PlateHandle } from '~/cymatics'
 import { COPY, describeSay, describeSayHeld, plateCaptionHeld } from '~/lib/copy'
 import { NBSP, formatHz } from '~/lib/format'
+import { plateShortcutFor, useGlobalShortcuts } from '~/lib/keyboard'
 import type { Bird } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 import { useAnnounce } from '../shell/SrStatus'
@@ -19,6 +20,7 @@ interface PlateZoneProps {
 
 export function PlateZone({ bird }: PlateZoneProps) {
   const api = useAudioApi()
+  const awake = useAwake()
   const announce = useAnnounce()
   const [held, setHeld] = useState(false)
   const [scatterToken, setScatterToken] = useState(0)
@@ -54,6 +56,16 @@ export function PlateZone({ bird }: PlateZoneProps) {
     const hz = api.features().dominantHz ?? api.getTelemetry()?.dominantHz ?? null
     announce(describeSay(describeMode('circle', key), hz ? formatHz(hz).replace(NBSP, ' ') : ''))
   }
+
+  useGlobalShortcuts(
+    (action) => {
+      if (action === 'hold') setHeld((current) => !current)
+      else if (action === 'photo') onPhoto()
+      else if (action === 'scatter' && !held) setScatterToken((t) => t + 1)
+    },
+    awake,
+    plateShortcutFor,
+  )
 
   return (
     <section
