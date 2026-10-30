@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CreditsPage } from '~/components/credits/CreditsPage'
-import { creditsHead } from '~/lib/head'
+import { creditsHead, jsonLd } from '~/lib/head'
 import { getBirds } from '~/lib/manifest'
 import { absoluteUrl } from '~/lib/site'
 import { validateBirdSearch } from '~/lib/search'
@@ -19,11 +19,10 @@ export const Route = createFileRoute('/credits')({
       acquireLicensePage: b.credits.photo.source,
       creditText: `${b.credits.photo.author}, ${b.credits.photo.license}`,
     }))
-    const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })
     return {
       meta,
       links,
-      scripts: [{ type: 'application/ld+json', children: json.replace(/</g, '\\u003c') }],
+      scripts: [jsonLd({ '@context': 'https://schema.org', '@graph': graph })],
     }
   },
   component: Credits,

@@ -1,7 +1,9 @@
+import { Link } from '@tanstack/react-router'
 import { ExternalLink } from '~/components/ui/external-link'
+import { textLinkVariants } from '~/components/ui/text-link'
 import { COPY } from '~/lib/copy'
 import { sourceLabel } from '~/lib/credits'
-import type { Bird, Credit } from '~/lib/manifest'
+import { DEFAULT_BIRD_SLUG, type Bird, type Credit } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
 
 /**
@@ -54,7 +56,15 @@ export function CreditEntry({
             id={`credit-${b.slug}`}
             className="credit-entry__name font-display text-xl leading-[1.15] tracking-title text-ink"
           >
-            {b.commonName}
+            <Link
+              to="/"
+              search={b.slug === DEFAULT_BIRD_SLUG ? {} : { bird: b.slug }}
+              preload={false}
+              className={cn('text-link', textLinkVariants())}
+              aria-label={`Listen to ${b.commonName}`}
+            >
+              {b.commonName}
+            </Link>
           </h2>
           <p className="credit-entry__sci mt-1 text-md leading-[1.4] text-ink-3">
             <i>{b.scientificName}</i>

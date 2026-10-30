@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useMediaSession } from '~/audio/mediaSession'
 import { useAudioApi, useAudioSnapshot, useAwake } from '~/audio/useAudio'
-import { BirdDetails } from '~/components/bird/BirdDetails'
 import { BirdZone } from '~/components/bird/BirdZone'
 import { PickerPager } from '~/components/bird/PickerPager'
 import { useSnapIndex } from '~/components/bird/useSnapIndex'
@@ -22,6 +21,10 @@ import { validateBirdSearch, type NavSource } from '~/lib/search'
 import { SITE_H1 } from '~/lib/site'
 import { birdTheme } from '~/lib/theme'
 import { cn } from '~/lib/utils'
+
+const BirdDetails = lazy(() =>
+  import('~/components/bird/BirdDetails').then((m) => ({ default: m.BirdDetails })),
+)
 
 export const Route = createFileRoute('/')({
   validateSearch: validateBirdSearch,
@@ -44,6 +47,11 @@ function Instrument() {
   const committed = birds[committedIndex]
   const [viewIndex, setViewIndex] = useState(committedIndex)
   const [detailsSlug, setDetailsSlug] = useState<string | null>(null)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const openDetails = useCallback((slug: string) => {
+    setDetailsSlug(slug)
+    setDetailsOpen(true)
+  }, [])
   const trackRef = useRef<HTMLDivElement>(null)
   const committedSlug = useRef(committed.slug)
   committedSlug.current = committed.slug
@@ -98,21 +106,14 @@ function Instrument() {
     // Mount only: later URLs are written by the app itself.
   }, [])
 
-  // Neighbours' bytes, once the committed song is under way (or after 1.5 s of quiet browsing).
+  // Warm neighbouring songs only after the listener has started playback.
   const playing = snap.state === 'playing'
   useEffect(() => {
-    const go = () => {
-      for (const d of [-1, 1]) {
-        const n = birds[committedIndex + d]
-        if (n) audio.prefetch(n)
-      }
+    if (!playing) return
+    for (const d of [-1, 1]) {
+      const n = birds[committedIndex + d]
+      if (n) audio.prefetch(n)
     }
-    if (playing) {
-      go()
-      return
-    }
-    const id = window.setTimeout(go, 1500)
-    return () => window.clearTimeout(id)
   }, [audio, birds, committedIndex, playing])
 
   const failed = snap.state === 'error' && snap.error !== 'unsupported'
@@ -186,14 +187,16 @@ function Instrument() {
           'compact:min-h-dvh compact:grid-cols-[minmax(0,1fr)_var(--plate-col)] compact:grid-rows-[auto_auto_1fr] compact:gap-x-(--gap) compact:gap-y-2.5 compact:pt-[calc(var(--safe-t)+8px)] compact:pb-[calc(var(--safe-b)+8px)]',
         )}
       >
-        <h1 className="sr-only">{SITE_H1}</h1>
+        <h1 className="sr-only">
+          {search.bird ? `${committed.commonName}: bird song and cymatics · Kyma Birds` : SITE_H1}
+        </h1>
         <BirdZone
           birds={birds}
           committedIndex={committedIndex}
           viewIndex={viewIndex}
           trackRef={trackRef}
           snap={snapCtl}
-          onDetails={setDetailsSlug}
+          onDetails={openDetails}
         />
         {/* Field and Compact have no rail to hold the arrows (BirdZone), so the pager sits low,
             in thumb reach. Compact sets it at the end of the song strip's row (this box is a flex
@@ -208,7 +211,14 @@ function Instrument() {
           <PickerPager {...pager} />
         </div>
       </main>
-      <BirdDetails bird={detailsBird} onClose={() => setDetailsSlug(null)} />
+      {detailsSlug && (
+        <Suspense fallback={null}>
+          <BirdDetails
+            bird={detailsOpen ? detailsBird : null}
+            onClose={() => setDetailsOpen(false)}
+          />
+        </Suspense>
+      )}
     </AppShell>
   )
 }

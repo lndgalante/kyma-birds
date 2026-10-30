@@ -52,11 +52,12 @@ only text fields, sliders, the rail's tabs and open dialogs keep the keys for th
   workerd.
 - Vite 8, TypeScript 7 (strict), Vitest 5, Prettier, pnpm 12, Node ≥ 22.12.
 - Web Audio API for playback and analysis, with no dependencies.
-- three.js (WebGL2 with float render targets), only inside the lazily loaded plate chunk. It is
-  never in the server bundle or the initial client chunk.
+- three.js (WebGL2 with float render targets), only inside the plate chunk, loaded after the first
+  Listen press. About and Details also load on first open. None of these chunks loads during the
+  initial page view.
 - Tailwind CSS v4 and shadcn/ui (Radix primitives, Lucide icons), themed with the Kyma tokens:
   one stylesheet, with the layout modes and container queries as custom variants. Fonts are
-  self-hosted Archivo and Martian Mono (Fontsource).
+  self-hosted Instrument Sans and Figtree (Fontsource).
 
 ## Getting started
 
@@ -169,13 +170,32 @@ pnpm wrangler deploy --dry-run    # check the bundle without uploading
   `Referrer-Policy`, `Permissions-Policy` and `X-Frame-Options` on every rendered response.
   `dist/client` is uploaded as static assets. There is no Content-Security-Policy yet: the page's
   inline scripts would each need a per-request nonce.
-- `VITE_SITE_ORIGIN` is read **at build time**, so it is not a wrangler var; `pnpm deploy` sets it.
-  It turns on canonical and `og:url` tags and makes `og:image` absolute. Without it (a plain
-  `pnpm build`), those two tags are left out and `og:image` is a root-relative path.
+- `VITE_SITE_ORIGIN` is read **at build time**, so it is not a wrangler var. It defaults to
+  `https://kymabirds.com`; set it when deploying to another public origin. Canonical URLs, social
+  previews, structured data and crawl files all use that origin, including in a plain `pnpm build`.
+- `/robots.txt` advertises `/sitemap.xml`. The Worker serves both without rendering React and
+  caches them for an hour. The sitemap derives its 13 canonical URLs from the bird manifest:
+  home, eleven other birds and Credits. `?bird=common-nightingale` shares the home canonical.
+  Credits links to every bird with ordinary links, including without JavaScript. Each bird page
+  includes server-rendered metadata and WebSite, WebPage, photo and recording structured data.
 - `public/_headers` caches `/birds/*` for a week with `stale-while-revalidate`, because those
   filenames aren't content-hashed. Hashed `/assets/*` are cached as immutable. Every asset also
   gets `X-Content-Type-Options: nosniff`.
-- No bindings, secrets or KV are needed. The worker only server-renders the page.
+- No bindings, secrets or KV are needed. The Worker renders pages and serves the crawl files.
+
+## Loading performance
+
+The selected song is fetched ahead of Listen to keep playback responsive. Neighbouring songs
+prefetch only during playback, and Save-Data disables that prefetch. The picker eagerly loads at
+most one photo on either side (none with Save-Data). The main photo stays high priority, and the
+two normal Latin fonts preload in production. The plate uses its CSS poster until Listen.
+
+On October 29, 2026, Lighthouse 13.6.0 with Chrome 156 and its default mobile simulation measured
+the local production preview at **1,723 KiB**, down from **3,434 KiB** before these changes. The
+performance score remained **77**, SEO **100**, and layout shift **0**. Simulated largest paint
+remained **6.3 seconds**: these changes chiefly remove work and downloads after the first paint.
+The local preview serves uncompressed responses; these are lab comparisons, not measurements of
+the deployed Cloudflare site or real users. A live-site audit is still needed for field performance.
 
 ## Browser support
 

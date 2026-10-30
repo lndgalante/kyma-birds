@@ -30,7 +30,6 @@ export function PlateControls({
     <div
       className={cn(
         'plate-controls relative flex flex-wrap items-center justify-center gap-2 no-js:hidden narrow:gap-1.5',
-        'foot-row:ms-auto',
         // Visibility flips at once and the opacity fades (instant under reduced motion).
         'transition-opacity duration-(--dur-5) ease-out js:not-data-awake:invisible js:not-data-awake:opacity-0',
       )}

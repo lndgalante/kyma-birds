@@ -62,6 +62,11 @@ export interface Bird {
 /** Committed bird when `?bird` is absent or unknown: the best-known songbird of the twelve. */
 export const DEFAULT_BIRD_SLUG = 'common-nightingale'
 
+/** The default bird shares the home page's canonical URL. */
+export function birdPath(slug: string): string {
+  return slug === DEFAULT_BIRD_SLUG ? '/' : `/?bird=${encodeURIComponent(slug)}`
+}
+
 export function kebab(s: string): string {
   return s
     .normalize('NFD')

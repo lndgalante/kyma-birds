@@ -1,14 +1,15 @@
 import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
 import { Button } from '~/components/ui/button'
 import { PART } from '~/components/ui/surface'
 import { COPY, nowPlayingAria } from '~/lib/copy'
 import { getBirds } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
-import { AboutDialog } from './AboutDialog'
 import { IconSwap } from './IconButton'
 import { Wordmark } from './Wordmark'
+
+const AboutDialog = lazy(() => import('./AboutDialog').then((m) => ({ default: m.AboutDialog })))
 
 /**
  * Field and Compact landscape: the masthead floats over the photo, under a short scrim for bright
@@ -32,7 +33,7 @@ interface MastheadProps {
 }
 
 export function Masthead({ variant, bird }: MastheadProps) {
-  const [aboutOpen, setAboutOpen] = useState(false)
+  const [about, setAbout] = useState<'unopened' | 'open' | 'closed'>('unopened')
   const instrument = variant === 'instrument'
   // Button's `relative` lifts the links over the header's scrim, a positioned ::before in Field
   // and Compact.
@@ -67,7 +68,7 @@ export function Masthead({ variant, bird }: MastheadProps) {
             )}
             aria-label="Site"
           >
-            <Button variant="nav" size="nav" className={navLink} onClick={() => setAboutOpen(true)}>
+            <Button variant="nav" size="nav" className={navLink} onClick={() => setAbout('open')}>
               {COPY.navAbout}
             </Button>
             <Button asChild variant="nav" size="nav" className={navLink}>
@@ -83,7 +84,12 @@ export function Masthead({ variant, bird }: MastheadProps) {
           </nav>
         </div>
       </header>
-      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} bird={bird} />
+      {/* Stay mounted after the first open so the sheet can animate out. */}
+      {about !== 'unopened' && (
+        <Suspense fallback={null}>
+          <AboutDialog open={about === 'open'} onClose={() => setAbout('closed')} bird={bird} />
+        </Suspense>
+      )}
     </>
   )
 }

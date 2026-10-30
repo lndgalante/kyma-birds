@@ -28,7 +28,7 @@ export function BirdZone({
   onDetails,
 }: BirdZoneProps) {
   const total = birds.length
-  const eagerRange = useSaveData() ? 1 : 2
+  const eagerRange = useSaveData() ? 0 : 1
   // Server HTML marks only the committed photo eager, so React's hoisted image preloads never
   // compete with the LCP image; neighbours turn eager once hydrated.
   const hydrated = useHydrated()

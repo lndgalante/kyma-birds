@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import figtreeLatin from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url'
 import instrumentSansLatin from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url'
 import { HeadContent, Scripts, ScriptOnce, createRootRoute } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
@@ -25,15 +26,13 @@ export const Route = createRootRoute({
       // In dev the stylesheet resolves the font through a different path, so a preload would
       // only fetch it twice; in the build both point at the same hashed file.
       ...(import.meta.env.PROD
-        ? [
-            {
-              rel: 'preload',
-              href: instrumentSansLatin,
-              as: 'font',
-              type: 'font/woff2',
-              crossOrigin: 'anonymous' as const,
-            },
-          ]
+        ? [instrumentSansLatin, figtreeLatin].map((href) => ({
+            rel: 'preload',
+            href,
+            as: 'font',
+            type: 'font/woff2',
+            crossOrigin: 'anonymous' as const,
+          }))
         : []),
       { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
     ],

@@ -77,13 +77,12 @@ export function PlateZone({ bird }: PlateZoneProps) {
           captionKind={caption.kind}
         />
       </div>
-      {/* An error at the start, the controls at the end. Phones centre the two as one row;
-          compact landscape stacks them in its narrow column; in Split the row is level with the
-          song strip. */}
+      {/* Compact landscape stacks errors above the controls; in Split the foot stays level
+          with the song strip. */}
       <div
         className={cn(
           'plate-foot flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2.5 narrow:gap-x-3',
-          'foot-row:h-12 foot-row:flex-nowrap foot-row:justify-start',
+          'foot-row:h-12 foot-row:flex-nowrap',
           'compact:flex-col compact:gap-2',
           'split:h-auto',
         )}

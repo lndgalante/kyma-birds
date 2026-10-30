@@ -1,7 +1,6 @@
 import { ClientOnly } from '@tanstack/react-router'
 import { Component, Suspense, useEffect, useMemo, useState, type ReactNode, type Ref } from 'react'
 import { useAudioApi, useAudioSnapshot } from '~/audio/useAudio'
-import type { PlateDriveSource } from '~/audio/engine'
 import type { PlateBird, PlateError, PlateHandle } from '~/cymatics'
 import { COPY, plateAria } from '~/lib/copy'
 import type { Bird } from '~/lib/manifest'
@@ -20,18 +19,6 @@ interface PlateFigureProps {
   plateRef: Ref<PlateHandle>
   caption: string
   captionKind: string
-}
-
-// Until the engine exists (or if it never can), the plate reads silence.
-const SILENT_SOURCE: PlateDriveSource = {
-  read(_now, out) {
-    out.audible = false
-    out.drive = 0
-    out.voiced = false
-    return out
-  },
-  isAudible: () => false,
-  subscribe: () => () => {},
 }
 
 export function useReducedMotion(): boolean {
@@ -121,15 +108,14 @@ export function PlateFigure({
           aria-label={plateAria(bird.commonName)}
           aria-describedby="plate-desc"
         >
-          {!failed && (
+          {/* Keep the poster until Listen, so WebGL loading and setup never delay the page. */}
+          {!failed && snap.unlocked && engine && (
             <ClientOnly>
               <PlateBoundary onError={setPlateError}>
                 <Suspense fallback={null}>
                   <LazyCymaticsPlate
-                    // The controller takes its source once; remount when the engine appears.
-                    key={engine ? 'engine' : 'silent'}
                     ref={plateRef}
-                    source={engine?.driveSource ?? SILENT_SOURCE}
+                    source={engine.driveSource}
                     bird={plateBird}
                     plateShape="circle"
                     paused={snap.state !== 'playing'}

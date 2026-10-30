@@ -1,4 +1,5 @@
 import handler from '@tanstack/react-start/server-entry'
+import { crawlResponse } from './lib/crawl'
 
 /**
  * The Worker entry (wrangler.jsonc `main`): TanStack Start's own handler, plus security headers
@@ -15,7 +16,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 
 export default {
   async fetch(request: Request): Promise<Response> {
-    const res = await handler.fetch(request)
+    const res = crawlResponse(request) ?? (await handler.fetch(request))
     // A new Response keeps the streamed body and makes the headers writable.
     const out = new Response(res.body, res)
     for (const [name, value] of Object.entries(SECURITY_HEADERS)) out.headers.set(name, value)

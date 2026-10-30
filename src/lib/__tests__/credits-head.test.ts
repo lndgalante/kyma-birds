@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { shortAuthor, shortLicense, sourceLabel, xcNumber } from '~/lib/credits'
-import { birdHead, creditsHead } from '~/lib/head'
+import { birdHead, creditsHead, jsonLd } from '~/lib/head'
 import { getBirds } from '~/lib/manifest'
-import { absoluteUrl, normalizeOrigin } from '~/lib/site'
+import { SITE_DESCRIPTION, SITE_ORIGIN, absoluteUrl, normalizeOrigin } from '~/lib/site'
 import { birdPalette, hexToOklch, oklchToHex } from '~/lib/theme'
 
 describe('credits helpers', () => {
@@ -43,20 +43,22 @@ describe('site and head', () => {
     expect(normalizeOrigin('')).toBeUndefined()
     expect(normalizeOrigin(undefined)).toBeUndefined()
     expect(normalizeOrigin('nope')).toBeUndefined()
+    expect(normalizeOrigin('javascript:alert(1)')).toBeUndefined()
+    expect(normalizeOrigin('file:///tmp')).toBeUndefined()
     expect(absoluteUrl('/a', 'https://x.dev')).toBe('https://x.dev/a')
-    expect(absoluteUrl('/a', undefined)).toBe('/a')
+    expect(absoluteUrl('/a')).toBe(`${SITE_ORIGIN}/a`)
   })
 
   const birds = getBirds()
   const metaOf = (h: ReturnType<typeof birdHead>, key: string) =>
     h.meta.find((m) => m.property === key || m.name === key)?.content
 
-  it('without an origin: no canonical or og:url, root-relative og:image (decision 3)', () => {
-    const h = birdHead(birds, 'kakapo', undefined)
-    expect(h.meta[0].title).toBe('Kākāpō · Kyma Birds')
-    expect(metaOf(h, 'og:url')).toBeUndefined()
-    expect(metaOf(h, 'og:image')).toBe('/birds/kakapo/photo.webp')
-    expect(h.links.some((l) => l.rel === 'canonical')).toBe(false)
+  it('uses the public origin even without a build-time override', () => {
+    const h = birdHead(birds, 'kakapo')
+    expect(h.meta[0].title).toBe('Kākāpō bird song & cymatics · Kyma Birds')
+    expect(metaOf(h, 'og:url')).toBe(`${SITE_ORIGIN}/?bird=kakapo`)
+    expect(metaOf(h, 'og:image')).toBe(`${SITE_ORIGIN}/birds/kakapo/photo.webp`)
+    expect(h.links).toContainEqual({ rel: 'canonical', href: `${SITE_ORIGIN}/?bird=kakapo` })
     expect(metaOf(h, 'theme-color')).toMatch(/^#[0-9a-f]{6}$/)
     expect(metaOf(h, 'description')!.length).toBeLessThanOrEqual(158)
   })
@@ -80,8 +82,43 @@ describe('site and head', () => {
   it('uses the home title and the default bird when no bird is asked for', () => {
     const h = birdHead(birds, undefined, 'https://kyma.example')
     expect(h.meta[0].title).toBe('Kyma Birds: bird song, made visible')
-    expect(metaOf(h, 'og:title')).toBe('Common Nightingale · Kyma Birds')
+    expect(metaOf(h, 'og:title')).toBe(h.meta[0].title)
+    expect(metaOf(h, 'description')).toBe(SITE_DESCRIPTION)
     expect(h.links).toContainEqual({ rel: 'canonical', href: 'https://kyma.example/' })
     expect(creditsHead(undefined).meta[0].title).toBe('Credits · Kyma Birds')
+  })
+
+  it('consolidates default and unknown bird URLs onto the home page', () => {
+    for (const slug of [undefined, 'common-nightingale', 'unknown']) {
+      const h = birdHead(birds, slug, 'https://kyma.example')
+      expect(h.links).toEqual([{ rel: 'canonical', href: 'https://kyma.example/' }])
+      expect(metaOf(h, 'og:url')).toBe('https://kyma.example/')
+    }
+    expect(creditsHead('https://kyma.example').links).toEqual([
+      { rel: 'canonical', href: 'https://kyma.example/credits' },
+    ])
+  })
+
+  it('keeps search, social previews and structured media aligned for every bird', () => {
+    for (const b of birds) {
+      const h = birdHead(birds, b.slug, 'https://kyma.example')
+      expect(metaOf(h, 'og:title')).toBe(h.meta[0].title)
+      expect(metaOf(h, 'twitter:title')).toBe(h.meta[0].title)
+      expect(metaOf(h, 'twitter:image')).toBe(metaOf(h, 'og:image'))
+      const { '@graph': graph } = JSON.parse(h.scripts[0].children)
+      const page = graph.find((node: { '@type': string }) => node['@type'] === 'WebPage')
+      expect(page.url).toBe(h.links[0].href)
+      expect(page.about.alternateName).toBe(b.scientificName)
+      expect(page.mainEntity.contentUrl).toBe(`https://kyma.example${b.audio.src}`)
+      expect(page.mainEntity.license).toBe(b.credits.audio.licenseUrl)
+      expect(page.primaryImageOfPage.license).toBe(b.credits.photo.licenseUrl)
+    }
+  })
+
+  it('escapes script-closing content without corrupting structured data', () => {
+    const data = { description: '</script><script>alert(1)</script>' }
+    const { children } = jsonLd(data)
+    expect(children).not.toContain('<')
+    expect(JSON.parse(children)).toEqual(data)
   })
 })
