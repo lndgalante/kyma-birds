@@ -11,7 +11,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "pnpm run build && wrangler deploy",
+    "deploy": "VITE_SITE_ORIGIN=https://kymabirds.com pnpm run build && wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lab:plate": "vite --config src/cymatics/__harness__/vite.config.ts",

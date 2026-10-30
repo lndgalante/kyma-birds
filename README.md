@@ -156,19 +156,22 @@ works are shared under the same licence. The code is MIT ([`LICENSE`](LICENSE)).
 ## Deploying to Cloudflare
 
 ```sh
-pnpm wrangler login                                       # once
-VITE_SITE_ORIGIN=https://birds.example.com pnpm deploy    # build + wrangler deploy
-pnpm wrangler deploy --dry-run                            # check the bundle without uploading
+pnpm wrangler login               # once
+pnpm deploy                       # build for https://kymabirds.com + wrangler deploy
+pnpm wrangler deploy --dry-run    # check the bundle without uploading
 ```
 
+- The site lives at [kymabirds.com](https://kymabirds.com), a Workers Custom Domain (`routes` in
+  `wrangler.jsonc`). The domain is registered with Cloudflare, so its zone is in the same account
+  and the deploy creates the DNS record and certificate.
 - The build writes `dist/server/wrangler.json`, which wrangler picks up automatically. The Worker
   is `src/server.ts`: TanStack Start's server entry, plus `X-Content-Type-Options`,
   `Referrer-Policy`, `Permissions-Policy` and `X-Frame-Options` on every rendered response.
   `dist/client` is uploaded as static assets. There is no Content-Security-Policy yet: the page's
   inline scripts would each need a per-request nonce.
-- `VITE_SITE_ORIGIN` is read **at build time**, so it is not a wrangler var. It turns on canonical
-  and `og:url` tags and makes `og:image` absolute. Without it, those two tags are left out and
-  `og:image` is a root-relative path.
+- `VITE_SITE_ORIGIN` is read **at build time**, so it is not a wrangler var; `pnpm deploy` sets it.
+  It turns on canonical and `og:url` tags and makes `og:image` absolute. Without it (a plain
+  `pnpm build`), those two tags are left out and `og:image` is a root-relative path.
 - `public/_headers` caches `/birds/*` for a week with `stale-while-revalidate`, because those
   filenames aren't content-hashed. Hashed `/assets/*` are cached as immutable. Every asset also
   gets `X-Content-Type-Options: nosniff`.

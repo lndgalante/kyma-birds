@@ -7,6 +7,8 @@
   // Cloudflare Vite plugin builds it into dist/server and wires the client build (dist/client)
   // up as static assets.
   "main": "src/server.ts",
+  // Cloudflare creates the DNS record and certificate on deploy; the zone must be in this account.
+  "routes": [{ "pattern": "kymabirds.com", "custom_domain": true }],
   "observability": {
     "enabled": true,
   },
