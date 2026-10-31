@@ -79,7 +79,6 @@ export const COPY = {
   creditsSoftware:
     'Software: Three.js, React, TanStack, Radix UI, shadcn/ui, Tailwind CSS, tw-animate-css, clsx and tailwind-merge, under the MIT License; class-variance-authority, under the Apache License 2.0; icons by Lucide, under the ISC License.',
   creditsBack: 'Back to the birds',
-  creditsAll: 'All credits',
   newTabSr: '(opens in a new tab)',
   notFoundTitle: 'This page doesn’t exist.',
   notFoundLink: 'Back to the birds',

@@ -1,7 +1,5 @@
-import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { ExternalLink } from '~/components/ui/external-link'
-import { textLinkVariants } from '~/components/ui/text-link'
 import { COPY } from '~/lib/copy'
 import { shortAuthor, sourceLabel } from '~/lib/credits'
 import { localNameEntries, type Bird, type Credit } from '~/lib/manifest'
@@ -143,16 +141,6 @@ export function BirdDetails({ bird, onClose }: { bird: Bird | null; onClose(): v
               <CreditRow label={COPY.creditsPhoto} credit={b.credits.photo} />
               <CreditRow label={COPY.creditsSong} credit={b.credits.audio} />
             </ul>
-            <p className="mt-4 text-sm">
-              <Link
-                to="/credits"
-                search={{ bird: b.slug }}
-                hash={b.slug}
-                className={cn('details__all text-link', CREDIT_LINK, textLinkVariants())}
-              >
-                {COPY.creditsAll}
-              </Link>
-            </p>
           </section>
         </>
       )}

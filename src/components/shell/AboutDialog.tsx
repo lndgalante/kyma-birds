@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import { ExternalLink } from '~/components/ui/external-link'
 import { Kbd } from '~/components/ui/kbd'
 import { Separator } from '~/components/ui/separator'
 import { textLinkVariants } from '~/components/ui/text-link'
@@ -27,6 +28,15 @@ export function AboutDialog({ open, onClose, bird }: AboutDialogProps) {
         <p className="about-kyma max-w-[62ch] text-lg leading-[1.5] text-ink">
           Kyma (<span lang="grc">κῦμα</span>) is Greek for wave. It’s the root of the word{' '}
           <i>cymatics</i>.
+        </p>
+        <p className="mt-4 max-w-[62ch]">
+          Created by{' '}
+          <ExternalLink href="https://github.com/lndgalante">Leonardo Galante</ExternalLink>.
+          Explore the{' '}
+          <ExternalLink href="https://github.com/lndgalante/kyma-birds">
+            project on GitHub
+          </ExternalLink>
+          .
         </p>
         <h3 className={SHEET_HEADING}>{COPY.aboutSeeingHeading}</h3>
         <p className="max-w-[62ch]">{COPY.aboutCymatics}</p>

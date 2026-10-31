@@ -11,8 +11,8 @@ const CAPTION_LINK = 'text-ink-3'
 
 /**
  * The card's credits on the night (Stacked, Split): one quiet caption, "Photo Author (CC0) · Song
- * Author (CC BY-SA)", each author and licence linked and wrapping as text does, then the way to
- * Details, which holds the full credits. Phones keep their credits in Details.
+ * Author (CC BY-SA) · Details", with links wrapping as text does. Phones keep their credits
+ * in Details.
  */
 export function CreditLine({
   credits,
@@ -22,26 +22,26 @@ export function CreditLine({
   onDetails(): void
 }) {
   return (
-    <div className="credit-line grid min-w-0 justify-items-start gap-2">
-      <p className="credit-line__caption max-w-[60ch] text-sm leading-[1.55] text-ink-3">
-        <CaptionPart label={COPY.creditsPhoto} credit={credits.photo} />
-        {/* The no-break space keeps the dot off the start of a wrapped line. */}
-        {`${NBSP}· `}
-        <CaptionPart label={COPY.creditsSong} credit={credits.audio} />
-      </p>
+    <p className="credit-line credit-line__caption min-w-0 max-w-[60ch] text-sm leading-[1.55] text-ink-3">
+      <CaptionPart label={COPY.creditsPhoto} credit={credits.photo} />
+      {/* The no-break space keeps the dot off the start of a wrapped line. */}
+      {`${NBSP}· `}
+      <CaptionPart label={COPY.creditsSong} credit={credits.audio} />
+      <span className="no-js:hidden" aria-hidden="true">{`${NBSP}· `}</span>
       {/* 32px tall, its hit area extended to 44px. No JS: nothing would open the sheet. */}
       <button
         type="button"
         className={cn(
           'details-link text-link',
-          textLinkVariants({ layout: 'flex' }),
-          'relative min-h-8 after:absolute after:-inset-x-1 after:-inset-y-1.5 no-js:hidden',
+          textLinkVariants(),
+          CAPTION_LINK,
+          'relative inline-block min-h-8 align-baseline after:absolute after:-inset-x-1 after:-inset-y-1.5 no-js:hidden',
         )}
         onClick={onDetails}
       >
         {COPY.detailsButton}
       </button>
-    </div>
+    </p>
   )
 }
 

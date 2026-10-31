@@ -68,9 +68,6 @@ export function Masthead({ variant, bird }: MastheadProps) {
             )}
             aria-label="Site"
           >
-            <Button variant="nav" size="nav" className={navLink} onClick={() => setAbout('open')}>
-              {COPY.navAbout}
-            </Button>
             <Button asChild variant="nav" size="nav" className={navLink}>
               <Link
                 to="/credits"
@@ -80,6 +77,9 @@ export function Masthead({ variant, bird }: MastheadProps) {
               >
                 {COPY.navCredits}
               </Link>
+            </Button>
+            <Button variant="nav" size="nav" className={navLink} onClick={() => setAbout('open')}>
+              {COPY.navAbout}
             </Button>
           </nav>
         </div>
