@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { COPY } from '~/lib/copy'
 import { committedIndexOf, type Bird } from '~/lib/manifest'
@@ -7,7 +6,7 @@ import { cn } from '~/lib/utils'
 import { AppShell } from '../shell/AppShell'
 import { Masthead } from '../shell/Masthead'
 import { SkipLink } from '../shell/SkipLink'
-import { PAGE, PAGE_BACK_LINK, PAGE_TITLE } from '../shell/page'
+import { PAGE, PAGE_TITLE } from '../shell/page'
 import { CreditEntry } from './CreditEntry'
 
 export function CreditsPage({ birds, highlight }: { birds: readonly Bird[]; highlight?: string }) {
@@ -30,7 +29,7 @@ export function CreditsPage({ birds, highlight }: { birds: readonly Bird[]; high
   return (
     <AppShell className="app--page" theme={birdTheme(themeBird)}>
       <SkipLink href="#main">Skip to the credits</SkipLink>
-      <Masthead variant="page" bird={highlight} />
+      <Masthead variant="page" bird={highlight} back />
       <main id="main" className={cn('page credits', PAGE)} tabIndex={-1}>
         <header className="page__head mb-10">
           <h1 className={PAGE_TITLE}>{COPY.creditsTitle}</h1>
@@ -55,11 +54,6 @@ export function CreditsPage({ birds, highlight }: { birds: readonly Bird[]; high
           <p>{COPY.creditsFonts}</p>
           <p>{COPY.creditsSoftware}</p>
         </section>
-        <p className="page__back mt-10">
-          <Link to="/" search={highlight ? { bird: highlight } : {}} className={PAGE_BACK_LINK}>
-            {COPY.creditsBack}
-          </Link>
-        </p>
       </main>
     </AppShell>
   )

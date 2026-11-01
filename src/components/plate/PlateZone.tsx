@@ -35,7 +35,7 @@ export function PlateZone({ bird }: PlateZoneProps) {
       return
     }
     setPhotoToken((t) => t + 1)
-    void savePlatePhoto(image, bird, caption.mode).then((saved) => {
+    void savePlatePhoto(image, bird).then((saved) => {
       if (saved) announce(COPY.photoSaved)
     })
   }

@@ -1,12 +1,11 @@
 import { LOOK } from '~/cymatics/params'
-import { plateCaptionLive } from '~/lib/copy'
 import { platePhotoName } from '~/lib/format'
 import type { Bird } from '~/lib/manifest'
 
 /**
  * Saves a capture of the plate's sand (PlateHandle.capture) as a PNG: the plate as the page
  * paints it (the bird's room, the shade, the stone rim and the soft contact shadow), the sand
- * over it, and the bird's name and the mode under it. Phones get the share sheet, whose
+ * over it, and the bird's name under it. Phones get the share sheet, whose
  * "Save image" puts it in the photo library; everything else downloads the file. Resolves false
  * only when the person dismisses the share sheet.
  *
@@ -16,9 +15,8 @@ import type { Bird } from '~/lib/manifest'
 export async function savePlatePhoto(
   plate: HTMLCanvasElement,
   bird: Pick<Bird, 'slug' | 'commonName'>,
-  mode: string,
 ): Promise<boolean> {
-  const photo = frame(plate, bird.commonName, mode ? plateCaptionLive(mode) : '')
+  const photo = frame(plate, bird.commonName)
   const file = new File([pngBlob(photo)], platePhotoName(bird.slug, new Date()), {
     type: 'image/png',
   })
@@ -35,7 +33,7 @@ export async function savePlatePhoto(
   return true
 }
 
-function frame(plate: HTMLCanvasElement, name: string, caption: string): HTMLCanvasElement {
+function frame(plate: HTMLCanvasElement, name: string): HTMLCanvasElement {
   const css = getComputedStyle(document.documentElement)
   const token = (prop: string) => css.getPropertyValue(prop).trim()
   const { width: w, height: h } = plate
@@ -43,11 +41,10 @@ function frame(plate: HTMLCanvasElement, name: string, caption: string): HTMLCan
   const nameSize = Math.round(w * 0.046)
   const smallSize = Math.round(w * 0.03)
   const nameBase = m + h + Math.round(m * 0.7) + nameSize
-  const captionBase = nameBase + Math.round(smallSize * 1.7)
 
   const out = document.createElement('canvas')
   out.width = w + 2 * m
-  out.height = captionBase + m
+  out.height = nameBase + m
   const ctx = out.getContext('2d')
   if (!ctx) return plate
 
@@ -72,7 +69,6 @@ function frame(plate: HTMLCanvasElement, name: string, caption: string): HTMLCan
   ctx.fillStyle = '#a3abbb'
   ctx.fillStyle = token('--ink-3')
   ctx.font = `500 ${smallSize}px ${token('--font-sans')}`
-  if (caption) ctx.fillText(caption, m, captionBase)
   ctx.textAlign = 'end'
   ctx.fillText('Kyma Birds', out.width - m, nameBase)
   return out

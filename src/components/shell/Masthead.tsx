@@ -30,9 +30,10 @@ interface MastheadProps {
   variant: 'instrument' | 'page'
   /** Bird to keep selected when following the wordmark home, and to open the credits at. */
   bird?: string
+  back?: boolean
 }
 
-export function Masthead({ variant, bird }: MastheadProps) {
+export function Masthead({ variant, bird, back }: MastheadProps) {
   const [about, setAbout] = useState<'unopened' | 'open' | 'closed'>('unopened')
   const instrument = variant === 'instrument'
   // Button's `relative` lifts the links over the header's scrim, a positioned ::before in Field
@@ -54,12 +55,20 @@ export function Masthead({ variant, bird }: MastheadProps) {
             instrument && 'field:h-12 compact:ps-[calc(max(var(--gutter),var(--safe-l))+16px)]',
           )}
         >
-          {/* On pages the wordmark and the nav never shrink: the now-playing pill gives way first,
+          {/* On pages the home link and the nav never shrink: the now-playing pill gives way first,
               then drops its name on phones, so About and Credits stay on screen. */}
-          <Wordmark
-            bird={bird}
-            className={instrument ? 'field-or-compact:halo-mast' : 'flex-none'}
-          />
+          {back ? (
+            <Button asChild className="masthead__back flex-none">
+              <Link to="/" search={bird ? { bird } : {}}>
+                {COPY.creditsBack}
+              </Link>
+            </Button>
+          ) : (
+            <Wordmark
+              bird={bird}
+              className={instrument ? 'field-or-compact:halo-mast' : 'flex-none'}
+            />
+          )}
           {!instrument && <NowPlaying />}
           <nav
             className={cn(

@@ -1,7 +1,7 @@
 import { ExternalLink } from '~/components/ui/external-link'
 import { textLinkVariants } from '~/components/ui/text-link'
 import { COPY } from '~/lib/copy'
-import { shortAuthor, shortLicense, sourceLabel } from '~/lib/credits'
+import { shortAuthor, sourceLabel } from '~/lib/credits'
 import { NBSP } from '~/lib/format'
 import type { Bird, Credit } from '~/lib/manifest'
 import { cn } from '~/lib/utils'
@@ -10,9 +10,7 @@ import { cn } from '~/lib/utils'
 const CAPTION_LINK = 'text-ink-3'
 
 /**
- * The card's credits on the night (Stacked, Split): one quiet caption, "Photo Author (CC0) · Song
- * Author (CC BY-SA) · Details", with links wrapping as text does. Phones keep their credits
- * in Details.
+ * Phones keep their credits in Details; Stacked and Split show this caption beside the photo.
  */
 export function CreditLine({
   credits,
@@ -45,11 +43,6 @@ export function CreditLine({
   )
 }
 
-/**
- * "Photo Author (CC BY-SA)": the author links to the work's page, the licence to its deed (the
- * link carries the version). The label stays with the author's first word, and the licence with
- * its parentheses.
- */
 function CaptionPart({ label, credit }: { label: string; credit: Credit }) {
   return (
     <>
@@ -57,14 +50,7 @@ function CaptionPart({ label, credit }: { label: string; credit: Credit }) {
       {NBSP}
       <ExternalLink href={credit.source} className={cn('credit-line__author', CAPTION_LINK)}>
         {shortAuthor(credit.author)}
-      </ExternalLink>{' '}
-      <span className="whitespace-nowrap">
-        (
-        <ExternalLink href={credit.licenseUrl} className={CAPTION_LINK}>
-          {shortLicense(credit.license)}
-        </ExternalLink>
-        )
-      </span>
+      </ExternalLink>
       <span className="sr-only">, via {sourceLabel(credit.source)}</span>
     </>
   )

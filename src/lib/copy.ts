@@ -78,7 +78,7 @@ export const COPY = {
     'Typefaces: Instrument Sans by Rodrigo Fuenzalida and Jordan Egstad, and Figtree by Erik Kennedy, both under the SIL Open Font License 1.1.',
   creditsSoftware:
     'Software: Three.js, React, TanStack, Radix UI, shadcn/ui, Tailwind CSS, tw-animate-css, clsx and tailwind-merge, under the MIT License; class-variance-authority, under the Apache License 2.0; icons by Lucide, under the ISC License.',
-  creditsBack: 'Back to the birds',
+  creditsBack: 'Back',
   newTabSr: '(opens in a new tab)',
   notFoundTitle: 'This page doesn’t exist.',
   notFoundLink: 'Back to the birds',
